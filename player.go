@@ -339,6 +339,9 @@ func (p *Player) Craft(itemName string) {
 	}
 	for ing, qty := range recipe.Ingredients {
 		p.Inventory[ing] -= qty
+		if p.Inventory[ing] == 0 {
+			delete(p.Inventory, ing)
+		}
 	}
 	switch recipe.ResultType {
 	case "tool":
@@ -346,10 +349,13 @@ func (p *Player) Craft(itemName string) {
 		p.Inventory[strings.ToLower(itemName)] = 1
 		fmt.Printf("🛠️ You crafted a %s! Tool durability set to %d.\n", recipe.Name, p.ToolDurability)
 	case "weapon":
-		p.Attack += recipe.ResultValue
-		fmt.Printf("⚔️ You crafted a %s! Attack increased by %d (Total: %d).\n", recipe.Name, recipe.ResultValue, p.Attack)
+		// Auto-equip check: If new weapon is stronger than current hidden "best"
+		// Actually, we'll just track inventory and Combat() will find the best.
+		p.Inventory[strings.ToLower(itemName)]++
+		fmt.Printf("⚔️ You crafted a %s!\n", recipe.Name)
 	case "armor":
 		p.Defense += recipe.ResultValue
+		p.Inventory[strings.ToLower(itemName)] = 1
 		fmt.Printf("🛡️ You crafted a %s! Defense increased by %d (Total: %d).\n", recipe.Name, recipe.ResultValue, p.Defense)
 	case "food":
 		p.Inventory[strings.ToLower(itemName)]++
@@ -368,15 +374,18 @@ func (p *Player) Use(itemName string) {
 		fmt.Printf("❌ You don't have any %s in your inventory.\n", itemName)
 		return
 	}
+
 	recipe, ok := Recipes[itemKey]
 	if !ok || (recipe.ResultType != "food" && recipe.ResultType != "stamina_food") {
 		fmt.Printf("❌ %s is not a consumable item.\n", itemName)
 		return
 	}
+
 	p.Inventory[itemKey]--
 	if p.Inventory[itemKey] == 0 {
 		delete(p.Inventory, itemKey)
 	}
+
 	switch recipe.ResultType {
 	case "food":
 		oldHP := p.Health
@@ -431,6 +440,9 @@ func (p *Player) Build(structName string) {
 	}
 	for ing, qty := range s.Ingredients {
 		p.Inventory[ing] -= qty
+		if p.Inventory[ing] == 0 {
+			delete(p.Inventory, ing)
+		}
 	}
 	p.Structures[strings.ToLower(structName)] = true
 	fmt.Printf("🔨 You built a %s! Perk Unlocked: %s\n", s.Name, s.PerkDesc)
@@ -451,11 +463,55 @@ func (p *Player) Build(structName string) {
 	p.Save()
 }
 
+func (p *Player) GetBestSwordDamage() int {
+	bestDmg := 0
+	for id, qty := range p.Inventory {
+		if qty > 0 {
+			if r, ok := Recipes[id]; ok && r.ResultType == "weapon" {
+				if r.ResultValue > bestDmg {
+					bestDmg = r.ResultValue
+				}
+			}
+		}
+	}
+	return bestDmg
+}
+
+func (p *Player) GetBestPickaxeMultiplier() float64 {
+	multi := 1.0
+	// Hardcoded multipliers for tiered pickaxes
+	multipliers := map[string]float64{
+		"wood_pickaxe":      1.0,
+		"stone_pickaxe":     1.2,
+		"iron_pickaxe":      1.5,
+		"diamond_pickaxe":   2.0,
+		"abyss_pickaxe":     3.0,
+		"nether_pickaxe":    5.0,
+		"void_pickaxe":      10.0,
+	}
+
+	for id, qty := range p.Inventory {
+		if qty > 0 {
+			if m, ok := multipliers[id]; ok {
+				if m > multi {
+					multi = m
+				}
+			}
+		}
+	}
+	return multi
+}
+
 func (p *Player) Combat(m *Monster) bool {
 	fmt.Printf("\n⚔️ A wild %s appeared!\n", m.Name)
 	monsterHealth := m.Health
+	
+	// Factor in best sword damage
+	extraAtk := p.GetBestSwordDamage()
+	totalAtk := p.Attack + extraAtk
+
 	for monsterHealth > 0 && p.Health > 0 {
-		damageToMonster := p.Attack + rand.Intn(5)
+		damageToMonster := totalAtk + rand.Intn(5)
 		monsterHealth -= damageToMonster
 		fmt.Printf("🤜 You hit %s for %d damage. (%d HP left)\n", m.Name, damageToMonster, monsterHealth)
 		if monsterHealth <= 0 {
@@ -512,17 +568,23 @@ func (p *Player) Mine(locName string) {
 	}
 	p.Stamina -= 10
 	p.ToolDurability -= 1
+
 	if len(loc.Descriptions) > 0 {
 		desc := loc.Descriptions[rand.Intn(len(loc.Descriptions))]
 		fmt.Printf("\n✨ %s\n", desc)
 	}
+
 	if rand.Float64() <= loc.EncounterChance {
 		monster := loc.EncounterTable[rand.Intn(len(loc.EncounterTable))]
 		if !p.Combat(&monster) {
 			return
 		}
 	}
-	numDrops := 1 + (p.Level / 5)
+
+	// Apply Pickaxe Multiplier
+	pickMulti := p.GetBestPickaxeMultiplier()
+	numDrops := int(float64(1+(p.Level/5)) * pickMulti)
+	
 	foundSomething := false
 	for i := 0; i < numDrops; i++ {
 		r := rand.Float64()
