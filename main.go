@@ -223,10 +223,10 @@ var Recipes = map[string]Recipe{
 	"leather_armor": {
 		Name: "🧥 Leather Armor",
 		Ingredients: map[string]int{
-			"rotten_flesh": 20, // Scavenged "leather"
+			"rotten_flesh": 20,
 		},
 		ResultType:    "armor",
-		ResultValue:   5, // +5 Defense
+		ResultValue:   5,
 		RequiredLevel: 4,
 	},
 	"iron_armor": {
@@ -235,7 +235,7 @@ var Recipes = map[string]Recipe{
 			"iron": 50,
 		},
 		ResultType:    "armor",
-		ResultValue:   15, // +15 Defense
+		ResultValue:   15,
 		RequiredLevel: 12,
 	},
 	"diamond_armor": {
@@ -244,7 +244,7 @@ var Recipes = map[string]Recipe{
 			"diamond": 25,
 		},
 		ResultType:    "armor",
-		ResultValue:   40, // +40 Defense
+		ResultValue:   40,
 		RequiredLevel: 30,
 	},
 }
@@ -344,6 +344,40 @@ var BotSettlements = map[string]BotSettlement{
 		},
 		LootTable:   map[string]int{"diamond": 20, "netherite": 5, "void_essence": 2},
 		Description: "A dark fortress where shadows linger. Extremely dangerous.",
+	},
+}
+
+type ShopItem struct {
+	ID    string
+	Name  string
+	Price int
+	Desc  string
+}
+
+var MerchantInventory = map[string]ShopItem{
+	"golden_apple": {
+		ID:    "golden_apple",
+		Name:  "🍎 Golden Apple",
+		Price: 50,
+		Desc:  "Instantly restores 100 HP.",
+	},
+	"energy_drink": {
+		ID:    "energy_drink",
+		Name:  "🥤 Energy Drink",
+		Price: 30,
+		Desc:  "Instantly restores 50 Stamina.",
+	},
+	"mystery_box": {
+		ID:    "mystery_box",
+		Name:  "🎁 Mystery Box",
+		Price: 100,
+		Desc:  "Contains random high-tier materials.",
+	},
+	"repair_kit": {
+		ID:    "repair_kit",
+		Name:  "🔧 Repair Kit",
+		Price: 40,
+		Desc:  "Fully restores tool durability.",
 	},
 }
 
@@ -560,6 +594,60 @@ func (p *Player) Raid(targetID string) {
 	p.Save()
 }
 
+func (p *Player) ListShop() {
+	fmt.Println("\n--- ⚖️ Merchant's Shop ---")
+	fmt.Printf("Your Gold: 💰 %d\n", p.Inventory["gold"])
+	for id, item := range MerchantInventory {
+		fmt.Printf("[%s] %s - 💰 %d\n    📝 %s\n", id, item.Name, item.Price, item.Desc)
+	}
+	fmt.Println("--------------------------")
+}
+
+func (p *Player) Buy(itemID string) {
+	item, ok := MerchantInventory[strings.ToLower(itemID)]
+	if !ok {
+		fmt.Printf("❓ Merchant says: 'I don't have a %s for sale!'\n", itemID)
+		return
+	}
+
+	if p.Inventory["gold"] < item.Price {
+		fmt.Printf("🚫 Merchant says: 'You need 💰 %d gold for that, you only have 💰 %d!'\n", item.Price, p.Inventory["gold"])
+		return
+	}
+
+	p.Inventory["gold"] -= item.Price
+	
+	// Handle special item effects or just add to inventory
+	switch item.ID {
+	case "golden_apple":
+		p.Health += 100
+		if p.Health > p.MaxHealth { p.Health = p.MaxHealth }
+		fmt.Printf("🍎 You bought and ate a Golden Apple! Health restored to %d.\n", p.Health)
+	case "energy_drink":
+		p.Stamina += 50
+		if p.Stamina > p.MaxStamina { p.Stamina = p.MaxStamina }
+		fmt.Printf("🥤 You bought and drank an Energy Drink! Stamina restored to %d.\n", p.Stamina)
+	case "repair_kit":
+		p.ToolDurability = 500 // Super durability from merchant kit
+		fmt.Printf("🔧 You bought a Repair Kit! Your tool is now extremely durable (%d).\n", p.ToolDurability)
+	case "mystery_box":
+		fmt.Printf("🎁 You opened a Mystery Box and found: ")
+		lootPool := []string{"iron", "gold", "diamond", "quartz", "netherite"}
+		for i := 0; i < 3; i++ {
+			loot := lootPool[rand.Intn(len(lootPool))]
+			qty := 5 + rand.Intn(10)
+			p.Inventory[loot] += qty
+			fmt.Printf("%d %s, ", qty, loot)
+		}
+		fmt.Println("Not bad!")
+	default:
+		p.Inventory[item.ID]++
+		fmt.Printf("⚖️ You bought 1 %s for 💰 %d gold.\n", item.Name, item.Price)
+	}
+	
+	p.Save()
+}
+
 func (p *Player) ListCraftable() {
 	fmt.Println("\n--- 📜 Crafting Menu ---")
 	for id, r := range Recipes {
@@ -710,7 +798,6 @@ func (p *Player) Combat(m *Monster) bool {
 	fmt.Printf("\n⚔️ A wild %s appeared!\n", m.Name)
 	monsterHealth := m.Health
 	for monsterHealth > 0 && p.Health > 0 {
-		// Player attacks
 		damageToMonster := p.Attack + rand.Intn(5)
 		monsterHealth -= damageToMonster
 		fmt.Printf("🤜 You hit %s for %d damage. (%d HP left)\n", m.Name, damageToMonster, monsterHealth)
@@ -725,11 +812,10 @@ func (p *Player) Combat(m *Monster) bool {
 			p.GainXP(15 + rand.Intn(10))
 			return true
 		}
-		// Monster attacks (with Defense reduction)
 		baseDamage := m.Damage + rand.Intn(5)
 		finalDamage := baseDamage - p.Defense
 		if finalDamage < 1 {
-			finalDamage = 1 // Minimum 1 damage
+			finalDamage = 1
 		}
 		p.Health -= finalDamage
 		fmt.Printf("💥 %s hits you for %d damage (Blocked %d). (%d HP left)\n", m.Name, finalDamage, p.Defense, p.Health)
@@ -810,7 +896,7 @@ func main() {
 	reader := bufio.NewReader(os.Stdin)
 
 	fmt.Println("🌟 Welcome back to the Mine & Exploration System! 🌟")
-	fmt.Println("Available Commands: !mine <location>, !craft [item], !build [structure], !use <item>, !raid [target], !stats, !inventory, !exit")
+	fmt.Println("Available Commands: !mine <location>, !craft [item], !build [structure], !shop, !buy <item>, !use <item>, !raid [target], !stats, !inventory, !exit")
 
 	for {
 		fmt.Print("\n> ")
@@ -844,6 +930,14 @@ func main() {
 				player.ListBuildable()
 			} else {
 				player.Build(parts[1])
+			}
+		case "!shop":
+			player.ListShop()
+		case "!buy":
+			if len(parts) < 2 {
+				fmt.Println("⚖️ Usage: !buy <item_id>")
+			} else {
+				player.Buy(parts[1])
 			}
 		case "!use":
 			if len(parts) < 2 {
