@@ -381,6 +381,24 @@ var MerchantInventory = map[string]ShopItem{
 	},
 }
 
+type Quest struct {
+	ID          string
+	Name        string
+	TargetType  string // "item", "combat", "level"
+	TargetID    string // "iron", "Slime", etc.
+	TargetQty   int
+	RewardXP    int
+	RewardGold  int
+	Description string
+}
+
+var GlobalQuests = []Quest{
+	{ID: "wood_gatherer", Name: "🌲 Wood Gatherer", TargetType: "item", TargetID: "wood", TargetQty: 50, RewardXP: 100, RewardGold: 20, Description: "Collect 50 Wood from the Surface."},
+	{ID: "slime_hunter", Name: "🟢 Slime Hunter", TargetType: "combat", TargetID: "🟢 Slime", TargetQty: 5, RewardXP: 150, RewardGold: 30, Description: "Defeat 5 Slimes on the Surface."},
+	{ID: "iron_miner", Name: "⛓️ Iron Miner", TargetType: "item", TargetID: "iron", TargetQty: 30, RewardXP: 300, RewardGold: 100, Description: "Mine 30 Iron from the Caves."},
+	{ID: "zombie_slayer", Name: "🧟 Zombie Slayer", TargetType: "combat", TargetID: "🧟 Zombie", TargetQty: 10, RewardXP: 500, RewardGold: 200, Description: "Defeat 10 Zombies in the Caves."},
+}
+
 // Player represents the player's state.
 type Player struct {
 	Health         int             `json:"health"`
@@ -395,6 +413,7 @@ type Player struct {
 	Inventory      map[string]int  `json:"inventory"`
 	ToolDurability int             `json:"tool_durability"`
 	Structures     map[string]bool `json:"structures"`
+	QuestProgress  map[string]int  `json:"quest_progress"`
 }
 
 func NewPlayer() *Player {
@@ -411,6 +430,7 @@ func NewPlayer() *Player {
 		Inventory:      map[string]int{"wood_pickaxe": 1},
 		ToolDurability: 50,
 		Structures:     make(map[string]bool),
+		QuestProgress:  make(map[string]int),
 	}
 }
 
@@ -432,6 +452,9 @@ func LoadPlayer() *Player {
 	if err := json.Unmarshal(data, &p); err != nil {
 		return NewPlayer()
 	}
+	if p.QuestProgress == nil {
+		p.QuestProgress = make(map[string]int)
+	}
 	return &p
 }
 
@@ -449,6 +472,35 @@ func (p *Player) GainXP(amount int) {
 		fmt.Printf("\n🎊 LEVEL UP! You are now level %d! 🎊\n", p.Level)
 	}
 	p.Save()
+}
+
+func (p *Player) TrackQuest(qType, id string, qty int) {
+	for _, q := range GlobalQuests {
+		if q.TargetType == qType && q.TargetID == id {
+			if p.QuestProgress[q.ID] < q.TargetQty {
+				p.QuestProgress[q.ID] += qty
+				if p.QuestProgress[q.ID] >= q.TargetQty {
+					fmt.Printf("\n📜 QUEST COMPLETE: %s! 📜\n", q.Name)
+					fmt.Printf("🎁 Rewards: ✨ %d XP, 💰 %d Gold\n", q.RewardXP, q.RewardGold)
+					p.Inventory["gold"] += q.RewardGold
+					p.GainXP(q.RewardXP)
+				}
+			}
+		}
+	}
+}
+
+func (p *Player) ListQuests() {
+	fmt.Println("\n--- 📜 Active Quests ---")
+	for _, q := range GlobalQuests {
+		status := "✅ Completed"
+		prog := p.QuestProgress[q.ID]
+		if prog < q.TargetQty {
+			status = fmt.Sprintf("⏳ Progress: %d/%d", prog, q.TargetQty)
+		}
+		fmt.Printf("[%s] %s\n    📝 %s\n    📊 %s\n", q.ID, q.Name, q.Description, status)
+	}
+	fmt.Println("-------------------------")
 }
 
 func (p *Player) ShowStats() {
@@ -609,26 +661,26 @@ func (p *Player) Buy(itemID string) {
 		fmt.Printf("❓ Merchant says: 'I don't have a %s for sale!'\n", itemID)
 		return
 	}
-
 	if p.Inventory["gold"] < item.Price {
 		fmt.Printf("🚫 Merchant says: 'You need 💰 %d gold for that, you only have 💰 %d!'\n", item.Price, p.Inventory["gold"])
 		return
 	}
-
 	p.Inventory["gold"] -= item.Price
-	
-	// Handle special item effects or just add to inventory
 	switch item.ID {
 	case "golden_apple":
 		p.Health += 100
-		if p.Health > p.MaxHealth { p.Health = p.MaxHealth }
+		if p.Health > p.MaxHealth {
+			p.Health = p.MaxHealth
+		}
 		fmt.Printf("🍎 You bought and ate a Golden Apple! Health restored to %d.\n", p.Health)
 	case "energy_drink":
 		p.Stamina += 50
-		if p.Stamina > p.MaxStamina { p.Stamina = p.MaxStamina }
+		if p.Stamina > p.MaxStamina {
+			p.Stamina = p.MaxStamina
+		}
 		fmt.Printf("🥤 You bought and drank an Energy Drink! Stamina restored to %d.\n", p.Stamina)
 	case "repair_kit":
-		p.ToolDurability = 500 // Super durability from merchant kit
+		p.ToolDurability = 500
 		fmt.Printf("🔧 You bought a Repair Kit! Your tool is now extremely durable (%d).\n", p.ToolDurability)
 	case "mystery_box":
 		fmt.Printf("🎁 You opened a Mystery Box and found: ")
@@ -644,7 +696,6 @@ func (p *Player) Buy(itemID string) {
 		p.Inventory[item.ID]++
 		fmt.Printf("⚖️ You bought 1 %s for 💰 %d gold.\n", item.Name, item.Price)
 	}
-	
 	p.Save()
 }
 
@@ -708,18 +759,15 @@ func (p *Player) Use(itemName string) {
 		fmt.Printf("❌ You don't have any %s in your inventory.\n", itemName)
 		return
 	}
-
 	recipe, ok := Recipes[itemKey]
 	if !ok || (recipe.ResultType != "food" && recipe.ResultType != "stamina_food") {
 		fmt.Printf("❌ %s is not a consumable item.\n", itemName)
 		return
 	}
-
 	p.Inventory[itemKey]--
 	if p.Inventory[itemKey] == 0 {
 		delete(p.Inventory, itemKey)
 	}
-
 	switch recipe.ResultType {
 	case "food":
 		oldHP := p.Health
@@ -809,6 +857,7 @@ func (p *Player) Combat(m *Monster) bool {
 					fmt.Printf("🎁 Dropped: %s\n", item)
 				}
 			}
+			p.TrackQuest("combat", m.Name, 1)
 			p.GainXP(15 + rand.Intn(10))
 			return true
 		}
@@ -854,12 +903,10 @@ func (p *Player) Mine(locName string) {
 	}
 	p.Stamina -= 10
 	p.ToolDurability -= 1
-
 	if len(loc.Descriptions) > 0 {
 		desc := loc.Descriptions[rand.Intn(len(loc.Descriptions))]
 		fmt.Printf("\n✨ %s\n", desc)
 	}
-
 	if rand.Float64() <= loc.EncounterChance {
 		monster := loc.EncounterTable[rand.Intn(len(loc.EncounterTable))]
 		if !p.Combat(&monster) {
@@ -876,6 +923,7 @@ func (p *Player) Mine(locName string) {
 			if r <= cumulative {
 				p.Inventory[item]++
 				fmt.Printf("⛏️ You mined in the %s and found: %s!\n", loc.Name, item)
+				p.TrackQuest("item", item, 1)
 				foundSomething = true
 				break
 			}
@@ -896,7 +944,7 @@ func main() {
 	reader := bufio.NewReader(os.Stdin)
 
 	fmt.Println("🌟 Welcome back to the Mine & Exploration System! 🌟")
-	fmt.Println("Available Commands: !mine <location>, !craft [item], !build [structure], !shop, !buy <item>, !use <item>, !raid [target], !stats, !inventory, !exit")
+	fmt.Println("Available Commands: !mine <location>, !craft [item], !build [structure], !shop, !buy <item>, !use <item>, !raid [target], !quests, !stats, !inventory, !exit")
 
 	for {
 		fmt.Print("\n> ")
@@ -951,6 +999,8 @@ func main() {
 			} else {
 				player.Raid(parts[1])
 			}
+		case "!quests":
+			player.ListQuests()
 		case "!stats":
 			player.ShowStats()
 		case "!inventory":
