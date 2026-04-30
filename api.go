@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/fs"
+	"net"
 	"net/http"
 )
 
@@ -16,18 +17,34 @@ var globalPlayer *Player
 func StartServer(p *Player) {
 	globalPlayer = p
 
-	// Serve API
+	// Register Handlers
 	http.HandleFunc("/api/player", playerHandler)
-
-	// Serve Static Files
 	public, _ := fs.Sub(staticFiles, "static")
 	http.Handle("/", http.FileServer(http.FS(public)))
 
-	fmt.Println("🌐 Dashboard live at: http://localhost:8080")
+	// Find an available port starting from 8080
+	port := 8080
+	var listener net.Listener
+	var err error
+
+	for {
+		addr := fmt.Sprintf(":%d", port)
+		listener, err = net.Listen("tcp", addr)
+		if err == nil {
+			break
+		}
+		port++
+		if port > 8100 { // Safety break
+			fmt.Printf("❌ Failed to find an open port after 20 attempts: %v\n", err)
+			return
+		}
+	}
+
+	fmt.Printf("🌐 Dashboard live at: http://localhost:%d\n", port)
 	
 	// Run server in background
 	go func() {
-		if err := http.ListenAndServe(":8080", nil); err != nil {
+		if err := http.Serve(listener, nil); err != nil {
 			fmt.Printf("❌ Web Server Error: %v\n", err)
 		}
 	}()
