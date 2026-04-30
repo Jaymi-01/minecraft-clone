@@ -42,8 +42,9 @@ var Locations = map[string]Location{
 	"abyss": {
 		Name: "🕳️ Abyss",
 		LootTable: map[string]float64{
-			"gold":    0.6,
-			"diamond": 0.4,
+			"gold":           0.5,
+			"diamond":        0.3,
+			"abyss_crystal": 0.2,
 		},
 		EncounterChance: 0.3,
 		EncounterTable: []Monster{
@@ -61,8 +62,9 @@ var Locations = map[string]Location{
 	"nether": {
 		Name: "🔥 Nether",
 		LootTable: map[string]float64{
-			"quartz":    0.7,
-			"netherite": 0.3,
+			"quartz":         0.5,
+			"netherite":      0.3,
+			"nether_crystal": 0.2,
 		},
 		EncounterChance: 0.4,
 		EncounterTable: []Monster{
@@ -81,15 +83,16 @@ var Locations = map[string]Location{
 	"void": {
 		Name: "🌌 Void",
 		LootTable: map[string]float64{
-			"void_essence": 0.8,
-			"star_matter":  0.2,
+			"void_essence": 0.5,
+			"star_matter":  0.3,
+			"void_crystal": 0.2,
 		},
 		EncounterChance: 0.5,
 		EncounterTable: []Monster{
 			{Name: "👾 Void Reaver", Health: 150, Damage: 50, LootTable: map[string]float64{"void_core": 1.0}},
 		},
 		RequiredLevel: 50,
-		RequiredItem:  "netherite_pickaxe",
+		RequiredItem:  "nether_pickaxe",
 		Descriptions: []string{
 			"Reality feels thin here, shimmering like oil on water.",
 			"There is no sound, only the vibration of the cosmos in your bones.",
@@ -100,6 +103,15 @@ var Locations = map[string]Location{
 }
 
 var Recipes = map[string]Recipe{
+	"wood_pickaxe": {
+		Name: "🪵 Wood Pickaxe",
+		Ingredients: map[string]int{
+			"wood": 10,
+		},
+		ResultType:    "tool",
+		ResultValue:   50,
+		RequiredLevel: 1,
+	},
 	"stone_pickaxe": {
 		Name: "🪨 Stone Pickaxe",
 		Ingredients: map[string]int{
@@ -130,6 +142,36 @@ var Recipes = map[string]Recipe{
 		ResultValue:   500,
 		RequiredLevel: 25,
 	},
+	"abyss_pickaxe": {
+		Name: "🌑 Abyss Pickaxe",
+		Ingredients: map[string]int{
+			"diamond":       10,
+			"abyss_crystal": 5,
+		},
+		ResultType:    "tool",
+		ResultValue:   1000,
+		RequiredLevel: 35,
+	},
+	"nether_pickaxe": {
+		Name: "🔥 Nether Pickaxe",
+		Ingredients: map[string]int{
+			"netherite":      10,
+			"nether_crystal": 5,
+		},
+		ResultType:    "tool",
+		ResultValue:   2500,
+		RequiredLevel: 45,
+	},
+	"void_pickaxe": {
+		Name: "🌌 Void Pickaxe",
+		Ingredients: map[string]int{
+			"star_matter":  10,
+			"void_crystal": 5,
+		},
+		ResultType:    "tool",
+		ResultValue:   5000,
+		RequiredLevel: 60,
+	},
 	"sword": {
 		Name: "🗡️ Sword",
 		Ingredients: map[string]int{
@@ -159,6 +201,36 @@ var Recipes = map[string]Recipe{
 		ResultType:    "weapon",
 		ResultValue:   35,
 		RequiredLevel: 25,
+	},
+	"abyss_sword": {
+		Name: "🌑 Abyss Sword",
+		Ingredients: map[string]int{
+			"diamond":       10,
+			"abyss_crystal": 5,
+		},
+		ResultType:    "weapon",
+		ResultValue:   60,
+		RequiredLevel: 35,
+	},
+	"nether_sword": {
+		Name: "🔥 Nether Sword",
+		Ingredients: map[string]int{
+			"netherite":      10,
+			"nether_crystal": 5,
+		},
+		ResultType:    "weapon",
+		ResultValue:   120,
+		RequiredLevel: 45,
+	},
+	"void_sword": {
+		Name: "🌌 Void Sword",
+		Ingredients: map[string]int{
+			"star_matter":  10,
+			"void_crystal": 5,
+		},
+		ResultType:    "weapon",
+		ResultValue:   250,
+		RequiredLevel: 60,
 	},
 	"bread": {
 		Name: "🥖 Bread",
@@ -250,9 +322,9 @@ var Structures = map[string]Structure{
 	"enchanting_table": {
 		Name: "🧪 Enchanting Table",
 		Ingredients: map[string]int{
-			"gold":    50,
-			"quartz":  20,
-			"diamond": 5,
+			"gold":           50,
+			"abyss_crystal": 10,
+			"diamond":        5,
 		},
 		RequiredLevel: 15,
 		PerkDesc:      "Arcane Wisdom (+50% XP gain from all sources)",
