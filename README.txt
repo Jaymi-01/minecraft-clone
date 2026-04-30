@@ -9,6 +9,8 @@ build your empire, and raid bot settlements!
 1. Extract the ZIP to a folder.
 2. Double-click the 'mine-system.exe' (or run './mine-system' on Linux/Mac).
 3. Your progress is automatically saved to 'player_data.json'.
+4. Open your browser to http://localhost:8080 while the game is running to see 
+   your stats and inventory update in real-time!
 
 🎮 COMMANDS
 -----------

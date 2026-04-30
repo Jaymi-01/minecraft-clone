@@ -17,6 +17,7 @@ If you just want to jump into the adventure, you **don't** need to install Go or
 3. Extract the ZIP to a new folder.
 4. Run the executable (`mine-system.exe` on Windows or `./mine-system` on Linux/Mac).
 5. **Start your journey!** Your progress is saved automatically to `player_data.json`.
+6. **📊 Visual Dashboard:** While the game is running, open your browser to [**`http://localhost:8080`**](http://localhost:8080) to see your real-time stats, XP, and inventory!
 
 ---
 
