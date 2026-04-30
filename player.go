@@ -9,8 +9,9 @@ import (
 	"time"
 )
 
-func NewPlayer() *Player {
+func NewPlayer(name string) *Player {
 	return &Player{
+		Name:           name,
 		Health:         100,
 		MaxHealth:      100,
 		Attack:         10,
@@ -27,6 +28,12 @@ func NewPlayer() *Player {
 	}
 }
 
+func (p *Player) HealFull() {
+	p.Health = p.MaxHealth
+	p.Stamina = p.MaxStamina
+	p.Save()
+}
+
 func (p *Player) Save() {
 	data, err := json.MarshalIndent(p, "", "  ")
 	if err != nil {
@@ -39,11 +46,11 @@ func (p *Player) Save() {
 func LoadPlayer() *Player {
 	data, err := os.ReadFile("player_data.json")
 	if err != nil {
-		return NewPlayer()
+		return NewPlayer("Adventurer")
 	}
 	var p Player
 	if err := json.Unmarshal(data, &p); err != nil {
-		return NewPlayer()
+		return NewPlayer("Adventurer")
 	}
 	if p.QuestProgress == nil {
 		p.QuestProgress = make(map[string]int)
