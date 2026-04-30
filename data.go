@@ -40,7 +40,7 @@ var Locations = map[string]Location{
 		},
 	},
 	"abyss": {
-		Name: "🕳️ Abyss",
+		Name: "🌑 Abyss",
 		LootTable: map[string]float64{
 			"gold":           0.5,
 			"diamond":        0.3,
@@ -104,7 +104,7 @@ var Locations = map[string]Location{
 
 var Recipes = map[string]Recipe{
 	"wood_pickaxe": {
-		Name: "🪵 Wood Pickaxe",
+		Name: "🪵⛏️ Wood Pickaxe",
 		Ingredients: map[string]int{
 			"wood": 10,
 		},
@@ -113,7 +113,7 @@ var Recipes = map[string]Recipe{
 		RequiredLevel: 1,
 	},
 	"stone_pickaxe": {
-		Name: "🪨 Stone Pickaxe",
+		Name: "🪨⛏️ Stone Pickaxe",
 		Ingredients: map[string]int{
 			"wood":  10,
 			"stone": 20,
@@ -123,7 +123,7 @@ var Recipes = map[string]Recipe{
 		RequiredLevel: 3,
 	},
 	"iron_pickaxe": {
-		Name: "⛓️ Iron Pickaxe",
+		Name: "⛓️⛏️ Iron Pickaxe",
 		Ingredients: map[string]int{
 			"wood": 5,
 			"iron": 20,
@@ -133,7 +133,7 @@ var Recipes = map[string]Recipe{
 		RequiredLevel: 10,
 	},
 	"diamond_pickaxe": {
-		Name: "💎 Diamond Pickaxe",
+		Name: "💎⛏️ Diamond Pickaxe",
 		Ingredients: map[string]int{
 			"iron":    10,
 			"diamond": 5,
@@ -143,7 +143,7 @@ var Recipes = map[string]Recipe{
 		RequiredLevel: 25,
 	},
 	"abyss_pickaxe": {
-		Name: "🌑 Abyss Pickaxe",
+		Name: "🌑⛏️ Abyss Pickaxe",
 		Ingredients: map[string]int{
 			"diamond":       10,
 			"abyss_crystal": 5,
@@ -153,7 +153,7 @@ var Recipes = map[string]Recipe{
 		RequiredLevel: 35,
 	},
 	"nether_pickaxe": {
-		Name: "🔥 Nether Pickaxe",
+		Name: "🔥⛏️ Nether Pickaxe",
 		Ingredients: map[string]int{
 			"netherite":      10,
 			"nether_crystal": 5,
@@ -163,7 +163,7 @@ var Recipes = map[string]Recipe{
 		RequiredLevel: 45,
 	},
 	"void_pickaxe": {
-		Name: "🌌 Void Pickaxe",
+		Name: "🌌⛏️ Void Pickaxe",
 		Ingredients: map[string]int{
 			"star_matter":  10,
 			"void_crystal": 5,
@@ -193,7 +193,7 @@ var Recipes = map[string]Recipe{
 		RequiredLevel: 8,
 	},
 	"diamond_sword": {
-		Name: "💎 Diamond Sword",
+		Name: "💎⚔️ Diamond Sword",
 		Ingredients: map[string]int{
 			"iron":    5,
 			"diamond": 10,
@@ -203,7 +203,7 @@ var Recipes = map[string]Recipe{
 		RequiredLevel: 25,
 	},
 	"abyss_sword": {
-		Name: "🌑 Abyss Sword",
+		Name: "🌑⚔️ Abyss Sword",
 		Ingredients: map[string]int{
 			"diamond":       10,
 			"abyss_crystal": 5,
@@ -213,7 +213,7 @@ var Recipes = map[string]Recipe{
 		RequiredLevel: 35,
 	},
 	"nether_sword": {
-		Name: "🔥 Nether Sword",
+		Name: "🔥⚔️ Nether Sword",
 		Ingredients: map[string]int{
 			"netherite":      10,
 			"nether_crystal": 5,
@@ -223,7 +223,7 @@ var Recipes = map[string]Recipe{
 		RequiredLevel: 45,
 	},
 	"void_sword": {
-		Name: "🌌 Void Sword",
+		Name: "🌌⚔️ Void Sword",
 		Ingredients: map[string]int{
 			"star_matter":  10,
 			"void_crystal": 5,
