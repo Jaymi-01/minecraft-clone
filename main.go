@@ -12,8 +12,12 @@ import (
 func main() {
 	rand.Seed(time.Now().UnixNano())
 	player := LoadPlayer()
+	
+	// Initialize Background Systems
 	player.StartRegeneration()
 	player.StartRaids()
+	StartServer(player) // Start the Web Dashboard
+
 	reader := bufio.NewReader(os.Stdin)
 
 	fmt.Println("🌟 Welcome back to the Mine & Exploration System! 🌟")
