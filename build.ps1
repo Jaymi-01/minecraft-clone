@@ -2,10 +2,13 @@
 
 # 1. Cleanup
 Write-Host 'Cleaning up old builds...'
-If (Test-Path 'Release') { Remove-Item 'Release' -Recurse -Force }
-$OldZips = Get-ChildItem -Filter 'MineRPG_*.zip'
-if ($OldZips) { $OldZips | Remove-Item -Force }
-New-Item -ItemType Directory -Path 'Release'
+$ReleaseDir = 'release'
+$TempStage = 'build_temp'
+
+If (Test-Path $TempStage) { Remove-Item $TempStage -Recurse -Force }
+If (Test-Path $ReleaseDir) { Remove-Item $ReleaseDir -Recurse -Force }
+New-Item -ItemType Directory -Path $ReleaseDir
+New-Item -ItemType Directory -Path $TempStage
 
 # 2. Build Targets
 $Targets = @(
@@ -21,24 +24,26 @@ foreach ($T in $Targets) {
     $Arch = $T.Arch
     $PlatformName = $T.Name
     $BinaryName = 'mine-system' + $T.Suffix
-    $ZipName = 'MineRPG_' + $PlatformName + '.zip'
+    $ZipName = Join-Path $ReleaseDir ('MineRPG_' + $PlatformName + '.zip')
 
     Write-Host ('Building for ' + $PlatformName + '...')
     
     $env:GOOS = $OS
     $env:GOARCH = $Arch
     
-    $TempPath = 'Release/' + $PlatformName
-    New-Item -ItemType Directory -Path $TempPath -Force | Out-Null
-    go build -o ($TempPath + '/' + $BinaryName) .
+    $TargetTempPath = Join-Path $TempStage $PlatformName
+    New-Item -ItemType Directory -Path $TargetTempPath -Force | Out-Null
+    go build -o (Join-Path $TargetTempPath $BinaryName) .
     
-    Copy-Item 'README.txt' ($TempPath + '/')
+    if (Test-Path 'README.txt') {
+        Copy-Item 'README.txt' $TargetTempPath
+    }
 
     Write-Host ('Packaging ' + $ZipName + '...')
-    Compress-Archive -Path ($TempPath + '/*') -DestinationPath $ZipName -Force
+    Compress-Archive -Path (Join-Path $TargetTempPath '*') -DestinationPath $ZipName -Force
 }
 
 # 4. Final Cleanup
-Remove-Item 'Release' -Recurse -Force
+Remove-Item $TempStage -Recurse -Force
 
-Write-Host 'ALL PLATFORMS READY!'
+Write-Host 'ALL PLATFORMS READY IN THE RELEASE FOLDER!'
