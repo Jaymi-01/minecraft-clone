@@ -59,6 +59,9 @@ func LoadPlayer() *Player {
 }
 
 func (p *Player) GainXP(amount int) {
+	if p.Structures["enchanting_table"] {
+		amount = int(float64(amount) * 1.5) // +50% XP
+	}
 	p.XP += amount
 	fmt.Printf("[✨ +%d XP]\n", amount)
 	if p.XP >= p.XPToNext {
@@ -220,6 +223,12 @@ func (p *Player) Raid(targetID string) {
 		fmt.Printf("❓ Unknown target: %s. Type !raid to see list.\n", targetID)
 		return
 	}
+
+	if p.Inventory[target.RequiredSword] <= 0 {
+		fmt.Printf("🗡️ A %s is needed to raid %s!\n", target.RequiredSword, target.Name)
+		return
+	}
+
 	if p.Level < target.Level {
 		fmt.Printf("🚫 Your level is too low to raid %s! Required: %d\n", target.Name, target.Level)
 		return
