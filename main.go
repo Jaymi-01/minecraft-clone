@@ -33,67 +33,67 @@ type Monster struct {
 
 var Locations = map[string]Location{
 	"surface": {
-		Name: "Surface",
+		Name: "🌳 Surface",
 		LootTable: map[string]float64{
 			"wood":  0.6,
 			"stone": 0.4,
 		},
 		EncounterChance: 0.1,
 		EncounterTable: []Monster{
-			{Name: "Slime", Health: 20, Damage: 5, LootTable: map[string]float64{"gel": 1.0}},
+			{Name: "🟢 Slime", Health: 20, Damage: 5, LootTable: map[string]float64{"gel": 1.0}},
 		},
 		RequiredLevel: 1,
 	},
 	"cave": {
-		Name: "Cave",
+		Name: "🕳️ Cave",
 		LootTable: map[string]float64{
 			"iron": 0.5,
 			"coal": 0.5,
 		},
 		EncounterChance: 0.2,
 		EncounterTable: []Monster{
-			{Name: "Zombie", Health: 40, Damage: 10, LootTable: map[string]float64{"rotten_flesh": 1.0}},
-			{Name: "Spider", Health: 30, Damage: 12, LootTable: map[string]float64{"string": 1.0}},
+			{Name: "🧟 Zombie", Health: 40, Damage: 10, LootTable: map[string]float64{"rotten_flesh": 1.0}},
+			{Name: "🕷️ Spider", Health: 30, Damage: 12, LootTable: map[string]float64{"string": 1.0}},
 		},
 		RequiredLevel: 3,
 		RequiredItem:  "stone_pickaxe",
 	},
 	"abyss": {
-		Name: "Abyss",
+		Name: "🕳️ Abyss",
 		LootTable: map[string]float64{
 			"gold":    0.6,
 			"diamond": 0.4,
 		},
 		EncounterChance: 0.3,
 		EncounterTable: []Monster{
-			{Name: "Shadow Stalker", Health: 60, Damage: 20, LootTable: map[string]float64{"shadow_dust": 1.0}},
+			{Name: "👻 Shadow Stalker", Health: 60, Damage: 20, LootTable: map[string]float64{"shadow_dust": 1.0}},
 		},
 		RequiredLevel: 10,
 		RequiredItem:  "iron_pickaxe",
 	},
 	"nether": {
-		Name: "Nether",
+		Name: "🔥 Nether",
 		LootTable: map[string]float64{
 			"quartz":    0.7,
 			"netherite": 0.3,
 		},
 		EncounterChance: 0.4,
 		EncounterTable: []Monster{
-			{Name: "Blaze", Health: 80, Damage: 25, LootTable: map[string]float64{"blaze_rod": 1.0}},
-			{Name: "Ghast", Health: 50, Damage: 40, LootTable: map[string]float64{"ghast_tear": 1.0}},
+			{Name: "🔥 Blaze", Health: 80, Damage: 25, LootTable: map[string]float64{"blaze_rod": 1.0}},
+			{Name: "☁️ Ghast", Health: 50, Damage: 40, LootTable: map[string]float64{"ghast_tear": 1.0}},
 		},
 		RequiredLevel: 25,
 		RequiredItem:  "diamond_pickaxe",
 	},
 	"void": {
-		Name: "Void",
+		Name: "🌌 Void",
 		LootTable: map[string]float64{
 			"void_essence": 0.8,
 			"star_matter":  0.2,
 		},
 		EncounterChance: 0.5,
 		EncounterTable: []Monster{
-			{Name: "Void Reaver", Health: 150, Damage: 50, LootTable: map[string]float64{"void_core": 1.0}},
+			{Name: "👾 Void Reaver", Health: 150, Damage: 50, LootTable: map[string]float64{"void_core": 1.0}},
 		},
 		RequiredLevel: 50,
 		RequiredItem:  "netherite_pickaxe",
@@ -110,7 +110,7 @@ type Recipe struct {
 
 var Recipes = map[string]Recipe{
 	"stone_pickaxe": {
-		Name: "Stone Pickaxe",
+		Name: "🪨 Stone Pickaxe",
 		Ingredients: map[string]int{
 			"wood":  10,
 			"stone": 20,
@@ -120,7 +120,7 @@ var Recipes = map[string]Recipe{
 		RequiredLevel: 3,
 	},
 	"iron_pickaxe": {
-		Name: "Iron Pickaxe",
+		Name: "⛓️ Iron Pickaxe",
 		Ingredients: map[string]int{
 			"wood": 5,
 			"iron": 20,
@@ -130,7 +130,7 @@ var Recipes = map[string]Recipe{
 		RequiredLevel: 10,
 	},
 	"diamond_pickaxe": {
-		Name: "Diamond Pickaxe",
+		Name: "💎 Diamond Pickaxe",
 		Ingredients: map[string]int{
 			"iron":    10,
 			"diamond": 5,
@@ -140,7 +140,7 @@ var Recipes = map[string]Recipe{
 		RequiredLevel: 25,
 	},
 	"sword": {
-		Name: "Sword",
+		Name: "🗡️ Sword",
 		Ingredients: map[string]int{
 			"wood":  2,
 			"stone": 10,
@@ -150,7 +150,7 @@ var Recipes = map[string]Recipe{
 		RequiredLevel: 1,
 	},
 	"iron_sword": {
-		Name: "Iron Sword",
+		Name: "⚔️ Iron Sword",
 		Ingredients: map[string]int{
 			"wood": 2,
 			"iron": 15,
@@ -170,7 +170,7 @@ type Structure struct {
 
 var Structures = map[string]Structure{
 	"house": {
-		Name: "House",
+		Name: "🏠 House",
 		Ingredients: map[string]int{
 			"wood":  50,
 			"stone": 50,
@@ -179,7 +179,7 @@ var Structures = map[string]Structure{
 		PerkDesc:      "Increases health regeneration (+2 per cycle)",
 	},
 	"farm": {
-		Name: "Farm",
+		Name: "🌾 Farm",
 		Ingredients: map[string]int{
 			"wood": 100,
 			"gel":  20,
@@ -188,7 +188,7 @@ var Structures = map[string]Structure{
 		PerkDesc:      "Increases stamina regeneration (+5 per cycle)",
 	},
 	"forge": {
-		Name: "Forge",
+		Name: "⚒️ Forge",
 		Ingredients: map[string]int{
 			"stone": 200,
 			"coal":  50,
@@ -198,7 +198,7 @@ var Structures = map[string]Structure{
 		PerkDesc:      "Increases attack power (+10 attack)",
 	},
 	"vault": {
-		Name: "Vault",
+		Name: "🏦 Vault",
 		Ingredients: map[string]int{
 			"iron": 100,
 			"gold": 20,
@@ -207,7 +207,7 @@ var Structures = map[string]Structure{
 		PerkDesc:      "Increases max health (+50 HP)",
 	},
 	"castle": {
-		Name: "Castle",
+		Name: "🏰 Castle",
 		Ingredients: map[string]int{
 			"stone":   1000,
 			"iron":    200,
@@ -251,7 +251,7 @@ func NewPlayer() *Player {
 
 func (p *Player) GainXP(amount int) {
 	p.XP += amount
-	fmt.Printf("[+ %d XP]\n", amount)
+	fmt.Printf("[✨ +%d XP]\n", amount)
 	if p.XP >= p.XPToNext {
 		p.Level++
 		p.XP -= p.XPToNext
@@ -260,32 +260,32 @@ func (p *Player) GainXP(amount int) {
 		p.MaxStamina += 10
 		p.Health = p.MaxHealth
 		p.Stamina = p.MaxStamina
-		fmt.Printf("\n*** LEVEL UP! You are now level %d! ***\n", p.Level)
+		fmt.Printf("\n🎊 LEVEL UP! You are now level %d! 🎊\n", p.Level)
 	}
 }
 
 func (p *Player) ShowStats() {
-	fmt.Printf("--- Player Stats ---\n")
-	fmt.Printf("Level:      %d (XP: %d/%d)\n", p.Level, p.XP, p.XPToNext)
-	fmt.Printf("Health:     %d/%d\n", p.Health, p.MaxHealth)
-	fmt.Printf("Attack:     %d\n", p.Attack)
-	fmt.Printf("Stamina:    %d/%d\n", p.Stamina, p.MaxStamina)
-	fmt.Printf("Tool Durability: %d\n", p.ToolDurability)
+	fmt.Printf("\n--- 👤 Player Stats ---\n")
+	fmt.Printf("⭐ Level:      %d (XP: %d/%d)\n", p.Level, p.XP, p.XPToNext)
+	fmt.Printf("❤️ Health:     %d/%d\n", p.Health, p.MaxHealth)
+	fmt.Printf("⚔️ Attack:     %d\n", p.Attack)
+	fmt.Printf("⚡ Stamina:    %d/%d\n", p.Stamina, p.MaxStamina)
+	fmt.Printf("🔨 Tool Durability: %d\n", p.ToolDurability)
 	if len(p.Structures) > 0 {
-		fmt.Printf("Structures: ")
+		fmt.Printf("🏗️ Structures: ")
 		var sList []string
 		for s := range p.Structures {
 			sList = append(sList, s)
 		}
 		fmt.Println(strings.Join(sList, ", "))
 	}
-	fmt.Println("--------------------")
+	fmt.Println("----------------------")
 }
 
 func (p *Player) ShowInventory() {
-	fmt.Printf("--- Inventory ---\n")
+	fmt.Printf("\n--- 🎒 Inventory ---\n")
 	if len(p.Inventory) == 0 {
-		fmt.Println("Empty")
+		fmt.Println("Empty 📭")
 	} else {
 		for itemID, qty := range p.Inventory {
 			if qty > 0 {
@@ -293,7 +293,7 @@ func (p *Player) ShowInventory() {
 			}
 		}
 	}
-	fmt.Println("-----------------")
+	fmt.Println("--------------------")
 }
 
 func (p *Player) StartRegeneration() {
@@ -331,33 +331,33 @@ func (p *Player) Regenerate() {
 }
 
 func (p *Player) ListCraftable() {
-	fmt.Println("--- Crafting Menu ---")
+	fmt.Println("\n--- 📜 Crafting Menu ---")
 	for id, r := range Recipes {
-		fmt.Printf("[%s] Level %d - Ingredients: ", id, r.RequiredLevel)
+		fmt.Printf("[%s] ⭐ Lvl %d - 📦 Ingredients: ", id, r.RequiredLevel)
 		var ingList []string
 		for ing, qty := range r.Ingredients {
 			ingList = append(ingList, fmt.Sprintf("%d %s", qty, ing))
 		}
 		fmt.Printf("%s\n", strings.Join(ingList, ", "))
 	}
-	fmt.Println("---------------------")
+	fmt.Println("------------------------")
 }
 
 func (p *Player) Craft(itemName string) {
 	recipe, ok := Recipes[strings.ToLower(itemName)]
 	if !ok {
-		fmt.Printf("Unknown recipe: %s. Type !craft to see options.\n", itemName)
+		fmt.Printf("❓ Unknown recipe: %s. Type !craft to see options.\n", itemName)
 		return
 	}
 
 	if p.Level < recipe.RequiredLevel {
-		fmt.Printf("Your level is too low to craft %s! Required: %d\n", recipe.Name, recipe.RequiredLevel)
+		fmt.Printf("🚫 Your level is too low to craft %s! Required: %d\n", recipe.Name, recipe.RequiredLevel)
 		return
 	}
 
 	for ing, qty := range recipe.Ingredients {
 		if p.Inventory[ing] < qty {
-			fmt.Printf("Missing ingredients for %s: Need %d %s, have %d\n", recipe.Name, qty, ing, p.Inventory[ing])
+			fmt.Printf("❌ Missing ingredients for %s: Need %d %s, have %d\n", recipe.Name, qty, ing, p.Inventory[ing])
 			return
 		}
 	}
@@ -370,48 +370,48 @@ func (p *Player) Craft(itemName string) {
 	case "tool":
 		p.ToolDurability = recipe.ResultValue
 		p.Inventory[strings.ToLower(itemName)] = 1
-		fmt.Printf("You crafted a %s! Tool durability set to %d.\n", recipe.Name, p.ToolDurability)
+		fmt.Printf("🛠️ You crafted a %s! Tool durability set to %d.\n", recipe.Name, p.ToolDurability)
 	case "weapon":
 		p.Attack += recipe.ResultValue
-		fmt.Printf("You crafted a %s! Attack increased by %d (Total: %d).\n", recipe.Name, recipe.ResultValue, p.Attack)
+		fmt.Printf("⚔️ You crafted a %s! Attack increased by %d (Total: %d).\n", recipe.Name, recipe.ResultValue, p.Attack)
 	}
 
 	p.GainXP(10 + rand.Intn(5))
 }
 
 func (p *Player) ListBuildable() {
-	fmt.Println("--- Building Menu ---")
+	fmt.Println("\n--- 🏗️ Building Menu ---")
 	for id, s := range Structures {
-		fmt.Printf("[%s] Level %d - Ingredients: ", id, s.RequiredLevel)
+		fmt.Printf("[%s] ⭐ Lvl %d - 📦 Ingredients: ", id, s.RequiredLevel)
 		var ingList []string
 		for ing, qty := range s.Ingredients {
 			ingList = append(ingList, fmt.Sprintf("%d %s", qty, ing))
 		}
-		fmt.Printf("%s\n    Perk: %s\n", strings.Join(ingList, ", "), s.PerkDesc)
+		fmt.Printf("%s\n    🎁 Perk: %s\n", strings.Join(ingList, ", "), s.PerkDesc)
 	}
-	fmt.Println("---------------------")
+	fmt.Println("------------------------")
 }
 
 func (p *Player) Build(structName string) {
 	s, ok := Structures[strings.ToLower(structName)]
 	if !ok {
-		fmt.Printf("Unknown structure: %s. Type !build to see options.\n", structName)
+		fmt.Printf("❓ Unknown structure: %s. Type !build to see options.\n", structName)
 		return
 	}
 
 	if p.Structures[strings.ToLower(structName)] {
-		fmt.Printf("You already built a %s!\n", s.Name)
+		fmt.Printf("🏠 You already built a %s!\n", s.Name)
 		return
 	}
 
 	if p.Level < s.RequiredLevel {
-		fmt.Printf("Your level is too low to build %s! Required: %d\n", s.Name, s.RequiredLevel)
+		fmt.Printf("🚫 Your level is too low to build %s! Required: %d\n", s.Name, s.RequiredLevel)
 		return
 	}
 
 	for ing, qty := range s.Ingredients {
 		if p.Inventory[ing] < qty {
-			fmt.Printf("Missing materials for %s: Need %d %s, have %d\n", s.Name, qty, ing, p.Inventory[ing])
+			fmt.Printf("❌ Missing materials for %s: Need %d %s, have %d\n", s.Name, qty, ing, p.Inventory[ing])
 			return
 		}
 	}
@@ -421,7 +421,7 @@ func (p *Player) Build(structName string) {
 	}
 
 	p.Structures[strings.ToLower(structName)] = true
-	fmt.Printf("You built a %s! Perk Unlocked: %s\n", s.Name, s.PerkDesc)
+	fmt.Printf("🔨 You built a %s! Perk Unlocked: %s\n", s.Name, s.PerkDesc)
 
 	// Apply immediate perks
 	switch strings.ToLower(structName) {
@@ -442,38 +442,38 @@ func (p *Player) Build(structName string) {
 }
 
 func (p *Player) Combat(m *Monster) bool {
-	fmt.Printf("A wild %s appeared!\n", m.Name)
+	fmt.Printf("\n⚔️ A wild %s appeared!\n", m.Name)
 	monsterHealth := m.Health
 
 	for monsterHealth > 0 && p.Health > 0 {
 		// Player attacks
 		damageToMonster := p.Attack + rand.Intn(5)
 		monsterHealth -= damageToMonster
-		fmt.Printf("You hit %s for %d damage. (%d HP left)\n", m.Name, damageToMonster, monsterHealth)
+		fmt.Printf("🤜 You hit %s for %d damage. (%d HP left)\n", m.Name, damageToMonster, monsterHealth)
 
 		if monsterHealth <= 0 {
-			fmt.Printf("You defeated the %s!\n", m.Name)
+			fmt.Printf("🏆 You defeated the %s!\n", m.Name)
 			// Add loot
 			for item, prob := range m.LootTable {
 				if rand.Float64() <= prob {
 					p.Inventory[item]++
-					fmt.Printf("Dropped: %s\n", item)
+					fmt.Printf("🎁 Dropped: %s\n", item)
 				}
 			}
-			p.GainXP(15 + rand.Intn(10)) // Small XP for combat
+			p.GainXP(15 + rand.Intn(10))
 			return true
 		}
 
 		// Monster attacks
 		damageToPlayer := m.Damage + rand.Intn(5)
 		p.Health -= damageToPlayer
-		fmt.Printf("%s hits you for %d damage. (%d HP left)\n", m.Name, damageToPlayer, p.Health)
+		fmt.Printf("💥 %s hits you for %d damage. (%d HP left)\n", m.Name, damageToPlayer, p.Health)
 	}
 
 	if p.Health <= 0 {
-		fmt.Println("You were defeated...")
+		fmt.Println("💀 You were defeated...")
 		p.Health = 20 // Respawn with low health
-		fmt.Println("You limped back to safety and recovered a bit of health.")
+		fmt.Println("🩹 You limped back to safety and recovered a bit of health.")
 		return false
 	}
 	return false
@@ -482,27 +482,27 @@ func (p *Player) Combat(m *Monster) bool {
 func (p *Player) Mine(locName string) {
 	loc, ok := Locations[strings.ToLower(locName)]
 	if !ok {
-		fmt.Printf("Unknown location: %s. Available: surface, cave, abyss, nether, void\n", locName)
+		fmt.Printf("❓ Unknown location: %s. Type !mine to see available zones.\n", locName)
 		return
 	}
 
 	if p.Level < loc.RequiredLevel {
-		fmt.Printf("Your level is too low to enter %s! Required: %d\n", loc.Name, loc.RequiredLevel)
+		fmt.Printf("🚫 Your level is too low to enter %s! Required: %d\n", loc.Name, loc.RequiredLevel)
 		return
 	}
 
 	if loc.RequiredItem != "" && p.Inventory[loc.RequiredItem] <= 0 {
-		fmt.Printf("You need a %s to mine in the %s!\n", loc.RequiredItem, loc.Name)
+		fmt.Printf("🔏 You need a %s to mine in the %s!\n", loc.RequiredItem, loc.Name)
 		return
 	}
 
 	if p.Stamina < 10 {
-		fmt.Println("Not enough stamina to mine! You need at least 10.")
+		fmt.Println("😫 Not enough stamina! Wait for regeneration.")
 		return
 	}
 
 	if p.ToolDurability <= 0 {
-		fmt.Println("Your tool is broken! You need to craft a new one or repair it.")
+		fmt.Println("⚠️ Your tool is broken! Craft a new one.")
 		return
 	}
 
@@ -513,12 +513,11 @@ func (p *Player) Mine(locName string) {
 	if rand.Float64() <= loc.EncounterChance {
 		monster := loc.EncounterTable[rand.Intn(len(loc.EncounterTable))]
 		if !p.Combat(&monster) {
-			return // Battle lost or fled
+			return // Battle lost
 		}
 	}
 
 	// Roll for loot based on level
-	// Base quantity is 1, increases by 1 for every 5 levels
 	numDrops := 1 + (p.Level / 5)
 	foundSomething := false
 
@@ -529,7 +528,7 @@ func (p *Player) Mine(locName string) {
 			cumulative += prob
 			if r <= cumulative {
 				p.Inventory[item]++
-				fmt.Printf("You mined in the %s and found: %s!\n", loc.Name, item)
+				fmt.Printf("⛏️ You mined in the %s and found: %s!\n", loc.Name, item)
 				foundSomething = true
 				break
 			}
@@ -537,10 +536,10 @@ func (p *Player) Mine(locName string) {
 	}
 
 	if !foundSomething {
-		fmt.Printf("You mined in the %s but found nothing.\n", loc.Name)
+		fmt.Printf("💨 You mined in the %s but found nothing.\n", loc.Name)
 	}
 
-	p.GainXP(2 + rand.Intn(3)) // Very slow XP for mining
+	p.GainXP(2 + rand.Intn(3))
 }
 
 func main() {
@@ -549,11 +548,11 @@ func main() {
 	player.StartRegeneration()
 	reader := bufio.NewReader(os.Stdin)
 
-	fmt.Println("Welcome to the Mine & Exploration System!")
-	fmt.Println("Commands: !mine <location>, !craft [item], !build [structure], !stats, !inventory, !exit")
+	fmt.Println("🌟 Welcome to the Mine & Exploration System! 🌟")
+	fmt.Println("Available Commands: !mine <location>, !craft [item], !build [structure], !stats, !inventory, !exit")
 
 	for {
-		fmt.Print("> ")
+		fmt.Print("\n> ")
 		input, err := reader.ReadString('\n')
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "Error reading input:", err)
@@ -571,6 +570,7 @@ func main() {
 		switch command {
 		case "!mine":
 			if len(parts) < 2 {
+				fmt.Println("📍 Available Locations: surface, cave, abyss, nether, void")
 				fmt.Println("Usage: !mine <location>")
 			} else {
 				player.Mine(parts[1])
@@ -592,10 +592,10 @@ func main() {
 		case "!inventory":
 			player.ShowInventory()
 		case "!exit":
-			fmt.Println("Goodbye!")
+			fmt.Println("👋 Goodbye! Your progress remains in memory until the program stops.")
 			return
 		default:
-			fmt.Printf("Unknown command: %s\n", command)
+			fmt.Printf("❓ Unknown command: %s\n", command)
 		}
 	}
 }
