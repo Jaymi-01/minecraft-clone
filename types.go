@@ -39,11 +39,12 @@ type Structure struct {
 }
 
 type BotSettlement struct {
-	Name        string
-	Level       int
-	Defenders   []Monster
-	LootTable   map[string]int
-	Description string
+	Name          string
+	Level         int
+	RequiredSword string // The specific sword needed to raid this camp
+	Defenders     []Monster
+	LootTable     map[string]int
+	Description   string
 }
 
 type ShopItem struct {
