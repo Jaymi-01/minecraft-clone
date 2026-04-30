@@ -23,6 +23,7 @@ type Location struct {
 	EncounterChance float64
 	RequiredLevel   int
 	RequiredItem    string
+	Descriptions    []string // Random flavor text for mining
 }
 
 type Monster struct {
@@ -44,6 +45,12 @@ var Locations = map[string]Location{
 			{Name: "🟢 Slime", Health: 20, Damage: 5, LootTable: map[string]float64{"gel": 1.0}},
 		},
 		RequiredLevel: 1,
+		Descriptions: []string{
+			"The sun shines warmly through the leaves as you gather supplies.",
+			"A gentle breeze carries the scent of pine and fresh earth.",
+			"Birds chirp overhead while you work on the grassy plains.",
+			"You find a sturdy tree and begin harvesting its timber.",
+		},
 	},
 	"cave": {
 		Name: "🕳️ Cave",
@@ -58,6 +65,12 @@ var Locations = map[string]Location{
 		},
 		RequiredLevel: 3,
 		RequiredItem:  "stone_pickaxe",
+		Descriptions: []string{
+			"Water droplets echo in the damp silence of the cavern.",
+			"The air grows cool and musty as you strike the rocky walls.",
+			"Your torch light flickers against a vein of dark coal.",
+			"The sound of your pickaxe rings out through the dark tunnels.",
+		},
 	},
 	"abyss": {
 		Name: "🕳️ Abyss",
@@ -71,6 +84,12 @@ var Locations = map[string]Location{
 		},
 		RequiredLevel: 10,
 		RequiredItem:  "iron_pickaxe",
+		Descriptions: []string{
+			"The darkness here feels heavy, almost physical.",
+			"Faint whispers seem to drift from the bottomless pits nearby.",
+			"A glint of something precious catches your light in the deep gloom.",
+			"The rock here is unnaturally hard, singing with a low hum when struck.",
+		},
 	},
 	"nether": {
 		Name: "🔥 Nether",
@@ -85,6 +104,12 @@ var Locations = map[string]Location{
 		},
 		RequiredLevel: 25,
 		RequiredItem:  "diamond_pickaxe",
+		Descriptions: []string{
+			"Heat waves distort the air around the bubbling lava lakes.",
+			"The ground itself seems to groan under the volcanic pressure.",
+			"Cinders fall like glowing snow from the jagged red ceiling.",
+			"You chip away at the glowing quartz while shielding your eyes from the glare.",
+		},
 	},
 	"void": {
 		Name: "🌌 Void",
@@ -98,6 +123,12 @@ var Locations = map[string]Location{
 		},
 		RequiredLevel: 50,
 		RequiredItem:  "netherite_pickaxe",
+		Descriptions: []string{
+			"Reality feels thin here, shimmering like oil on water.",
+			"There is no sound, only the vibration of the cosmos in your bones.",
+			"Stars seem to drift past you in the endless indigo expanse.",
+			"You reach into the nothingness and pull back fragments of pure energy.",
+		},
 	},
 }
 
@@ -626,6 +657,13 @@ func (p *Player) Mine(locName string) {
 	}
 	p.Stamina -= 10
 	p.ToolDurability -= 1
+
+	// Display Flavor Text
+	if len(loc.Descriptions) > 0 {
+		desc := loc.Descriptions[rand.Intn(len(loc.Descriptions))]
+		fmt.Printf("\n✨ %s\n", desc)
+	}
+
 	if rand.Float64() <= loc.EncounterChance {
 		monster := loc.EncounterTable[rand.Intn(len(loc.EncounterTable))]
 		if !p.Combat(&monster) {
