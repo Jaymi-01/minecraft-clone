@@ -135,7 +135,7 @@ var Locations = map[string]Location{
 type Recipe struct {
 	Name          string
 	Ingredients   map[string]int
-	ResultType    string // "tool", "weapon", "armor"
+	ResultType    string // "tool", "weapon", "armor", "food", "stamina_food"
 	ResultValue   int
 	RequiredLevel int
 }
@@ -190,6 +190,35 @@ var Recipes = map[string]Recipe{
 		ResultType:    "weapon",
 		ResultValue:   15,
 		RequiredLevel: 8,
+	},
+	"bread": {
+		Name: "🥖 Bread",
+		Ingredients: map[string]int{
+			"wood": 5,
+		},
+		ResultType:    "food",
+		ResultValue:   20,
+		RequiredLevel: 2,
+	},
+	"health_potion": {
+		Name: "🧪 Health Potion",
+		Ingredients: map[string]int{
+			"gel":  10,
+			"gold": 5,
+		},
+		ResultType:    "food",
+		ResultValue:   50,
+		RequiredLevel: 5,
+	},
+	"stamina_potion": {
+		Name: "⚡ Stamina Potion",
+		Ingredients: map[string]int{
+			"gel":    10,
+			"quartz": 10,
+		},
+		ResultType:    "stamina_food",
+		ResultValue:   30,
+		RequiredLevel: 10,
 	},
 }
 
@@ -541,8 +570,51 @@ func (p *Player) Craft(itemName string) {
 	case "weapon":
 		p.Attack += recipe.ResultValue
 		fmt.Printf("⚔️ You crafted a %s! Attack increased by %d (Total: %d).\n", recipe.Name, recipe.ResultValue, p.Attack)
+	case "food":
+		p.Inventory[strings.ToLower(itemName)]++
+		fmt.Printf("🍞 You crafted a %s!\n", recipe.Name)
+	case "stamina_food":
+		p.Inventory[strings.ToLower(itemName)]++
+		fmt.Printf("⚡ You crafted a %s!\n", recipe.Name)
 	}
 	p.GainXP(10 + rand.Intn(5))
+	p.Save()
+}
+
+func (p *Player) Use(itemName string) {
+	itemKey := strings.ToLower(itemName)
+	if p.Inventory[itemKey] <= 0 {
+		fmt.Printf("❌ You don't have any %s in your inventory.\n", itemName)
+		return
+	}
+
+	recipe, ok := Recipes[itemKey]
+	if !ok || (recipe.ResultType != "food" && recipe.ResultType != "stamina_food") {
+		fmt.Printf("❌ %s is not a consumable item.\n", itemName)
+		return
+	}
+
+	p.Inventory[itemKey]--
+	if p.Inventory[itemKey] == 0 {
+		delete(p.Inventory, itemKey)
+	}
+
+	switch recipe.ResultType {
+	case "food":
+		oldHP := p.Health
+		p.Health += recipe.ResultValue
+		if p.Health > p.MaxHealth {
+			p.Health = p.MaxHealth
+		}
+		fmt.Printf("😋 You consumed %s and recovered %d HP! (❤️ %d -> %d)\n", recipe.Name, p.Health-oldHP, oldHP, p.Health)
+	case "stamina_food":
+		oldStam := p.Stamina
+		p.Stamina += recipe.ResultValue
+		if p.Stamina > p.MaxStamina {
+			p.Stamina = p.MaxStamina
+		}
+		fmt.Printf("⚡ You consumed %s and recovered %d Stamina! (⚡ %d -> %d)\n", recipe.Name, p.Stamina-oldStam, oldStam, p.Stamina)
+	}
 	p.Save()
 }
 
@@ -658,7 +730,6 @@ func (p *Player) Mine(locName string) {
 	p.Stamina -= 10
 	p.ToolDurability -= 1
 
-	// Display Flavor Text
 	if len(loc.Descriptions) > 0 {
 		desc := loc.Descriptions[rand.Intn(len(loc.Descriptions))]
 		fmt.Printf("\n✨ %s\n", desc)
@@ -700,7 +771,7 @@ func main() {
 	reader := bufio.NewReader(os.Stdin)
 
 	fmt.Println("🌟 Welcome back to the Mine & Exploration System! 🌟")
-	fmt.Println("Available Commands: !mine <location>, !craft [item], !build [structure], !raid [target], !stats, !inventory, !exit")
+	fmt.Println("Available Commands: !mine <location>, !craft [item], !build [structure], !use <item>, !raid [target], !stats, !inventory, !exit")
 
 	for {
 		fmt.Print("\n> ")
@@ -734,6 +805,12 @@ func main() {
 				player.ListBuildable()
 			} else {
 				player.Build(parts[1])
+			}
+		case "!use":
+			if len(parts) < 2 {
+				fmt.Println("🎒 Usage: !use <item>")
+			} else {
+				player.Use(parts[1])
 			}
 		case "!raid":
 			if len(parts) < 2 {
