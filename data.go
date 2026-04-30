@@ -150,6 +150,16 @@ var Recipes = map[string]Recipe{
 		ResultValue:   15,
 		RequiredLevel: 8,
 	},
+	"diamond_sword": {
+		Name: "💎 Diamond Sword",
+		Ingredients: map[string]int{
+			"iron":    5,
+			"diamond": 10,
+		},
+		ResultType:    "weapon",
+		ResultValue:   35,
+		RequiredLevel: 25,
+	},
 	"bread": {
 		Name: "🥖 Bread",
 		Ingredients: map[string]int{
@@ -237,6 +247,16 @@ var Structures = map[string]Structure{
 		RequiredLevel: 12,
 		PerkDesc:      "Increases attack power (+10 attack)",
 	},
+	"enchanting_table": {
+		Name: "🧪 Enchanting Table",
+		Ingredients: map[string]int{
+			"gold":    50,
+			"quartz":  20,
+			"diamond": 5,
+		},
+		RequiredLevel: 15,
+		PerkDesc:      "Arcane Wisdom (+50% XP gain from all sources)",
+	},
 	"vault": {
 		Name: "🏦 Vault",
 		Ingredients: map[string]int{
@@ -260,8 +280,9 @@ var Structures = map[string]Structure{
 
 var BotSettlements = map[string]BotSettlement{
 	"goblin_camp": {
-		Name:  "👺 Goblin Camp",
-		Level: 5,
+		Name:          "👺 Goblin Camp",
+		Level:         5,
+		RequiredSword: "sword",
 		Defenders: []Monster{
 			{Name: "👺 Goblin Warrior", Health: 50, Damage: 10},
 			{Name: "👺 Goblin Archer", Health: 30, Damage: 15},
@@ -270,8 +291,9 @@ var BotSettlements = map[string]BotSettlement{
 		Description: "A small camp of pesky goblins. Easy pickings for a beginner.",
 	},
 	"bandit_fort": {
-		Name:  "🏴‍☠️ Bandit Fort",
-		Level: 15,
+		Name:          "🏴‍☠️ Bandit Fort",
+		Level:         15,
+		RequiredSword: "iron_sword",
 		Defenders: []Monster{
 			{Name: "🏴‍☠️ Bandit Thug", Health: 100, Damage: 20},
 			{Name: "🏴‍☠️ Bandit Leader", Health: 200, Damage: 35},
@@ -280,8 +302,9 @@ var BotSettlements = map[string]BotSettlement{
 		Description: "A fortified base filled with ruthless outlaws.",
 	},
 	"shadow_keep": {
-		Name:  "🏰 Shadow Keep",
-		Level: 35,
+		Name:          "🏰 Shadow Keep",
+		Level:         35,
+		RequiredSword: "diamond_sword",
 		Defenders: []Monster{
 			{Name: "👻 Shadow Knight", Health: 300, Damage: 50},
 			{Name: "👻 Shadow Mage", Health: 150, Damage: 80},
