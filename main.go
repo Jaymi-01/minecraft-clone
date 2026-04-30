@@ -11,16 +11,30 @@ import (
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
-	player := LoadPlayer()
+	
+	var player *Player
+	reader := bufio.NewReader(os.Stdin)
+
+	// Onboarding Check
+	if _, err := os.Stat("player_data.json"); os.IsNotExist(err) {
+		fmt.Println("🌟 Welcome to your new adventure! 🌟")
+		fmt.Print("Enter your character's name: ")
+		name, _ := reader.ReadString('\n')
+		name = strings.TrimSpace(name)
+		if name == "" { name = "Adventurer" }
+		player = NewPlayer(name)
+		player.Save()
+		fmt.Printf("Hello, %s! Your journey begins now.\n", name)
+	} else {
+		player = LoadPlayer()
+		fmt.Printf("🌟 Welcome back, %s! 🌟\n", player.Name)
+	}
 	
 	// Initialize Background Systems
 	player.StartRegeneration()
 	player.StartRaids()
 	StartServer(player) // Start the Web Dashboard
 
-	reader := bufio.NewReader(os.Stdin)
-
-	fmt.Println("🌟 Welcome back to the Mine & Exploration System! 🌟")
 	fmt.Println("Available Commands: !mine <location>, !craft [item], !build [structure], !shop, !buy <item>, !use <item>, !raid [target], !quests, !stats, !inventory, !exit")
 
 	for {
@@ -82,6 +96,9 @@ func main() {
 			player.ShowStats()
 		case "!inventory":
 			player.ShowInventory()
+		case "!recover":
+			player.HealFull()
+			fmt.Println("⚡ [CHEAT] Health and Stamina fully replenished! ⚡")
 		case "!exit":
 			player.Save()
 			fmt.Println("👋 Goodbye! Your progress has been saved to player_data.json.")
