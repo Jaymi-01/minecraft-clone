@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"os"
@@ -220,17 +221,17 @@ var Structures = map[string]Structure{
 
 // Player represents the player's state.
 type Player struct {
-	Health         int
-	MaxHealth      int
-	Attack         int
-	Stamina        int
-	MaxStamina     int
-	Level          int
-	XP             int
-	XPToNext       int
-	Inventory      map[string]int
-	ToolDurability int
-	Structures     map[string]bool
+	Health         int             `json:"health"`
+	MaxHealth      int             `json:"max_health"`
+	Attack         int             `json:"attack"`
+	Stamina        int             `json:"stamina"`
+	MaxStamina     int             `json:"max_stamina"`
+	Level          int             `json:"level"`
+	XP             int             `json:"xp"`
+	XPToNext       int             `json:"xp_to_next"`
+	Inventory      map[string]int  `json:"inventory"`
+	ToolDurability int             `json:"tool_durability"`
+	Structures     map[string]bool `json:"structures"`
 }
 
 func NewPlayer() *Player {
@@ -249,6 +250,27 @@ func NewPlayer() *Player {
 	}
 }
 
+func (p *Player) Save() {
+	data, err := json.MarshalIndent(p, "", "  ")
+	if err != nil {
+		fmt.Printf("❌ Error saving data: %v\n", err)
+		return
+	}
+	os.WriteFile("player_data.json", data, 0644)
+}
+
+func LoadPlayer() *Player {
+	data, err := os.ReadFile("player_data.json")
+	if err != nil {
+		return NewPlayer()
+	}
+	var p Player
+	if err := json.Unmarshal(data, &p); err != nil {
+		return NewPlayer()
+	}
+	return &p
+}
+
 func (p *Player) GainXP(amount int) {
 	p.XP += amount
 	fmt.Printf("[✨ +%d XP]\n", amount)
@@ -262,6 +284,7 @@ func (p *Player) GainXP(amount int) {
 		p.Stamina = p.MaxStamina
 		fmt.Printf("\n🎊 LEVEL UP! You are now level %d! 🎊\n", p.Level)
 	}
+	p.Save()
 }
 
 func (p *Player) ShowStats() {
@@ -328,6 +351,7 @@ func (p *Player) Regenerate() {
 			p.Stamina = p.MaxStamina
 		}
 	}
+	p.Save()
 }
 
 func (p *Player) ListCraftable() {
@@ -377,6 +401,7 @@ func (p *Player) Craft(itemName string) {
 	}
 
 	p.GainXP(10 + rand.Intn(5))
+	p.Save()
 }
 
 func (p *Player) ListBuildable() {
@@ -439,6 +464,7 @@ func (p *Player) Build(structName string) {
 	}
 
 	p.GainXP(50 + rand.Intn(50))
+	p.Save()
 }
 
 func (p *Player) Combat(m *Monster) bool {
@@ -474,6 +500,7 @@ func (p *Player) Combat(m *Monster) bool {
 		fmt.Println("💀 You were defeated...")
 		p.Health = 20 // Respawn with low health
 		fmt.Println("🩹 You limped back to safety and recovered a bit of health.")
+		p.Save()
 		return false
 	}
 	return false
@@ -540,15 +567,16 @@ func (p *Player) Mine(locName string) {
 	}
 
 	p.GainXP(2 + rand.Intn(3))
+	p.Save()
 }
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
-	player := NewPlayer()
+	player := LoadPlayer()
 	player.StartRegeneration()
 	reader := bufio.NewReader(os.Stdin)
 
-	fmt.Println("🌟 Welcome to the Mine & Exploration System! 🌟")
+	fmt.Println("🌟 Welcome back to the Mine & Exploration System! 🌟")
 	fmt.Println("Available Commands: !mine <location>, !craft [item], !build [structure], !stats, !inventory, !exit")
 
 	for {
@@ -592,7 +620,8 @@ func main() {
 		case "!inventory":
 			player.ShowInventory()
 		case "!exit":
-			fmt.Println("👋 Goodbye! Your progress remains in memory until the program stops.")
+			player.Save()
+			fmt.Println("👋 Goodbye! Your progress has been saved to player_data.json.")
 			return
 		default:
 			fmt.Printf("❓ Unknown command: %s\n", command)
