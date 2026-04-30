@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mine RPG Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <style>
         body {
@@ -47,9 +46,6 @@
             color: #fff;
             text-shadow: 2px 2px #000;
         }
-        i.ph {
-            font-size: 2.5rem;
-        }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -57,11 +53,11 @@
         <!-- Header -->
         <div class="flex justify-between items-center mb-8 border-b-4 border-gray-600 pb-4">
             <div>
-                <h1 class="text-5xl text-yellow-500 mb-2"><i class="ph ph-user"></i> <span id="player-name">DASHBOARD</span></h1>
+                <h1 class="text-5xl text-yellow-500 mb-2">👤 <span id="player-name">DASHBOARD</span></h1>
                 <p class="text-2xl">Status: <span id="status-text" class="text-green-500">ONLINE</span></p>
             </div>
             <div class="text-right">
-                <div class="text-4xl text-blue-400"><i class="ph ph-star"></i> LEVEL <span id="level-val">1</span></div>
+                <div class="text-4xl text-blue-400">⭐ LEVEL <span id="level-val">1</span></div>
                 <div class="w-64 mt-2">
                     <div class="text-xl mb-1 text-blue-300 text-center">XP: <span id="xp-text">0/100</span></div>
                     <div class="progress-bar">
@@ -78,7 +74,7 @@
                 <div class="space-y-6">
                     <div>
                         <div class="flex justify-between text-2xl mb-1">
-                            <span><i class="ph ph-heart"></i> Health</span>
+                            <span>Health</span>
                             <span id="hp-text">100/100</span>
                         </div>
                         <div class="progress-bar">
@@ -87,7 +83,7 @@
                     </div>
                     <div>
                         <div class="flex justify-between text-2xl mb-1">
-                            <span><i class="ph ph-lightning"></i> Stamina</span>
+                            <span>Stamina</span>
                             <span id="stamina-text">50/50</span>
                         </div>
                         <div class="progress-bar">
@@ -102,17 +98,15 @@
                 <h2 class="text-3xl mb-4 border-b-2 border-gray-500">⚔️ COMBAT & GEAR</h2>
                 <div class="grid grid-cols-2 gap-4 text-3xl">
                     <div class="flex items-center">
-                        <i class="ph ph-sword mr-2"></i>
-                        <span class="mr-2">Atk:</span>
+                        <span class="mr-2">⚔️ Attack:</span>
                         <span id="attack-val" class="text-red-400">10</span>
                     </div>
                     <div class="flex items-center">
-                        <i class="ph ph-shield mr-2"></i>
-                        <span class="mr-2">Def:</span>
+                        <span class="mr-2">🛡️ Defense:</span>
                         <span id="defense-val" class="text-blue-400">0</span>
                     </div>
                     <div class="col-span-2 mt-4">
-                        <div class="text-2xl mb-1"><i class="ph ph-pickaxe"></i> Tool Durability</div>
+                        <div class="text-2xl mb-1">🔨 Tool Durability</div>
                         <div class="progress-bar">
                             <div id="durability-fill" class="progress-fill bg-green-500" style="width: 100%"></div>
                         </div>
@@ -144,39 +138,31 @@
     </div>
 
     <script>
-        const itemIcons = {
-            "wood": "ph ph-tree",
-            "stone": "ph ph-mountains",
-            "iron": "ph ph-cube",
-            "gold": "ph ph-coins",
-            "diamond": "ph ph-diamond",
-            "gel": "ph ph-drop",
-            "rotten_flesh": "ph ph-skull",
-            "string": "ph ph-line-segments",
-            "shadow_dust": "ph ph-ghost",
-            "quartz": "ph ph-flame",
-            "netherite": "ph ph-shield-checkered",
-            "void_essence": "ph ph-planet",
-            "star_matter": "ph ph-star",
-            "void_crystal": "ph ph-crystal-ball",
-            "abyss_crystal": "ph ph-eye",
-            "nether_crystal": "ph ph-fire",
-            "bread": "ph ph-bread",
-            "health_potion": "ph ph-flask",
-            "stamina_potion": "ph ph-lightning",
-            "wood_pickaxe": "ph ph-pickaxe",
-            "stone_pickaxe": "ph ph-pickaxe",
-            "iron_pickaxe": "ph ph-pickaxe",
-            "diamond_pickaxe": "ph ph-pickaxe",
-            "abyss_pickaxe": "ph ph-pickaxe",
-            "nether_pickaxe": "ph ph-pickaxe",
-            "void_pickaxe": "ph ph-pickaxe",
-            "sword": "ph ph-sword",
-            "iron_sword": "ph ph-sword",
-            "diamond_sword": "ph ph-sword",
-            "abyss_sword": "ph ph-sword",
-            "nether_sword": "ph ph-sword",
-            "void_sword": "ph ph-sword"
+        const itemEmojis = {
+            "wood": "🌲",
+            "stone": "🪨",
+            "iron": "⛓️",
+            "gold": "💰",
+            "diamond": "💎",
+            "gel": "🟢",
+            "rotten_flesh": "🧟",
+            "string": "🕸️",
+            "shadow_dust": "👻",
+            "quartz": "🔥🧫",
+            "netherite": "🔥",
+            "void_essence": "🌌",
+            "star_matter": "✨",
+            "void_core": "👾",
+            "bread": "🥖",
+            "health_potion": "🧪",
+            "stamina_potion": "⚡",
+            "wood_pickaxe": "🪵⛏️",
+            "stone_pickaxe": "🪨⛏️",
+            "iron_pickaxe": "⛓️⛏️",
+            "diamond_pickaxe": "💎⛏️",
+            "netherite_pickaxe": "🔥⛏️",
+            "sword": "🗡️",
+            "iron_sword": "⚔️"
         };
 
         function updateDashboard() {
@@ -202,6 +188,7 @@
                     document.getElementById('defense-val').innerText = p.defense;
                     
                     // Durability (assuming max is 500 for repair kit, or base 50-100)
+                    // We'll estimate max based on current value for visual feel
                     const maxDur = p.tool_durability > 100 ? 500 : 100;
                     document.getElementById('durability-text').innerText = `${p.tool_durability}`;
                     document.getElementById('durability-fill').style.width = `${Math.min(100, (p.tool_durability / maxDur) * 100)}%`;
@@ -210,6 +197,7 @@
                     const grid = document.getElementById('inventory-grid');
                     grid.innerHTML = '';
                     
+                    // Create 18 slots total (Minecraft style)
                     const slots = 18;
                     const items = Object.entries(p.inventory).filter(([_, qty]) => qty > 0);
                     
@@ -219,8 +207,8 @@
                         
                         if (items[i]) {
                             const [id, qty] = items[i];
-                            const iconClass = itemIcons[id] || "ph ph-package";
-                            slot.innerHTML = `<i class="${iconClass}"></i><span class="item-qty">${qty}</span>`;
+                            const emoji = itemEmojis[id] || "📦";
+                            slot.innerHTML = `<span class="text-4xl">${emoji}</span><span class="item-qty">${qty}</span>`;
                             slot.title = id.replace('_', ' ');
                         }
                         
