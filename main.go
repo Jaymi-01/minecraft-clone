@@ -220,6 +220,33 @@ var Recipes = map[string]Recipe{
 		ResultValue:   30,
 		RequiredLevel: 10,
 	},
+	"leather_armor": {
+		Name: "🧥 Leather Armor",
+		Ingredients: map[string]int{
+			"rotten_flesh": 20, // Scavenged "leather"
+		},
+		ResultType:    "armor",
+		ResultValue:   5, // +5 Defense
+		RequiredLevel: 4,
+	},
+	"iron_armor": {
+		Name: "🛡️ Iron Armor",
+		Ingredients: map[string]int{
+			"iron": 50,
+		},
+		ResultType:    "armor",
+		ResultValue:   15, // +15 Defense
+		RequiredLevel: 12,
+	},
+	"diamond_armor": {
+		Name: "💎 Diamond Armor",
+		Ingredients: map[string]int{
+			"diamond": 25,
+		},
+		ResultType:    "armor",
+		ResultValue:   40, // +40 Defense
+		RequiredLevel: 30,
+	},
 }
 
 type Structure struct {
@@ -325,6 +352,7 @@ type Player struct {
 	Health         int             `json:"health"`
 	MaxHealth      int             `json:"max_health"`
 	Attack         int             `json:"attack"`
+	Defense        int             `json:"defense"`
 	Stamina        int             `json:"stamina"`
 	MaxStamina     int             `json:"max_stamina"`
 	Level          int             `json:"level"`
@@ -340,6 +368,7 @@ func NewPlayer() *Player {
 		Health:         100,
 		MaxHealth:      100,
 		Attack:         10,
+		Defense:        0,
 		Stamina:        50,
 		MaxStamina:     50,
 		Level:          1,
@@ -393,6 +422,7 @@ func (p *Player) ShowStats() {
 	fmt.Printf("⭐ Level:      %d (XP: %d/%d)\n", p.Level, p.XP, p.XPToNext)
 	fmt.Printf("❤️ Health:     %d/%d\n", p.Health, p.MaxHealth)
 	fmt.Printf("⚔️ Attack:     %d\n", p.Attack)
+	fmt.Printf("🛡️ Defense:    %d\n", p.Defense)
 	fmt.Printf("⚡ Stamina:    %d/%d\n", p.Stamina, p.MaxStamina)
 	fmt.Printf("🔨 Tool Durability: %d\n", p.ToolDurability)
 	if len(p.Structures) > 0 {
@@ -570,6 +600,9 @@ func (p *Player) Craft(itemName string) {
 	case "weapon":
 		p.Attack += recipe.ResultValue
 		fmt.Printf("⚔️ You crafted a %s! Attack increased by %d (Total: %d).\n", recipe.Name, recipe.ResultValue, p.Attack)
+	case "armor":
+		p.Defense += recipe.ResultValue
+		fmt.Printf("🛡️ You crafted a %s! Defense increased by %d (Total: %d).\n", recipe.Name, recipe.ResultValue, p.Defense)
 	case "food":
 		p.Inventory[strings.ToLower(itemName)]++
 		fmt.Printf("🍞 You crafted a %s!\n", recipe.Name)
@@ -677,6 +710,7 @@ func (p *Player) Combat(m *Monster) bool {
 	fmt.Printf("\n⚔️ A wild %s appeared!\n", m.Name)
 	monsterHealth := m.Health
 	for monsterHealth > 0 && p.Health > 0 {
+		// Player attacks
 		damageToMonster := p.Attack + rand.Intn(5)
 		monsterHealth -= damageToMonster
 		fmt.Printf("🤜 You hit %s for %d damage. (%d HP left)\n", m.Name, damageToMonster, monsterHealth)
@@ -691,9 +725,14 @@ func (p *Player) Combat(m *Monster) bool {
 			p.GainXP(15 + rand.Intn(10))
 			return true
 		}
-		damageToPlayer := m.Damage + rand.Intn(5)
-		p.Health -= damageToPlayer
-		fmt.Printf("💥 %s hits you for %d damage. (%d HP left)\n", m.Name, damageToPlayer, p.Health)
+		// Monster attacks (with Defense reduction)
+		baseDamage := m.Damage + rand.Intn(5)
+		finalDamage := baseDamage - p.Defense
+		if finalDamage < 1 {
+			finalDamage = 1 // Minimum 1 damage
+		}
+		p.Health -= finalDamage
+		fmt.Printf("💥 %s hits you for %d damage (Blocked %d). (%d HP left)\n", m.Name, finalDamage, p.Defense, p.Health)
 	}
 	if p.Health <= 0 {
 		fmt.Println("💀 You were defeated...")
