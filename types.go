@@ -66,6 +66,7 @@ type Quest struct {
 
 // Player represents the player's state.
 type Player struct {
+	Name           string          `json:"name"`
 	Health         int             `json:"health"`
 	MaxHealth      int             `json:"max_health"`
 	Attack         int             `json:"attack"`
