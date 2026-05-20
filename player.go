@@ -120,7 +120,7 @@ func (p *Player) GainHunterXP(amount int) {
 }
 
 func (p *Player) StartGateSpawning() {
-	ticker := time.NewTicker(30 * time.Minute)
+	ticker := time.NewTicker(10 * time.Minute)
 	go func() {
 		for range ticker.C {
 			p.SpawnGate()
