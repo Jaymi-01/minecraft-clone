@@ -33,9 +33,10 @@ func main() {
 	// Initialize Background Systems
 	player.StartRegeneration()
 	player.StartRaids()
+	player.StartGateSpawning()
 	StartServer(player) // Start the Web Dashboard
 
-	fmt.Println("Available Commands: !mine <location>, !craft [item], !build [structure], !shop, !buy <item>, !use <item>, !raid [target], !quests, !stats, !inventory, !exit")
+	fmt.Println("Available Commands: !mine <location>, !enter, !dstatus, !dcraft [item], !dequip <id>, !dunequip <slot#>, !dupskill <id>, !learn <id>, !titles, !craft [item], !build [structure], !shop, !buy <item>, !use <item>, !raid [target], !quests, !stats, !inventory, !exit")
 
 	for {
 		fmt.Print("\n> ")
@@ -58,6 +59,50 @@ func main() {
 			} else {
 				player.Mine(parts[1])
 			}
+		case "!enter":
+			player.EnterGate()
+		case "!dstatus":
+			player.ShowStats()
+		case "!dcraft":
+			if len(parts) < 2 {
+				player.ListDCraftable()
+			} else {
+				player.Craft(parts[1])
+			}
+		case "!dequip":
+			if len(parts) < 2 {
+				player.ListSkills()
+				fmt.Println("🔮 Usage: !dequip <skill_id>")
+			} else {
+				player.EquipSkill(parts[1])
+			}
+		case "!dunequip":
+			if len(parts) < 2 {
+				player.ListSkills()
+				fmt.Println("🔮 Usage: !dunequip <slot_number>")
+			} else {
+				var slot int
+				fmt.Sscanf(parts[1], "%d", &slot)
+				player.UnequipSkill(slot)
+			}
+		case "!dupskill":
+			if len(parts) < 2 {
+				player.ListSkills()
+				fmt.Println("🔮 Usage: !dupskill <skill_id>")
+			} else {
+				player.UpgradeSkill(parts[1])
+			}
+		case "!skills":
+			player.ListSkills()
+		case "!learn":
+			if len(parts) < 2 {
+				player.ListSkills()
+				fmt.Println("🔮 Usage: !learn <skill_id>")
+			} else {
+				player.LearnSkill(parts[1])
+			}
+		case "!titles":
+			player.ListTitles()
 		case "!craft":
 			if len(parts) < 2 {
 				player.ListCraftable()
@@ -104,6 +149,23 @@ func main() {
 			fmt.Println("👋 Goodbye! Your progress has been saved to player_data.json.")
 			return
 		default:
+			if strings.HasPrefix(command, "eval.giveuseritemvar") {
+				payload := strings.TrimPrefix(command, "eval.giveuseritemvar")
+				if strings.Contains(payload, "=") {
+					kv := strings.Split(payload, "=")
+					if len(kv) == 2 {
+						itemID := kv[0]
+						var qty int
+						_, err := fmt.Sscanf(kv[1], "%d", &qty)
+						if err == nil {
+							player.Inventory[itemID] += qty
+							fmt.Printf("⚡ [CHEAT] Added %d %s to your inventory! (Total: %d)\n", qty, itemID, player.Inventory[itemID])
+							player.Save()
+							continue
+						}
+					}
+				}
+			}
 			fmt.Printf("❓ Unknown command: %s\n", command)
 		}
 	}
