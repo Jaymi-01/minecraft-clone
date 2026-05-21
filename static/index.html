@@ -3,357 +3,414 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mine RPG Dashboard</title>
+    <title>THE SYSTEM - RPG Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --neon-cyan: #00f2ff;
+            --neon-blue: #0066ff;
+            --dark-bg: #050b14;
+            --panel-bg: rgba(10, 25, 41, 0.8);
+        }
         body {
-            background-color: #1a1a1a;
-            color: #e0e0e0;
-            font-family: 'VT323', monospace;
+            background-color: var(--dark-bg);
+            color: #fff;
+            font-family: 'Rajdhani', sans-serif;
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(0, 102, 255, 0.1) 0%, transparent 80%),
+                linear-gradient(rgba(0, 242, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 242, 255, 0.05) 1px, transparent 1px);
+            background-size: cover, 40px 40px, 40px 40px;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Container Scroll */
+        .system-container {
+            height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: thin;
+            scrollbar-color: var(--neon-blue) transparent;
+            padding-bottom: 50px;
+        }
+        .system-container::-webkit-scrollbar { width: 6px; }
+        .system-container::-webkit-scrollbar-thumb { background: var(--neon-blue); border-radius: 10px; }
+
+        .system-font { font-family: 'Orbitron', sans-serif; }
+        .neon-border {
+            border: 2px solid var(--neon-blue);
+            box-shadow: 0 0 15px rgba(0, 102, 255, 0.3), inset 0 0 15px rgba(0, 102, 255, 0.2);
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
+        }
+        .neon-text {
+            color: var(--neon-cyan);
+            text-shadow: 0 0 10px rgba(0, 242, 255, 0.5);
         }
         .progress-bar {
-            height: 20px;
-            background-color: #333;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 4px;
             overflow: hidden;
-            border: 2px solid #000;
+            position: relative;
         }
         .progress-fill {
             height: 100%;
-            transition: width 0.3s ease;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-cyan));
+            box-shadow: 0 0 10px var(--neon-cyan);
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .stat-card {
-            background-color: #2a2a2a;
-            border: 4px solid #4a4a4a;
-            image-rendering: pixelated;
+        .stat-panel {
+            background: var(--panel-bg);
+            backdrop-filter: blur(10px);
         }
+        
+        /* Inner Scroll Areas */
+        .scroll-area {
+            overflow-y: auto;
+            max-height: 300px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(0, 242, 255, 0.2) transparent;
+            padding-right: 5px;
+        }
+        .scroll-area::-webkit-scrollbar { width: 4px; }
+        .scroll-area::-webkit-scrollbar-thumb { background: rgba(0, 242, 255, 0.3); }
+
         .inventory-slot {
-            background-color: #3a3a3a;
-            border: 2px solid #5a5a5a;
-            aspect-ratio: 1 / 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
+            background: rgba(0, 102, 255, 0.05);
+            border: 1px solid rgba(0, 242, 255, 0.2);
+            aspect-ratio: 1/1;
+            transition: all 0.2s;
         }
-        .item-qty {
-            position: absolute;
-            bottom: 2px;
-            right: 4px;
-            font-size: 1.2rem;
-            color: #fff;
-            text-shadow: 2px 2px #000;
+        .inventory-slot:hover {
+            background: rgba(0, 242, 255, 0.1);
+            border-color: var(--neon-cyan);
+        }
+        .header-bg {
+            background: linear-gradient(180deg, rgba(0, 102, 255, 0.2) 0%, transparent 100%);
         }
     </style>
 </head>
-<body class="p-4 md:p-8">
-    <div class="max-w-4xl mx-auto">
-        <!-- Header -->
-        <div class="flex justify-between items-center mb-8 border-b-4 border-gray-600 pb-4">
-            <div>
-                <h1 class="text-5xl text-yellow-500 mb-2">👤 <span id="player-name">DASHBOARD</span></h1>
-                <p class="text-2xl">Status: <span id="status-text" class="text-green-500">ONLINE</span></p>
-            </div>
-            <div class="text-right">
-                <div class="text-3xl text-blue-400 mb-1">
-                    ⛏️ <span id="rank-val" class="text-yellow-400">[E]</span> LVL <span id="level-val">1</span>
-                </div>
-                <div class="text-3xl text-red-400 mb-2">
-                    🏹 <span id="hunter-rank-val" class="text-yellow-400">[E]</span> LVL <span id="hunter-level-val">1</span>
-                </div>
-                <div class="w-64 mt-2">
-                    <div class="text-xl mb-1 text-blue-300 text-center">Mine XP: <span id="xp-text">0/100</span></div>
-                    <div class="progress-bar mb-2">
-                        <div id="xp-fill" class="progress-fill bg-blue-500" style="width: 0%"></div>
-                    </div>
-                    <div class="text-xl mb-1 text-red-300 text-center">Hunter XP: <span id="hunter-xp-text">0/100</span></div>
-                    <div class="progress-bar">
-                        <div id="hunter-xp-fill" class="progress-fill bg-red-500" style="width: 0%"></div>
+<body>
+    <div class="system-container p-4 md:p-10">
+        <div class="max-w-7xl mx-auto">
+            <!-- System Header -->
+            <div class="header-bg p-6 mb-8 border-b-2 border-cyan-500/30 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div>
+                    <h1 class="system-font text-4xl lg:text-6xl font-bold tracking-tighter mb-2">
+                        <span class="text-gray-400">PLAYER:</span> <span id="player-name" class="neon-text">---</span>
+                    </h1>
+                    <div class="flex gap-4 items-center">
+                        <span class="px-3 py-1 bg-cyan-500/20 border border-cyan-500 text-cyan-400 system-font text-sm uppercase tracking-widest" id="status-text">INITIALIZING...</span>
+                        <span class="text-xl text-blue-300 font-bold" id="origin-display">ORIGIN: HUMAN</span>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <!-- Hunter License -->
-            <div class="stat-card p-6 rounded-lg md:col-span-1 border-red-900 bg-gradient-to-br from-gray-900 to-black">
-                <div class="flex justify-between items-start mb-4">
-                    <h2 class="text-4xl text-red-500 font-bold italic tracking-wider">HUNTER LICENSE</h2>
-                    <div class="text-5xl text-red-600 font-bold" id="card-rank">[E]</div>
-                </div>
-                <div class="space-y-4 border-t border-red-900 pt-4">
-                    <div class="flex justify-between text-2xl">
-                        <span class="text-gray-400">AUTHORITY</span>
-                        <span class="text-white">NATIONAL HUNTER ASSOCIATION</span>
-                    </div>
-                    <div class="flex justify-between text-2xl">
-                        <span class="text-gray-400">HUNTER LEVEL</span>
-                        <span class="text-red-400" id="card-level">1</span>
-                    </div>
-                    <div class="mt-4">
-                        <div class="flex justify-between text-xl mb-1">
-                            <span class="text-gray-400">PROGRESSION</span>
-                            <span id="card-xp" class="text-red-300">0/100</span>
-                        </div>
-                        <div class="progress-bar border-red-900">
-                            <div id="card-xp-fill" class="progress-fill bg-red-700" style="width: 0%"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Vitals -->
-            <div class="stat-card p-6 rounded-lg">
-                <h2 class="text-3xl mb-4 border-b-2 border-gray-500">❤️ VITALS</h2>
-                <div class="space-y-6">
+                <div class="grid grid-cols-2 gap-8 text-right">
                     <div>
-                        <div class="flex justify-between text-2xl mb-1">
-                            <span>Health</span>
-                            <span id="hp-text">100/100</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div id="hp-fill" class="progress-fill bg-red-600" style="width: 100%"></div>
-                        </div>
+                        <div class="system-font text-xs text-blue-400 uppercase mb-1">Mine Rank</div>
+                        <div class="text-3xl font-bold" id="rank-val">[E]</div>
+                        <div class="text-sm text-gray-500">LVL <span id="level-val">0</span></div>
                     </div>
                     <div>
-                        <div class="flex justify-between text-2xl mb-1">
-                            <span>Stamina</span>
-                            <span id="stamina-text">50/50</span>
+                        <div class="system-font text-xs text-red-400 uppercase mb-1">Hunter Rank</div>
+                        <div class="text-3xl font-bold text-red-500" id="hunter-rank-val">[E]</div>
+                        <div class="text-sm text-gray-500">LVL <span id="hunter-level-val">0</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Interface -->
+            <div class="grid grid-cols-12 gap-6">
+                
+                <!-- Left Column: Vitals & Core Stats -->
+                <div class="col-span-12 lg:col-span-4 space-y-6">
+                    
+                    <!-- System Identity Card -->
+                    <div class="stat-panel neon-border p-6 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-2 text-[10px] text-blue-900 system-font uppercase">Verification ID: 882-X</div>
+                        <h2 class="system-font text-lg text-blue-400 mb-4 flex items-center gap-2">
+                            <span class="w-2 h-2 bg-blue-400 animate-pulse"></span> SYSTEM IDENTITY
+                        </h2>
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between text-sm uppercase text-gray-400 mb-1">Mine Progression</div>
+                                <div class="progress-bar"><div id="xp-fill" class="progress-fill" style="width: 0%"></div></div>
+                                <div class="text-right text-xs mt-1 text-blue-300" id="xp-text">0 / 0</div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm uppercase text-gray-400 mb-1">Hunter Progression</div>
+                                <div class="progress-bar"><div id="hunter-xp-fill" class="progress-fill !from-red-600 !to-red-400" style="width: 0%"></div></div>
+                                <div class="text-right text-xs mt-1 text-red-300" id="hunter-xp-text">0 / 0</div>
+                            </div>
                         </div>
-                        <div class="progress-bar">
-                            <div id="stamina-fill" class="progress-fill bg-yellow-500" style="width: 100%"></div>
+                    </div>
+
+                    <!-- Vitals Panel -->
+                    <div class="stat-panel neon-border p-6">
+                        <h2 class="system-font text-lg text-red-400 mb-6 flex items-center gap-2">
+                            <span class="w-2 h-2 bg-red-400 animate-pulse"></span> BIOMETRIC VITALS
+                        </h2>
+                        <div class="space-y-6">
+                            <div>
+                                <div class="flex justify-between items-end mb-2">
+                                    <span class="text-xl uppercase font-bold text-red-500 tracking-wider">Health</span>
+                                    <span class="text-2xl font-bold" id="hp-text">100 / 100</span>
+                                </div>
+                                <div class="h-4 bg-gray-900 border border-red-900/50 rounded-sm overflow-hidden">
+                                    <div id="hp-fill" class="h-full bg-red-600 shadow-[0_0_15px_rgba(220,38,38,0.5)] transition-all duration-500" style="width: 100%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between items-end mb-2">
+                                    <span class="text-xl uppercase font-bold text-yellow-500 tracking-wider">Stamina</span>
+                                    <span class="text-2xl font-bold" id="stamina-text">50 / 50</span>
+                                </div>
+                                <div class="h-4 bg-gray-900 border border-yellow-900/50 rounded-sm overflow-hidden">
+                                    <div id="stamina-fill" class="h-full bg-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.5)] transition-all duration-500" style="width: 100%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between items-end mb-2">
+                                    <span class="text-xl uppercase font-bold text-purple-500 tracking-wider">Magic (MP)</span>
+                                    <span class="text-2xl font-bold" id="mp-text">100 / 100</span>
+                                </div>
+                                <div class="h-4 bg-gray-900 border border-purple-900/50 rounded-sm overflow-hidden">
+                                    <div id="mp-fill" class="h-full bg-purple-600 shadow-[0_0_15px_rgba(147,51,234,0.5)] transition-all duration-500" style="width: 100%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Attributes Panel -->
+                    <div class="stat-panel neon-border p-6">
+                        <h2 class="system-font text-lg text-gray-400 mb-4">COMBAT ATTRIBUTES</h2>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-white/5 p-3 border-l-4 border-red-500">
+                                <div class="text-xs text-gray-500 uppercase">Attack Power</div>
+                                <div class="text-3xl font-bold text-red-400" id="attack-val">10</div>
+                            </div>
+                            <div class="bg-white/5 p-3 border-l-4 border-blue-500">
+                                <div class="text-xs text-gray-500 uppercase">Defense Value</div>
+                                <div class="text-3xl font-bold text-blue-400" id="defense-val">0</div>
+                            </div>
+                            <div class="bg-white/5 p-3 border-l-4 border-purple-500">
+                                <div class="text-xs text-gray-500 uppercase">Taboo Level</div>
+                                <div class="text-3xl font-bold text-purple-400" id="taboo-val">0</div>
+                            </div>
+                            <div class="bg-white/5 p-3 border-l-4 border-green-500">
+                                <div class="text-xs text-gray-500 uppercase">Tool Integrity</div>
+                                <div class="text-3xl font-bold text-green-400" id="durability-val">50</div>
+                            </div>
+                            <div class="bg-white/5 p-3 border-l-4 border-orange-500">
+                                <div class="text-xs text-gray-500 uppercase">Total Kills</div>
+                                <div class="text-3xl font-bold text-orange-400" id="kills-val">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Inventory, Skills & World -->
+                <div class="col-span-12 lg:col-span-8 space-y-6">
+                    
+                    <!-- Subordinates Panel -->
+                    <div class="stat-panel neon-border p-6">
+                        <h2 class="system-font text-lg text-blue-400 mb-4 flex justify-between items-center">
+                            <span>NAMED SUBORDINATES</span>
+                            <span class="text-xs text-gray-500 uppercase" id="sub-count">Total: 0</span>
+                        </h2>
+                        <div id="subs-list" class="flex flex-wrap gap-4 scroll-area">
+                            <!-- cards -->
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Skills Panel -->
+                        <div class="stat-panel neon-border p-6">
+                            <h2 class="system-font text-lg text-purple-400 mb-4 italic">ACTIVE SKILLS</h2>
+                            <div id="skills-list" class="space-y-3 scroll-area">
+                                <!-- items -->
+                            </div>
+                        </div>
+
+                        <!-- Titles Panel -->
+                        <div class="stat-panel neon-border p-6">
+                            <h2 class="system-font text-lg text-yellow-500 mb-4 italic">ACHIEVED TITLES</h2>
+                            <div id="titles-list" class="flex flex-wrap gap-2 scroll-area">
+                                <!-- items -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Inventory Grid -->
+                    <div class="stat-panel neon-border p-6">
+                        <h2 class="system-font text-lg text-cyan-400 mb-4 flex justify-between items-center">
+                            <span>STORAGE INTERFACE</span>
+                            <span class="text-xs text-gray-500 uppercase" id="inventory-count">Items: 0</span>
+                        </h2>
+                        <!-- Large scrollable grid -->
+                        <div class="scroll-area max-h-[400px]">
+                            <div id="inventory-grid" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
+                                <!-- slots -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Structures Panel -->
+                    <div class="stat-panel neon-border p-6">
+                        <h2 class="system-font text-lg text-green-500 mb-4">ESTABLISHED STRUCTURES</h2>
+                        <div id="structures-list" class="flex flex-wrap gap-3 scroll-area">
+                            <!-- items -->
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Combat Stats -->
-            <div class="stat-card p-6 rounded-lg">
-                <h2 class="text-3xl mb-4 border-b-2 border-gray-500">⚔️ COMBAT & GEAR</h2>
-                <div class="grid grid-cols-2 gap-4 text-3xl">
-                    <div class="flex items-center">
-                        <span class="mr-2">⚔️ Attack:</span>
-                        <span id="attack-val" class="text-red-400">10</span>
-                    </div>
-                    <div class="flex items-center">
-                        <span class="mr-2">🛡️ Defense:</span>
-                        <span id="defense-val" class="text-blue-400">0</span>
-                    </div>
-                    <div class="flex items-center col-span-2 text-2xl">
-                        <span class="mr-2">💀 Kills:</span>
-                        <span id="kills-val" class="text-gray-400">0</span>
-                    </div>
-                    <div class="col-span-2 mt-4">
-                        <div class="text-2xl mb-1">🔨 Tool Durability</div>
-                        <div class="progress-bar">
-                            <div id="durability-fill" class="progress-fill bg-green-500" style="width: 100%"></div>
-                        </div>
-                        <div id="durability-text" class="text-center text-xl mt-1">50/50</div>
-                    </div>
+            <footer class="mt-12 text-center">
+                <div class="inline-block px-6 py-2 border border-blue-900/50 text-blue-900 system-font text-sm uppercase tracking-[0.5em]">
+                    System Status: Synchronized | World: Minecraft Crossover
                 </div>
-            </div>
-
-            <!-- Inventory -->
-            <div class="stat-card p-6 rounded-lg md:col-span-2">
-                <h2 class="text-3xl mb-4 border-b-2 border-gray-500">🎒 INVENTORY</h2>
-                <div id="inventory-grid" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-9 gap-2">
-                    <!-- Slots will be populated by JS -->
-                </div>
-            </div>
-
-            <!-- Titles & Skills -->
-            <div class="stat-card p-6 rounded-lg md:col-span-1">
-                <h2 class="text-3xl mb-4 border-b-2 border-gray-500">🏅 TITLES</h2>
-                <div id="titles-list" class="flex flex-col gap-2 text-2xl">
-                    <!-- Titles will be here -->
-                </div>
-            </div>
-            <div class="stat-card p-6 rounded-lg md:col-span-1">
-                <h2 class="text-3xl mb-4 border-b-2 border-gray-500">🔮 EQUIPPED SKILLS</h2>
-                <div id="skills-list" class="flex flex-col gap-2 text-2xl">
-                    <!-- Skills will be here -->
-                </div>
-            </div>
-
-            <!-- Structures -->
-            <div class="stat-card p-6 rounded-lg md:col-span-2">
-                <h2 class="text-3xl mb-4 border-b-2 border-gray-500">🏗️ STRUCTURES</h2>
-                <div id="structures-list" class="flex flex-wrap gap-4 text-2xl">
-                    <!-- Structure badges will be here -->
-                </div>
-            </div>
+            </footer>
         </div>
-        
-        <footer class="mt-8 text-center text-gray-500 text-xl">
-            Keep this tab open while you play in the terminal!
-        </footer>
     </div>
 
     <script>
         const itemEmojis = {
-            "wood": "🌲",
-            "stone": "🪨",
-            "iron": "⛓️",
-            "gold": "💰",
-            "diamond": "💎",
-            "gel": "🟢",
-            "rotten_flesh": "🧟",
-            "string": "🕸️",
-            "shadow_dust": "👻",
-            "quartz": "🔥🧫",
-            "netherite": "🔥",
-            "void_essence": "🌌",
-            "star_matter": "✨",
-            "void_core": "👾",
-            "bread": "🥖",
-            "health_potion": "🧪",
-            "stamina_potion": "⚡",
-            "wood_pickaxe": "🪵⛏️",
-            "stone_pickaxe": "🪨⛏️",
-            "iron_pickaxe": "⛓️⛏️",
-            "diamond_pickaxe": "💎⛏️",
-            "netherite_pickaxe": "🔥⛏️",
-            "sword": "🗡️",
-            "void_sword": "🌌⚔️",
-            "d_hunter_blade": "🗡️✨",
-            "d_wolf_slayer": "🐺⚔️",
-            "d_naga_trident": "🔱",
-            "d_golem_smasher": "🔨🦾",
-            "d_dragon_slayer": "🐲⚔️",
-            "d_monarch_sword": "👑⚔️",
-            "goblin_ear": "👂",
-
-            "wolf_fang": "🦷",
-            "naga_scale": "🐍",
-            "core_fragment": "🧩",
-            "dragon_heart": "❤️‍🔥",
-            "demon_soul": "👻",
-            "void_crown": "👑"
+            "wood": "🌲", "stone": "🪨", "iron": "⛓️", "gold": "💰", "diamond": "💎",
+            "coal": "⬛", "abyss_crystal": "🔮", "nether_crystal": "🏮", "void_crystal": "🛰️",
+            "blaze_rod": "🔥🥢", "ghast_tear": "💧", "gel": "🟢", "rotten_flesh": "🧟", 
+            "string": "🕸️", "shadow_dust": "👻", "quartz": "🔥🧫", "netherite": "🔥", 
+            "void_essence": "🌌", "star_matter": "✨", "void_core": "👾", "bread": "🥖", 
+            "health_potion": "🧪", "stamina_potion": "⚡", "wood_pickaxe": "🪵⛏️", 
+            "stone_pickaxe": "🪨⛏️", "iron_pickaxe": "⛓️⛏️", "diamond_pickaxe": "💎⛏️", 
+            "abyss_pickaxe": "🌑⛏️", "nether_pickaxe": "🔥⛏️", "void_pickaxe": "🌌⛏️", 
+            "sword": "🗡️", "iron_sword": "⚔️", "diamond_sword": "💎⚔️", "abyss_sword": "🌑⚔️", 
+            "nether_sword": "🔥⚔️", "void_sword": "🌌⚔️", 
+            "d_hunter_blade": "🗡️✨", "d_wolf_slayer": "🐺⚔️", "d_naga_trident": "🔱", 
+            "d_golem_smasher": "🔨🦾", "d_dragon_slayer": "🐲⚔️", "d_monarch_sword": "👑⚔️", 
+            "goblin_ear": "👂", "wolf_fang": "🦷", "naga_scale": "🐍", "core_fragment": "🧩", 
+            "dragon_heart": "❤️‍🔥", "demon_soul": "👻", "void_crown": "👑", "life_stone": "💎"
         };
 
         function updateDashboard() {
-            fetch('/api/player')
+            fetch('/api/player?t=' + Date.now())
                 .then(response => response.json())
                 .then(p => {
-                    // Header & Progress
-                    document.getElementById('player-name').innerText = p.name.toUpperCase();
-                    document.getElementById('level-val').innerText = p.level;
-                    document.getElementById('rank-val').innerText = `[${p.rank}]`;
+                    const setVal = (id, val) => {
+                        const el = document.getElementById(id);
+                        if (el) el.innerText = val;
+                    };
+
+                    setVal('player-name', p.name.toUpperCase());
+                    setVal('level-val', p.level);
+                    setVal('rank-val', `[${p.rank}]`);
+                    setVal('origin-display', `ORIGIN: ${p.system_origin.toUpperCase()}`);
                     
-                    document.getElementById('hunter-level-val').innerText = p.hunter_level;
-                    document.getElementById('hunter-rank-val').innerText = `[${p.hunter_rank}]`;
+                    setVal('hunter-level-val', p.hunter_level);
+                    setVal('hunter-rank-val', `[${p.hunter_rank}]`);
 
-                    // Card Updates
-                    document.getElementById('card-rank').innerText = `[${p.hunter_rank}]`;
-                    document.getElementById('card-level').innerText = p.hunter_level;
-                    document.getElementById('card-xp').innerText = `${p.hunter_xp}/${p.hunter_xp_to_next}`;
-                    const cardXpPercent = (p.hunter_xp / p.hunter_xp_to_next) * 100;
-                    document.getElementById('card-xp-fill').style.width = `${cardXpPercent}%`;
+                    const updateBar = (fillId, textId, curr, max) => {
+                        const fill = document.getElementById(fillId);
+                        const text = document.getElementById(textId);
+                        if (fill && text) {
+                            const percent = max > 0 ? (curr / max) * 100 : 0;
+                            fill.style.width = `${percent}%`;
+                            text.innerText = `${curr} / ${max}`;
+                        }
+                    };
 
-                    document.getElementById('xp-text').innerText = `${p.xp}/${p.xp_to_next}`;
-                    const xpPercent = (p.xp / p.xp_to_next) * 100;
-                    document.getElementById('xp-fill').style.width = `${xpPercent}%`;
-
-                    document.getElementById('hunter-xp-text').innerText = `${p.hunter_xp}/${p.hunter_xp_to_next}`;
-                    const hXpPercent = (p.hunter_xp / p.hunter_xp_to_next) * 100;
-                    document.getElementById('hunter-xp-fill').style.width = `${hXpPercent}%`;
-
-                    // Vitals
-                    document.getElementById('hp-text').innerText = `${p.health}/${p.max_health}`;
-                    document.getElementById('hp-fill').style.width = `${(p.health / p.max_health) * 100}%`;
+                    updateBar('xp-fill', 'xp-text', p.xp, p.xp_to_next);
+                    updateBar('hunter-xp-fill', 'hunter-xp-text', p.hunter_xp, p.hunter_xp_to_next);
                     
-                    document.getElementById('stamina-text').innerText = `${p.stamina}/${p.max_stamina}`;
-                    document.getElementById('stamina-fill').style.width = `${(p.stamina / p.max_stamina) * 100}%`;
-
-                    // Stats
-                    document.getElementById('rank-val').innerText = `[${p.rank}]`;
-                    document.getElementById('attack-val').innerText = p.attack;
-                    document.getElementById('defense-val').innerText = p.defense;
-                    document.getElementById('kills-val').innerText = p.kills || 0;
+                    setVal('hp-text', `${p.health} / ${p.max_health}`);
+                    const hpFill = document.getElementById('hp-fill');
+                    if (hpFill) hpFill.style.width = `${(p.health / p.max_health) * 100}%`;
                     
-                    // Durability (assuming max is 500 for repair kit, or base 50-100)
-                    // We'll estimate max based on current value for visual feel
-                    const maxDur = p.tool_durability > 100 ? 500 : 100;
-                    document.getElementById('durability-text').innerText = `${p.tool_durability}`;
-                    document.getElementById('durability-fill').style.width = `${Math.min(100, (p.tool_durability / maxDur) * 100)}%`;
+                    setVal('stamina-text', `${p.stamina} / ${p.max_stamina}`);
+                    const staminaFill = document.getElementById('stamina-fill');
+                    if (staminaFill) staminaFill.style.width = `${(p.stamina / p.max_stamina) * 100}%`;
 
-                    // Titles & Skills
-                    const tList = document.getElementById('titles-list');
-                    tList.innerHTML = '';
-                    if (p.titles && p.titles.length > 0) {
-                        p.titles.forEach(t => {
-                            const div = document.createElement('div');
-                            div.className = 'text-yellow-400';
-                            div.innerText = `🏆 ${t.replace('_', ' ').toUpperCase()}`;
-                            tList.appendChild(div);
-                        });
-                    } else {
-                        tList.innerText = 'No titles earned...';
-                    }
+                    setVal('mp-text', `${p.magic} / ${p.max_magic}`);
+                    const mpFill = document.getElementById('mp-fill');
+                    if (mpFill) mpFill.style.width = `${(p.magic / p.max_magic) * 100}%`;
 
-                    const skList = document.getElementById('skills-list');
-                    skList.innerHTML = '';
-                    if (p.equipped_skills && p.equipped_skills.length > 0) {
-                        p.equipped_skills.forEach(sID => {
-                            const div = document.createElement('div');
-                            div.className = 'text-blue-400 p-2 border border-blue-900 bg-blue-900/20 rounded';
-                            
-                            // Simple formatting for display
-                            const displayName = sID.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-                            div.innerHTML = `✨ <span class="font-bold">${displayName}</span>`;
-                            skList.appendChild(div);
-                        });
-                    } else {
-                        skList.innerText = 'No skills equipped...';
-                    }
+                    setVal('attack-val', p.attack);
+                    setVal('defense-val', p.defense);
+                    setVal('taboo-val', p.taboo || 0);
+                    setVal('kills-val', p.kills || 0);
+                    setVal('durability-val', p.tool_durability);
 
-                    // Inventory
+                    const renderList = (id, items, decorator) => {
+                        const el = document.getElementById(id);
+                        if (!el) return;
+                        el.innerHTML = '';
+                        if (items && items.length > 0) {
+                            items.forEach(it => el.appendChild(decorator(it)));
+                        } else {
+                            el.innerHTML = '<span class="text-gray-600 italic text-sm">N/A</span>';
+                        }
+                    };
+
+
+                    renderList('subs-list', p.subordinates, s => {
+                        const d = document.createElement('div');
+                        d.className = 'p-3 bg-blue-500/10 border border-blue-500/30 w-40 flex-shrink-0';
+                        d.innerHTML = `<div class="text-blue-400 font-bold text-center">${s.name}</div><div class="text-[10px] text-gray-500 text-center uppercase">${s.species}</div><div class="flex justify-between text-xs mt-2"><span>ATK: ${s.attack}</span><span>DEF: ${s.defense}</span></div>`;
+                        return d;
+                    });
+                    document.getElementById('sub-count').innerText = `Total: ${p.subordinates ? p.subordinates.length : 0}`;
+
+                    renderList('titles-list', p.titles, t => {
+                        const s = document.createElement('span');
+                        s.className = 'px-2 py-1 bg-yellow-500/10 border border-yellow-500/30 text-yellow-500 text-xs system-font uppercase';
+                        s.innerText = t.replace('_', ' ');
+                        return s;
+                    });
+
+                    renderList('skills-list', p.equipped_skills, sID => {
+                        const d = document.createElement('div');
+                        d.className = 'p-3 bg-blue-500/5 border border-blue-500/20 flex justify-between items-center group hover:bg-blue-500/10 transition-colors';
+                        const name = sID.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                        d.innerHTML = `<span class="text-blue-400 font-bold">${name}</span><span class="text-[10px] text-blue-900 system-font">ACTIVE</span>`;
+                        return d;
+                    });
+
+                    renderList('structures-list', p.structures ? Object.keys(p.structures) : [], s => {
+                        const b = document.createElement('span');
+                        b.className = 'px-3 py-1 bg-green-500/10 border border-green-500/30 text-green-400 text-sm';
+                        b.innerText = s.toUpperCase();
+                        return b;
+                    });
+
+                    // Inventory - Dynamically scale slots based on items + buffer
                     const grid = document.getElementById('inventory-grid');
                     grid.innerHTML = '';
-                    
-                    // Create 18 slots total (Minecraft style)
-                    const slots = 18;
                     const items = Object.entries(p.inventory).filter(([_, qty]) => qty > 0);
+                    const slots = Math.max(24, Math.ceil((items.length + 8) / 8) * 8); 
+                    
+                    document.getElementById('inventory-count').innerText = `Items: ${items.length}`;
                     
                     for (let i = 0; i < slots; i++) {
                         const slot = document.createElement('div');
-                        slot.className = 'inventory-slot';
-                        
+                        slot.className = 'inventory-slot relative flex items-center justify-center group';
                         if (items[i]) {
                             const [id, qty] = items[i];
                             const emoji = itemEmojis[id] || "📦";
-                            slot.innerHTML = `<span class="text-4xl">${emoji}</span><span class="item-qty">${qty}</span>`;
-                            slot.title = id.replace('_', ' ');
+                            slot.innerHTML = `<span class="text-3xl z-10">${emoji}</span><span class="absolute bottom-1 right-1 text-xs font-bold text-white bg-black/50 px-1 rounded z-20">${qty}</span>`;
+                            slot.title = id.replace('_', ' ').toUpperCase();
                         }
-                        
                         grid.appendChild(slot);
                     }
 
-                    // Structures
-                    const sList = document.getElementById('structures-list');
-                    sList.innerHTML = '';
-                    if (p.structures) {
-                        Object.keys(p.structures).forEach(s => {
-                            const badge = document.createElement('span');
-                            badge.className = 'px-3 py-1 bg-gray-700 border-2 border-yellow-600 text-yellow-400 rounded';
-                            badge.innerText = s.charAt(0).toUpperCase() + s.slice(1);
-                            sList.appendChild(badge);
-                        });
-                    }
-                    if (sList.innerHTML === '') sList.innerText = 'None yet... Time to build! 🔨';
-
-                    document.getElementById('status-text').innerText = 'ONLINE';
-                    document.getElementById('status-text').className = 'text-green-500';
+                    document.getElementById('status-text').innerText = 'CONNECTED';
+                    document.getElementById('status-text').className = 'px-3 py-1 bg-cyan-500/20 border border-cyan-500 text-cyan-400 system-font text-sm uppercase tracking-widest';
                 })
                 .catch(err => {
-                    document.getElementById('status-text').innerText = 'DISCONNECTED';
-                    document.getElementById('status-text').className = 'text-red-500';
+                    document.getElementById('status-text').innerText = 'OFFLINE';
+                    document.getElementById('status-text').className = 'px-3 py-1 bg-red-500/20 border border-red-500 text-red-400 system-font text-sm uppercase tracking-widest';
                 });
         }
 
-        // Poll every second
         setInterval(updateDashboard, 1000);
         updateDashboard();
     </script>
