@@ -36,7 +36,7 @@ func main() {
 	player.StartGateSpawning()
 	StartServer(player) // Start the Web Dashboard
 
-	fmt.Println("Available Commands: !mine <location>, !enter, !dstatus, !dcraft [item], !dequip <id>, !dunequip <slot#>, !dupskill <id>, !learn <id>, !titles, !craft [item], !build [structure], !shop, !buy <item>, !use <item>, !raid [target], !quests, !stats, !inventory, !exit")
+	fmt.Println("Available Commands: !mine <location>, !enter, !status, !craft [item], !equip <id>, !unequip <slot#>, !dupskill <id>, !learn <id>, !titles, !build [structure], !shop, !buy <item>, !use <item>, !raid [target], !quests, !subordinates, !name <species> <name>, !stats, !inventory, !origin <slime|spider>, !evolve, !help, !exit")
 
 	for {
 		fmt.Print("\n> ")
@@ -51,7 +51,37 @@ func main() {
 		}
 		parts := strings.Fields(input)
 		command := parts[0]
+		
+		// Handle Movement if Exploring
+		if player.Exploring {
+			cmdUpper := strings.ToUpper(command)
+			if cmdUpper == "W" || cmdUpper == "A" || cmdUpper == "S" || cmdUpper == "D" {
+				player.Move(cmdUpper)
+				continue
+			}
+		}
+
 		switch command {
+		case "!explore":
+			player.StartExploration()
+		case "!emerge":
+			player.Emerge()
+		case "!name":
+			if len(parts) < 3 {
+				fmt.Println("🤝 Usage: !name <species> <given_name> (Costs 50 Max MP)")
+			} else {
+				player.NameSubordinate(parts[1], parts[2])
+			}
+		case "!subordinates":
+			player.ListSubordinates()
+		case "!origin":
+			if len(parts) < 2 {
+				fmt.Println("🧬 Choose your System Origin: slime, spider (Unlocked at Level 5)")
+			} else {
+				player.ChooseOrigin(parts[1])
+			}
+		case "!evolve":
+			player.Evolve()
 		case "!mine":
 			if len(parts) < 2 {
 				fmt.Println("📍 Available Locations: surface, cave, abyss, nether, void")
@@ -61,25 +91,19 @@ func main() {
 			}
 		case "!enter":
 			player.EnterGate()
-		case "!dstatus":
+		case "!status", "!stats", "!s", "!id":
 			player.ShowStats()
-		case "!dcraft":
-			if len(parts) < 2 {
-				player.ListDCraftable()
-			} else {
-				player.Craft(parts[1])
-			}
-		case "!dequip":
+		case "!equip":
 			if len(parts) < 2 {
 				player.ListSkills()
-				fmt.Println("🔮 Usage: !dequip <skill_id>")
+				fmt.Println("🔮 Usage: !equip <skill_id>")
 			} else {
 				player.EquipSkill(parts[1])
 			}
-		case "!dunequip":
+		case "!unequip":
 			if len(parts) < 2 {
 				player.ListSkills()
-				fmt.Println("🔮 Usage: !dunequip <slot_number>")
+				fmt.Println("🔮 Usage: !unequip <slot_number>")
 			} else {
 				var slot int
 				fmt.Sscanf(parts[1], "%d", &slot)
@@ -105,7 +129,7 @@ func main() {
 			player.ListTitles()
 		case "!craft":
 			if len(parts) < 2 {
-				player.ListCraftable()
+				player.ListDCraftable() // dcraft consolidated into craft
 			} else {
 				player.Craft(parts[1])
 			}
@@ -137,10 +161,10 @@ func main() {
 			}
 		case "!quests":
 			player.ListQuests()
-		case "!stats":
-			player.ShowStats()
-		case "!inventory":
+		case "!inventory", "!i":
 			player.ShowInventory()
+		case "!help", "!h":
+			player.ShowHelp()
 		case "!recover":
 			player.HealFull()
 			fmt.Println("⚡ [CHEAT] Health and Stamina fully replenished! ⚡")
@@ -164,6 +188,12 @@ func main() {
 							continue
 						}
 					}
+				}
+			} else if strings.HasPrefix(command, "eval.giveusergatevar") {
+				rank := strings.TrimPrefix(command, "eval.giveusergatevar")
+				if rank != "" {
+					player.ManualSpawnGate(rank)
+					continue
 				}
 			}
 			fmt.Printf("❓ Unknown command: %s\n", command)
