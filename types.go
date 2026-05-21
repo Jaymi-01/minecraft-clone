@@ -74,6 +74,8 @@ type Player struct {
 	Defense        int             `json:"defense"`
 	Stamina        int             `json:"stamina"`
 	MaxStamina     int             `json:"max_stamina"`
+	Magic          int             `json:"magic"`
+	MaxMagic       int             `json:"max_magic"`
 	Level          int             `json:"level"`
 	XP             int             `json:"xp"`
 	XPToNext       int             `json:"xp_to_next"`
@@ -87,6 +89,8 @@ type Player struct {
 	HunterXPToNext int             `json:"hunter_xp_to_next"`
 	HunterRank     string          `json:"hunter_rank"`
 	Kills          int             `json:"kills"`
+	MonsterKills   map[string]int  `json:"monster_kills"`
+	Taboo          int             `json:"taboo"`
 	SkillPoints    int             `json:"skill_points"`
 	Titles         []string        `json:"titles"`
 	Skills         []string        `json:"skills"`
@@ -94,7 +98,21 @@ type Player struct {
 	SkillSlots     int             `json:"skill_slots"`
 	SkillLevels    map[string]int  `json:"skill_levels"`
 	SkillCooldowns map[string]int  `json:"skill_cooldowns"`
+	Subordinates   []Subordinate   `json:"subordinates"`
 	CurrentGate    *Gate           `json:"current_gate"`
+	SystemOrigin   string          `json:"system_origin"`
+	Exploring      bool            `json:"exploring"`
+	ExplorationDepth int           `json:"exploration_depth"`
+}
+
+type Subordinate struct {
+	Name    string `json:"name"`
+	Species string `json:"species"`
+	Attack  int    `json:"attack"`
+	Defense int    `json:"defense"`
+	Level   int    `json:"level"`
+	XP      int    `json:"xp"`
+	NextXP  int    `json:"next_xp"`
 }
 
 type Title struct {
@@ -111,12 +129,16 @@ type Skill struct {
 	Name              string
 	DmgBonus          int
 	Cooldown          int
+	MPCost            int
 	Desc              string
 	Rank              string // E, D, C, B, A, S
 	Type              string // "active", "passive"
 	Category          string // "attack", "defense", "heal"
 	Level             int
 	UnlockRequirement string
+	ReqBoss           string
+	ReqLevel          int
+	ReqHunterLevel    int
 }
 
 type Gate struct {
