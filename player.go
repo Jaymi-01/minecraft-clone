@@ -357,7 +357,9 @@ func (p *Player) Combat(m *Monster, isGate bool) bool {
 					p.Magic -= skill.MPCost
 					p.SkillCooldowns[sID] = skill.Cooldown; actionTaken = true
 					
-					if p.SystemOrigin == "Spider" && sID == "heresy_magic" { p.Taboo++ }
+					if (p.SystemOrigin == "Spider" || p.SystemOrigin == "God (Shiraori)") && (sID == "heresy_magic" || sID == "rot_attack") { 
+						p.GainTaboo(1) 
+					}
 
 					// Skill Usage Progression
 					p.SkillUsage[sID]++
