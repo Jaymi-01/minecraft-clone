@@ -430,12 +430,13 @@ func (p *Player) Combat(m *Monster, isGate bool) bool {
 	return false
 }
 
-func (p *Player) EnterGate() {
+func (p *Player) EnterGate(isAdmin bool) {
 	if p.CurrentGate == nil { fmt.Println("📭 No gate."); return }
 	gate := p.CurrentGate
-	if p.Level < gate.MinLevel { fmt.Printf("🚫 Min Level %d required!\n", gate.MinLevel); return }
+	if !isAdmin && p.Level < gate.MinLevel { fmt.Printf("🚫 Min Level %d required!\n", gate.MinLevel); return }
 	if p.Stamina < 20 { fmt.Println("😫 Low stamina!"); return }
 	p.Stamina -= 20
+	if isAdmin { p.WorldNotice("ADMINISTRATIVE GATE OVERRIDE ACTIVATED") }
 	fmt.Printf("\n🌀 Entering %s-Rank Gate...\n", gate.Rank)
 	for floor := 1; floor <= gate.Floors; floor++ {
 		fmt.Printf("\n🏢 FLOOR %d / %d\n", floor, gate.Floors)
