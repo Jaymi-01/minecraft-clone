@@ -250,6 +250,7 @@ func (p *Player) GainTaboo(amount int) {
 	if p.Taboo == 10 {
 		p.WorldNotice("Individual has crossed the threshold of Forbidden Knowledge.")
 	}
+	p.CheckTitles()
 }
 
 func (p *Player) Combat(m *Monster, isGate bool) bool {
@@ -372,6 +373,7 @@ func (p *Player) Combat(m *Monster, isGate bool) bool {
 						if (sID == "predator" || sID == "beelzebuth") && float64(monsterHealth)/float64(m.Health) < (map[string]float64{"predator": 0.2, "beelzebuth": 0.4}[sID]) {
 							damageToMonster = monsterHealth
 							fmt.Printf("🌀 CONSUMED! +2 Atk, +10 HP.\n"); p.Attack += 2; p.MaxHealth += 10
+							p.GainTaboo(1)
 						} else {
 							bonusDmg := skill.DmgBonus + (skill.DmgBonus * (lvl - 1) / 2)
 							damageToMonster = int(float64(baseAtk+bonusDmg+rand.Intn(10)) * damageMultiplier)
@@ -637,15 +639,28 @@ func (p *Player) EquipSkill(skillID string) {
 
 func (p *Player) CheckTitles() {
 	for id, t := range GlobalTitles {
-		if p.Kills >= t.KillsNeeded {
-			owned := false; for _, o := range p.Titles { if o == id { owned = true; break } }
-			if !owned {
-				p.Titles = append(p.Titles, id)
-				p.Attack += t.AttackBonus; p.MaxHealth += t.HPBonus; p.Health += t.HPBonus
-				fmt.Printf("\n🏆 [NEW TITLE]: %s UNLOCKED!\n", t.Name)
-				p.WorldNotice(fmt.Sprintf("Title '%s' verified. Permanent stat bonus applied.", t.Name))
-				p.Save()
-			}
+		owned := false; for _, o := range p.Titles { if o == id { owned = true; break } }
+		if owned { continue }
+
+		met := false
+		if t.KillsNeeded > 0 && p.Kills >= t.KillsNeeded { met = true }
+		
+		// Special Requirements
+		switch id {
+		case "taboo_master": if p.Taboo >= 10 { met = true }
+		case "slime_emperor": if p.SystemOrigin == "Ultimate Slime (True Dragon)" { met = true }
+		case "labyrinth_walker": if p.ExplorationDepth >= 100 { met = true }
+		case "world_conqueror": if p.Level >= 100 && len(p.Subordinates) >= 5 { met = true }
+		case "supreme_hunter": if p.HunterLevel >= 100 { met = true }
+		}
+
+		if met {
+			p.Titles = append(p.Titles, id)
+			p.Attack += t.AttackBonus; p.MaxHealth += t.HPBonus; p.Health += t.HPBonus
+			p.Defense += t.DefenseBonus; p.MaxMagic += t.MPBonus; p.Magic += t.MPBonus
+			fmt.Printf("\n🏆 [NEW TITLE]: %s UNLOCKED!\n", t.Name)
+			p.WorldNotice(fmt.Sprintf("Title '%s' verified. Permanent stat bonus applied.", t.Name))
+			p.Save()
 		}
 	}
 }
@@ -687,10 +702,12 @@ func (p *Player) ShowHelp() {
 	fmt.Println("   !equip <id>   - Set skill to an active slot")
 	fmt.Println("   !unequip <#>  - Remove skill from slot")
 	fmt.Println("   !learn <id>   - Unlock new ability")
-	fmt.Println("\n   ━━━ *SKILL USAGE* ━━━")
+	fmt.Println("\n   ━━━ *SKILL USAGE & MANAGEMENT* ━━━")
 	fmt.Println("   🔥 ACTIVE: Use !fight1, !fight2, etc. during combat.")
 	fmt.Println("   👁️ PASSIVE: (e.g. Great Sage) Active automatically if EQUIPPED.")
 	fmt.Println("   🌀 AUTO: Analysis/Appraisal also works during !mine/!explore.")
+	fmt.Println("   🧬 !duplicate <sub_name> <skill_id> - Copy sub's skill (Req: Shub-Niggurath)")
+	fmt.Println("   ✨ !create <skill_1> <skill_2>      - Birth new skill (Req: Shub-Niggurath)")
 }
 
 func (p *Player) HealFull() { p.Health = p.MaxHealth; p.Stamina = p.MaxStamina; p.Magic = p.MaxMagic; p.Save() }
@@ -1018,6 +1035,7 @@ func (p *Player) Raid(targetID string) {
 		p.Inventory[id] += qty
 		fmt.Printf("   - %s x%d\n", strings.Replace(id, "_", " ", -1), qty)
 	}
+	p.GainTaboo(1)
 	p.GainXP(100 + t.Level*10); p.Save()
 	p.WorldNotice(fmt.Sprintf("Raid on %s successful.", t.Name))
 }
