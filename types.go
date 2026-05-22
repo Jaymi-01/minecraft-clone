@@ -106,6 +106,7 @@ type Player struct {
 	SystemOrigin   string          `json:"system_origin"`
 	Exploring      bool            `json:"exploring"`
 	ExplorationDepth int           `json:"exploration_depth"`
+	ActionLog      []string        `json:"action_log"`
 }
 
 type Subordinate struct {
