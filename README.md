@@ -1,63 +1,81 @@
 # 🌟 Mine & Exploration RPG 🌟
 
-A feature-rich, text-based RPG built in Go. Explore vast locations, build a thriving settlement, craft powerful gear, and raid NPC fortresses!
+A feature-rich, text-based RPG built in Go with a real-time web dashboard. Combine mining mechanics with deep anime-inspired progression systems.
 
 ---
 
-## 🎮 For Players (Just want to play!)
+## 🎮 How to Play
 
-If you just want to jump into the adventure, you **don't** need to install Go or clone this repository. 
+### Just want to jump in?
+1. Navigate to the [**`release/`**](./release) folder.
+2. Download the `.zip` file for your OS.
+3. Extract and run the executable.
+4. **📊 Visual Dashboard:** While playing, open [**`http://localhost:8080`**](http://localhost:8080) in your browser to see your real-time stats and inventory!
 
-1. Navigate to the [**`release/`**](./release) folder in this repository.
-2. Download the `.zip` file that matches your operating system:
-   - `MineRPG_Windows.zip` (for PC)
-   - `MineRPG_Linux.zip` (for Linux)
-   - `MineRPG_Mac_M1_M2.zip` (for Apple Silicon Macs)
-   - `MineRPG_Mac_Intel.zip` (for older Macs)
-3. Extract the ZIP to a new folder.
-4. Run the executable (`mine-system.exe` on Windows or `./mine-system` on Linux/Mac).
-5. **Start your journey!** Your progress is saved automatically to `player_data.json`.
-6. **📊 Visual Dashboard:** While the game is running, open your browser to [**`http://localhost:8080`**](http://localhost:8080) to see your real-time stats, XP, and inventory!
+### Developers
+- **Prerequisites:** [Go 1.20+](https://go.dev/dl/)
+- **Run:** `go run .`
+- **Build:** `go build -o mine-rpg .`
 
 ---
 
-## 🛠️ For Developers (Want to contribute!)
+## 📜 Core Game Systems
 
-We welcome contributors! To set up the development environment:
+### ⛏️ Mining & Resources
+Explore 5 distinct zones from the **Surface** to the **Void**. Each zone requires a minimum level and specific tools (Pickaxes) to harvest rare ores and crystals.
 
-### Prerequisites
-- [Go 1.20+](https://go.dev/dl/)
+### 🌀 The Gate System (Dungeons)
+Gates from **Rank E to SS** manifest throughout the world. Enter them to clear floors of monsters and defeat a **Gate Boss** for massive Gold and Hunter XP rewards.
 
-### Setup
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/Jaymi-01/minecraft-clone.git
-   cd minecraft-clone
-   ```
-2. **Run the game locally:**
-   ```bash
-   go run .
-   ```
-3. **Build for your specific platform:**
-   ```bash
-   go build -o mine-game .
-   ```
+### 🗺️ The Great Elroe Labyrinth
+A deep exploration mode where you navigate through dangerous tunnels. The further you move (`ExplorationDepth`), the stronger the monsters become, but the better the hidden loot.
 
-### Project Structure
-- `main.go`: CLI Entry point and command loop.
-- `player.go`: Core game logic (Mining, Combat, Crafting, Saving).
-- `data.go`: Static definitions for locations, items, and quests.
-- `types.go`: Struct and model definitions.
-- `build.ps1`: Automation script for multi-platform packaging.
+### 🛡️ Building & Settlement
+Construct structures to gain permanent account-wide buffs:
+- **Forge:** +10 Attack
+- **Vault:** +50 Max HP
+- **Enchanting Table:** +50% XP Gain
+- **Castle:** Massive stats across the board.
 
 ---
 
-## 📜 Core Features
-- **🌍 5 Exploration Zones:** From the Surface to the Cosmic Void.
-- **🏗️ Building System:** Construct Houses, Farms, and Castles for passive perks.
-- **⚔️ Bot Raiding:** Attack NPC settlements or defend your base from incoming raids.
-- **📜 Quest System:** Track objectives and earn massive gold/XP rewards.
-- **⚖️ Merchant Shop:** Spend your gold on rare consumables and repair kits.
-- **💾 Persistence:** Seamless JSON-based save system.
+## 🧬 Anime-Inspired Origins (Lvl 5+)
 
-Enjoy the grind! ⛏️💎🏰
+Once you reach Level 5, you can choose a **System Origin** to unlock unique skill trees and evolution paths:
+
+- **💧 Slime Path:** Focuses on consumption and analysis.
+  - *Skills:* Predator, Great Sage, Raphael, Beelzebuth.
+  - *Evolution:* Demon Slime -> True Dragon.
+- **🕷️ Spider Path:** Focuses on survival and status effects.
+  - *Skills:* Appraisal, Spider Thread, Evil Eye, Parallel Minds.
+  - *Evolution:* Arachne -> God (Shiraori).
+
+---
+
+## ⚔️ Combat & Progression
+- **Active Skills:** Equip up to 3 active skills (expandable) to use in turn-based combat.
+- **Titles:** Defeat large quantities of monsters to unlock Titles (e.g., *Wolf Slayer*) that grant permanent stat bonuses.
+- **Subordinates:** Tame and **Name** monsters (Slimes, Goblins, Wolves) to have them assist you in combat and base defense.
+- **Raiding:** Launch raids on NPC settlements like Goblin Camps or Bandit Forts to plunder resources.
+
+---
+
+## 💾 System Integrity
+- **Real-time Sync:** The web dashboard updates every second with your latest stats.
+- **Save Safety:** The system maintains a `player_data.json.bak` file to prevent progress loss in case of crashes.
+- **Auto-Save:** Every major action (combat, mining, crafting) triggers an automatic save.
+
+---
+
+## ⌨️ Common Commands
+- `!mine <zone>` - Start resource gathering.
+- `!status` / `!s` - View full character profile.
+- `!enter` - Challenge the currently manifested Gate.
+- `!explore` - Enter the Great Elroe Labyrinth.
+- `!origin <slime|spider>` - Choose your path at Level 5.
+- `!evolve` - Advance to the next species tier.
+- `!skills` - View your collection and unlock requirements.
+- `!quests` - Check your mission progress.
+- `!build <name>` - Construct a new settlement structure.
+
+Enjoy the journey to the top of the System! 🗡️💎👑
