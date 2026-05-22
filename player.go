@@ -777,6 +777,12 @@ func (p *Player) StartRegeneration() {
 	go func() { for range ticker.C { p.Regenerate() } }()
 }
 
+func (p *Player) LogAction(msg string) {
+	timestamp := time.Now().Format("15:04:05")
+	p.ActionLog = append([]string{fmt.Sprintf("[%s] %s", timestamp, msg)}, p.ActionLog...)
+	if len(p.ActionLog) > 30 { p.ActionLog = p.ActionLog[:30] }
+}
+
 func (p *Player) StartSubordinateAutonomy() {
 	ticker := time.NewTicker(5 * time.Minute)
 	go func() {
@@ -799,13 +805,15 @@ func (p *Player) SubordinateAction(s *Subordinate) {
 		locID := locs[rand.Intn(len(locs))]
 		loc := Locations[locID]
 		if s.Level >= loc.RequiredLevel {
-			fmt.Printf("⛏️ Subordinate '%s' is mining in the %s...\n", s.Name, loc.Name)
+			p.LogAction(fmt.Sprintf("%s is mining in %s...", s.Name, loc.Name))
+			found := ""
 			for item, prob := range loc.LootTable {
 				if rand.Float64() <= prob {
 					p.Inventory[item]++
-					fmt.Printf("   🎁 '%s' found: %s\n", s.Name, item)
+					found += strings.Replace(item, "_", " ", -1) + ", "
 				}
 			}
+			if found != "" { p.LogAction(fmt.Sprintf("%s found: %s", s.Name, strings.TrimSuffix(found, ", "))) }
 			p.GainXP(5)
 			p.SubordinateGainXPForOne(s, 20)
 		}
@@ -814,11 +822,11 @@ func (p *Player) SubordinateAction(s *Subordinate) {
 		raidID := raids[rand.Intn(len(raids))]
 		raid := BotSettlements[raidID]
 		if s.Level >= raid.Level {
-			fmt.Printf("⚔️ Subordinate '%s' is raiding %s!\n", s.Name, raid.Name)
+			p.LogAction(fmt.Sprintf("%s is raiding %s!", s.Name, raid.Name))
 			for item, qty := range raid.LootTable {
 				p.Inventory[item] += qty
-				fmt.Printf("   💰 '%s' plundered: %s x%d\n", s.Name, item, qty)
 			}
+			p.LogAction(fmt.Sprintf("%s completed raid on %s.", s.Name, raid.Name))
 			p.GainXP(raid.Level * 10)
 			p.SubordinateGainXPForOne(s, raid.Level*50)
 		}
