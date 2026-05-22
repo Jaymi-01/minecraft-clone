@@ -468,26 +468,37 @@ var Gates = map[string]Gate{
 
 var GlobalTitles = map[string]Title{
 	"wolf_slayer": {
-		ID:          "wolf_slayer",
-		Name:        "🐺 Wolf Slayer",
-		KillsNeeded: 50,
-		PerkDesc:    "+10 Attack",
-		AttackBonus: 10,
+		ID: "wolf_slayer", Name: "🐺 Wolf Slayer", KillsNeeded: 50, PerkDesc: "+10 Attack", AttackBonus: 10,
+	},
+	"goblin_bane": {
+		ID: "goblin_bane", Name: "👺 Goblin Bane", KillsNeeded: 100, PerkDesc: "+20 Attack, +50 HP", AttackBonus: 20, HPBonus: 50,
+	},
+	"spider_crusher": {
+		ID: "spider_crusher", Name: "🕷️ Spider Crusher", KillsNeeded: 150, PerkDesc: "+30 Defense, +100 MP", DefenseBonus: 30, HPBonus: 0,
 	},
 	"demon_hunter": {
-		ID:          "demon_hunter",
-		Name:        "😈 Demon Hunter",
-		KillsNeeded: 200,
-		PerkDesc:    "+500 Max HP",
-		HPBonus:     500,
+		ID: "demon_hunter", Name: "😈 Demon Hunter", KillsNeeded: 250, PerkDesc: "+50 Attack, +500 Max HP", AttackBonus: 50, HPBonus: 500,
+	},
+	"dragon_slayer": {
+		ID: "dragon_slayer", Name: "🐲 Dragon Slayer", KillsNeeded: 500, PerkDesc: "+100 Attack, +1000 Max HP", AttackBonus: 100, HPBonus: 1000,
 	},
 	"god_slayer": {
-		ID:          "god_slayer",
-		Name:        "✨ God Slayer",
-		KillsNeeded: 1000,
-		PerkDesc:    "+100 Attack, +2000 Max HP",
-		AttackBonus: 100,
-		HPBonus:     2000,
+		ID: "god_slayer", Name: "✨ God Slayer", KillsNeeded: 1000, PerkDesc: "+250 Attack, +5000 Max HP", AttackBonus: 250, HPBonus: 5000,
+	},
+	"taboo_master": {
+		ID: "taboo_master", Name: "🌌 Master of Taboo", KillsNeeded: 0, PerkDesc: "+500 MP, +50 Defense", AttackBonus: 0, HPBonus: 0,
+	},
+	"slime_emperor": {
+		ID: "slime_emperor", Name: "💧 Slime Emperor", KillsNeeded: 0, PerkDesc: "+100 Attack, +1000 MP", AttackBonus: 100,
+	},
+	"labyrinth_walker": {
+		ID: "labyrinth_walker", Name: "🕵️ Labyrinth Walker", KillsNeeded: 0, PerkDesc: "+50 Defense, +200 Stamina", DefenseBonus: 50,
+	},
+	"world_conqueror": {
+		ID: "world_conqueror", Name: "🌍 World Conqueror", KillsNeeded: 0, PerkDesc: "+500 Attack, +10000 HP", AttackBonus: 500, HPBonus: 10000,
+	},
+	"supreme_hunter": {
+		ID: "supreme_hunter", Name: "🏹 Supreme Hunter", KillsNeeded: 0, PerkDesc: "+200 Attack, +500 Defense", AttackBonus: 200, DefenseBonus: 500,
 	},
 }
 
