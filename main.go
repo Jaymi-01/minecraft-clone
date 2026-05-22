@@ -90,7 +90,9 @@ func main() {
 				player.Mine(parts[1])
 			}
 		case "!enter":
-			player.EnterGate()
+			player.EnterGate(false)
+		case "!allowadminenter":
+			player.EnterGate(true)
 		case "!status", "!stats", "!s", "!id":
 			player.ShowStats()
 		case "!equip":
