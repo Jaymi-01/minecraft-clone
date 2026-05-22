@@ -227,8 +227,19 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Skills Panel -->
                         <div class="stat-panel neon-border p-6">
-                            <h2 class="system-font text-lg text-purple-400 mb-4 italic">ACTIVE SKILLS</h2>
+                            <h2 class="system-font text-lg text-purple-400 mb-4 italic flex justify-between items-center">
+                                <span>ACTIVE SKILLS</span>
+                                <span class="text-xs text-gray-500 uppercase" id="skill-slots-val">Slots: 0/0</span>
+                            </h2>
                             <div id="skills-list" class="space-y-3 scroll-area">
+                                <!-- items -->
+                            </div>
+                        </div>
+
+                        <!-- Mastered Skills Panel -->
+                        <div class="stat-panel neon-border p-6 mt-6">
+                            <h2 class="system-font text-lg text-blue-500 mb-4 italic">MASTERED SKILLS</h2>
+                            <div id="mastered-skills-list" class="flex flex-wrap gap-2 scroll-area max-h-[200px]">
                                 <!-- items -->
                             </div>
                         </div>
@@ -339,6 +350,7 @@
                     setVal('taboo-val', p.taboo || 0);
                     setVal('kills-val', p.kills || 0);
                     setVal('durability-val', p.tool_durability);
+                    setVal('skill-slots-val', `Slots: ${p.equipped_skills ? p.equipped_skills.length : 0} / ${p.skill_slots}`);
 
                     const renderList = (id, items, decorator) => {
                         const el = document.getElementById(id);
@@ -354,8 +366,21 @@
 
                     renderList('subs-list', p.subordinates, s => {
                         const d = document.createElement('div');
-                        d.className = 'p-3 bg-blue-500/10 border border-blue-500/30 w-40 flex-shrink-0';
-                        d.innerHTML = `<div class="text-blue-400 font-bold text-center">${s.name}</div><div class="text-[10px] text-gray-500 text-center uppercase">${s.species}</div><div class="flex justify-between text-xs mt-2"><span>ATK: ${s.attack}</span><span>DEF: ${s.defense}</span></div>`;
+                        d.className = 'p-3 bg-blue-500/10 border border-blue-500/30 w-48 flex-shrink-0';
+                        const skills = s.skills && s.skills.length > 0 ? s.skills.map(id => id.split('_').join(' ').toUpperCase()).join(', ') : 'None';
+                        d.innerHTML = `
+                            <div class="flex justify-between items-center mb-1">
+                                <div class="text-blue-400 font-bold truncate pr-2">${s.name}</div>
+                                <div class="text-[10px] text-blue-300 font-bold">LV.${s.level}</div>
+                            </div>
+                            <div class="text-[9px] text-gray-500 uppercase mb-2 border-b border-blue-500/10 pb-1">${s.species}</div>
+                            <div class="flex justify-between text-[10px] mb-2">
+                                <span>ATK: ${s.attack}</span>
+                                <span>DEF: ${s.defense}</span>
+                            </div>
+                            <div class="text-[9px] text-gray-600 uppercase mb-1">Abilities:</div>
+                            <div class="text-[10px] text-blue-200 italic line-clamp-2 leading-tight">${skills}</div>
+                        `;
                         return d;
                     });
                     document.getElementById('sub-count').innerText = `Total: ${p.subordinates ? p.subordinates.length : 0}`;
@@ -375,10 +400,28 @@
                         return d;
                     });
 
+                    renderList('mastered-skills-list', p.skills, sID => {
+                        const s = document.createElement('div');
+                        s.className = 'px-3 py-1 bg-blue-900/20 border border-blue-500/30 text-blue-400 text-xs flex justify-between gap-4 items-center';
+                        const name = sID.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                        const lvl = p.skill_levels[sID] || 1;
+                        s.innerHTML = `<span>${name}</span><span class="text-blue-200 font-bold">LV.${lvl}</span>`;
+                        return s;
+                    });
+
                     renderList('structures-list', p.structures ? Object.keys(p.structures) : [], s => {
-                        const b = document.createElement('span');
-                        b.className = 'px-3 py-1 bg-green-500/10 border border-green-500/30 text-green-400 text-sm';
-                        b.innerText = s.toUpperCase();
+                        const b = document.createElement('div');
+                        b.className = 'p-3 bg-green-500/10 border border-green-500/30 w-full flex justify-between items-center';
+                        const perks = {
+                            "house": "+2 HP Regen",
+                            "farm": "+5 Stamina Regen",
+                            "forge": "+10 Attack",
+                            "enchanting_table": "+50% XP Gain",
+                            "vault": "+50 Max HP",
+                            "castle": "+20 ATK, +100 HP, +50 STA"
+                        };
+                        const perk = perks[s] || '';
+                        b.innerHTML = `<span class="text-green-400 font-bold uppercase">${s}</span><span class="text-xs text-green-300 italic">${perk}</span>`;
                         return b;
                     });
 
