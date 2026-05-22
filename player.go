@@ -40,8 +40,9 @@ func NewPlayer(name string) *Player {
 		Titles:         []string{},
 		Skills:         []string{},
 		EquippedSkills: []string{},
-		SkillSlots:     3,
+		SkillSlots:     5,
 		SkillLevels:    make(map[string]int),
+		SkillUsage:     make(map[string]int),
 		SkillCooldowns: make(map[string]int),
 		Subordinates:   []Subordinate{},
 		SystemOrigin:   "Human",
@@ -88,6 +89,10 @@ func (p *Player) UpdateHunterRank() {
 	}
 }
 
+func (p *Player) UpdateSkillSlots() {
+	p.SkillSlots = 5 + (p.Level / 5)
+}
+
 func (p *Player) GainXP(amount int) {
 	if p.Structures["enchanting_table"] {
 		amount = int(float64(amount) * 1.5)
@@ -105,6 +110,8 @@ func (p *Player) GainXP(amount int) {
 		p.Stamina = p.MaxStamina
 		p.Magic = p.MaxMagic
 		p.UpdateRank()
+		p.UpdateSkillSlots()
+		p.TrackQuest("level", "mine", p.Level)
 		p.WorldNotice(fmt.Sprintf("Individual '%s' has reached Mine Level %d", p.Name, p.Level))
 	}
 	p.Save()
@@ -114,6 +121,7 @@ func (p *Player) GainHunterXP(amount int) {
 	p.HunterXP += amount
 	fmt.Printf("[🏹 +%d Hunter XP]\n", amount)
 	for p.HunterXP >= p.HunterXPToNext {
+		oldRank := p.HunterRank
 		p.HunterLevel++
 		p.HunterXP -= p.HunterXPToNext
 		p.HunterXPToNext = int(float64(p.HunterXPToNext) * 1.5)
@@ -122,12 +130,17 @@ func (p *Player) GainHunterXP(amount int) {
 			p.WorldNotice("Skill Capacity Increased")
 		}
 		p.UpdateHunterRank()
-		p.WorldNotice(fmt.Sprintf("Hunter Rank promotion to %s successful", p.HunterRank))
+		p.TrackQuest("level", "hunter", p.HunterLevel)
+		p.WorldNotice(fmt.Sprintf("Hunter Level %d achieved", p.HunterLevel))
+		if p.HunterRank != oldRank {
+			p.WorldNotice(fmt.Sprintf("Hunter Rank promotion to %s successful", p.HunterRank))
+		}
 	}
 	p.Save()
 }
 
 func (p *Player) StartGateSpawning() {
+
 	ticker := time.NewTicker(10 * time.Minute)
 	go func() {
 		for range ticker.C {
@@ -171,11 +184,13 @@ func (p *Player) ChooseOrigin(origin string) {
 	switch origin {
 	case "slime":
 		p.SystemOrigin = "Slime"
-		p.Skills = append(p.Skills, "predator", "great_sage")
+		p.AddSkill("predator")
+		p.AddSkill("great_sage")
 		p.WorldNotice("Unique Path: SLIME - Predator and Great Sage acquired")
 	case "spider":
 		p.SystemOrigin = "Spider"
-		p.Skills = append(p.Skills, "appraisal", "spider_thread")
+		p.AddSkill("appraisal")
+		p.AddSkill("spider_thread")
 		p.WorldNotice("Unique Path: SPIDER - Appraisal and Spider Thread acquired")
 	default:
 		fmt.Println("❓ Choice unavailable.")
@@ -194,7 +209,7 @@ func (p *Player) Evolve() {
 	case "Slime":
 		if p.Level >= 30 {
 			p.SystemOrigin = "Demon Slime"
-			p.Skills = append(p.Skills, "megiddo", "raphael", "beelzebuth")
+			p.AddSkill("megiddo"); p.AddSkill("raphael"); p.AddSkill("beelzebuth")
 			p.MaxHealth += 500; p.Attack += 50; p.MaxMagic += 500
 			p.WorldNotice("Evolution to DEMON SLIME successful.")
 			evolved = true
@@ -209,7 +224,7 @@ func (p *Player) Evolve() {
 	case "Spider":
 		if p.Level >= 30 {
 			p.SystemOrigin = "Arachne"
-			p.Skills = append(p.Skills, "wisdom", "evil_eye", "parallel_minds")
+			p.AddSkill("wisdom"); p.AddSkill("evil_eye"); p.AddSkill("parallel_minds")
 			p.MaxHealth += 300; p.Attack += 80; p.MaxMagic += 200
 			p.WorldNotice("Evolution to ARACHNE successful.")
 			evolved = true
@@ -229,6 +244,14 @@ func (p *Player) Evolve() {
 	}
 }
 
+func (p *Player) GainTaboo(amount int) {
+	p.Taboo += amount
+	p.WorldNotice(fmt.Sprintf("Taboo Level increased by %d (Current: %d)", amount, p.Taboo))
+	if p.Taboo == 10 {
+		p.WorldNotice("Individual has crossed the threshold of Forbidden Knowledge.")
+	}
+}
+
 func (p *Player) Combat(m *Monster, isGate bool) bool {
 	fmt.Printf("\n⚔️ ENCOUNTER: %s\n", m.Name)
 	monsterHealth := m.Health
@@ -243,6 +266,14 @@ func (p *Player) Combat(m *Monster, isGate bool) bool {
 	for _, sID := range p.EquippedSkills {
 		if sID == "appraisal" || sID == "wisdom" { appraisalActive = true }
 		if sID == "parallel_minds" { parallelMindsActive = true }
+		
+		// Passive Usage: Combat Passives
+		skill := GlobalSkills[sID]
+		passives := map[string]bool{"appraisal":true, "wisdom":true, "great_sage":true, "raphael":true, "critical_eye":true, "battle_hardened":true, "eclipse_affinity":true}
+		if skill.Type == "passive" && passives[sID] {
+			p.SkillUsage[sID]++
+			if p.SkillUsage[sID] >= 10 { p.UpgradeSkill(sID, true) }
+		}
 	}
 
 	for monsterHealth > 0 && p.Health > 0 {
@@ -254,7 +285,24 @@ func (p *Player) Combat(m *Monster, isGate bool) bool {
 		} else { damageMultiplier = 1.0 }
 
 		if appraisalActive {
+			lvl := 1
+			if l, ok := p.SkillLevels["appraisal"]; ok { lvl = l }
+			if l, ok := p.SkillLevels["wisdom"]; ok { lvl = l + 10 }
+
 			fmt.Printf("\n--- 👁️ APPRAISAL: %s [HP: %d/%d | DMG: %d] ---\n", m.Name, monsterHealth, m.Health, m.Damage)
+			if lvl >= 4 {
+				fmt.Printf("   💰 EXPECTED REWARDS: ~%d XP\n", 15+p.Level)
+			}
+			if lvl >= 7 {
+				fmt.Print("   🎁 DROP TABLE: ")
+				for item := range m.LootTable { fmt.Printf("[%s] ", strings.Replace(item, "_", " ", -1)) }
+				fmt.Println()
+			}
+			if lvl >= 10 {
+				fmt.Print("   🔮 ANALYSIS: ")
+				for item, prob := range m.LootTable { fmt.Printf("%s (%.0f%%) ", strings.Replace(item, "_", " ", -1), prob*100) }
+				fmt.Println()
+			}
 		}
 		fmt.Printf("--- Your Turn (❤️ %d/%d | 🔮 %d/%d) ---\n", p.Health, p.MaxHealth, p.Magic, p.MaxMagic)
 		for sID, cd := range p.SkillCooldowns {
@@ -311,6 +359,12 @@ func (p *Player) Combat(m *Monster, isGate bool) bool {
 					
 					if p.SystemOrigin == "Spider" && sID == "heresy_magic" { p.Taboo++ }
 
+					// Skill Usage Progression
+					p.SkillUsage[sID]++
+					if p.SkillUsage[sID] >= 10 {
+						p.UpgradeSkill(sID, true)
+					}
+
 					switch skill.Category {
 					case "attack":
 						if (sID == "predator" || sID == "beelzebuth") && float64(monsterHealth)/float64(m.Health) < (map[string]float64{"predator": 0.2, "beelzebuth": 0.4}[sID]) {
@@ -342,8 +396,7 @@ func (p *Player) Combat(m *Monster, isGate bool) bool {
 		if monsterHealth <= 0 {
 			fmt.Printf("🏆 Defeated %s!\n", m.Name); p.Kills++; p.MonsterKills[strings.ToLower(m.Name)]++
 			if p.SystemOrigin == "Spider" && p.Taboo >= 10 {
-				found := false; for _, s := range p.Skills { if s == "heresy_magic" { found = true; break } }
-				if !found { p.Skills = append(p.Skills, "heresy_magic"); p.WorldNotice("Forbidden Skill 'Heresy Magic' acquired via Taboo") }
+				p.AddSkill("heresy_magic")
 			}
 			p.CheckTitles()
 			for item, prob := range m.LootTable {
@@ -400,21 +453,33 @@ func (p *Player) EnterGate() {
 }
 
 func (p *Player) NameSubordinate(species, givenName string) {
-	species = strings.ToLower(species)
+	species = strings.ToLower(strings.Replace(species, "_", " ", -1))
 	if p.MaxMagic < 50 {
 		fmt.Println("❌ Insufficient maximum magic capacity to name a subordinate.")
 		return
 	}
+	
+	subAtk := 10; subDef := 2
 	valid := false
-	if species == "slime" || species == "hobgoblin" || species == "alpha wolf" { valid = true }
+	
+	switch species {
+	case "slime": valid = true; subAtk = 15; subDef = 5
+	case "goblin", "hobgoblin": valid = true; subAtk = 25; subDef = 10
+	case "wolf", "alpha wolf": valid = true; subAtk = 40; subDef = 15
+	case "small lesser taratect", "lesser taratect": valid = true; subAtk = 30; subDef = 10
+	case "greater taratect", "arch taratect": valid = true; subAtk = 100; subDef = 50
+	case "naga", "naga warrior": valid = true; subAtk = 60; subDef = 30
+	case "orc", "lesser orc lord": valid = true; subAtk = 50; subDef = 40
+	}
+
 	if !valid {
 		fmt.Printf("❌ Individual of species '%s' cannot be named at this time.\n", species)
 		return
 	}
+	
 	p.MaxMagic -= 50
 	if p.Magic > p.MaxMagic { p.Magic = p.MaxMagic }
-	subAtk := 20; subDef := 5
-	if species == "alpha wolf" { subAtk = 50; subDef = 20 }
+	
 	sub := Subordinate{
 		Name:    givenName,
 		Species: species,
@@ -466,7 +531,12 @@ func (p *Player) ListSkills() {
 	for _, r := range ranks {
 		for _, skill := range GlobalSkills {
 			if skill.Rank == r && !owned[skill.ID] {
-				fmt.Printf("   🔒 %s [%s-Rank]\n       %s\n", skill.Name, skill.Rank, skill.UnlockRequirement)
+				status := "❌"
+				if skill.ReqLevel > 0 && p.Level >= skill.ReqLevel { status = "✅" }
+				if skill.ReqBoss != "" && p.MonsterKills[strings.ToLower(skill.ReqBoss)] > 0 { status = "✅" }
+				if skill.Rank == "Forbidden" && p.Taboo >= 10 { status = "✅" }
+				if strings.Contains(skill.UnlockRequirement, "Origin") && strings.Contains(strings.ToLower(skill.UnlockRequirement), strings.ToLower(p.SystemOrigin)) { status = "✅" }
+				fmt.Printf("   %s %s [%s-Rank]\n       Req: %s\n", status, skill.Name, skill.Rank, skill.UnlockRequirement)
 			}
 		}
 	}
@@ -480,12 +550,48 @@ func (p *Player) UnequipSkill(slot int) {
 	fmt.Printf("⚪ Unequipped %s.\n", GlobalSkills[sID].Name); p.Save()
 }
 
-func (p *Player) UpgradeSkill(skillID string) {
+func (p *Player) AddSkill(skillID string) {
 	skillID = strings.ToLower(skillID)
-	if p.SkillPoints < 1 { return }
+	for _, s := range p.Skills { if s == skillID { return } }
+	p.Skills = append(p.Skills, skillID)
+	if s, ok := GlobalSkills[skillID]; ok {
+		p.WorldNotice(fmt.Sprintf("New Skill Acquired: %s", s.Name))
+	}
+}
+
+func (p *Player) UpgradeSkill(skillID string, isFree bool) {
+	skillID = strings.ToLower(skillID)
+	if !isFree && p.SkillPoints < 1 { return }
 	if p.SkillLevels[skillID] == 0 { p.SkillLevels[skillID] = 1 }
-	p.SkillLevels[skillID]++; p.SkillPoints--
-	fmt.Printf("✨ Upgraded %s to Lv%d!\n", GlobalSkills[skillID].Name, p.SkillLevels[skillID]); p.Save()
+	p.SkillLevels[skillID]++
+	if !isFree { p.SkillPoints-- }
+	
+	p.SkillUsage[skillID] = 0 // Reset usage on level up
+	skillName := GlobalSkills[skillID].Name
+	fmt.Printf("✨ Upgraded %s to Lv%d!\n", skillName, p.SkillLevels[skillID])
+	p.WorldNotice(fmt.Sprintf("Skill Level Increased: %s is now Lv%d", skillName, p.SkillLevels[skillID]))
+
+	// Evolution Logic
+	if p.SkillLevels[skillID] >= 10 {
+		if evolvedID, canEvolve := SkillEvolutions[skillID]; canEvolve {
+			// Remove old skill
+			newSkills := []string{}
+			for _, s := range p.Skills { if s != skillID { newSkills = append(newSkills, s) } }
+			p.Skills = newSkills
+
+			// Remove from equipped
+			newEquipped := []string{}
+			for _, s := range p.EquippedSkills { if s != skillID { newEquipped = append(newEquipped, s) } }
+			p.EquippedSkills = newEquipped
+
+			// Add new skill
+			p.AddSkill(evolvedID)
+			p.SkillLevels[evolvedID] = 1
+			p.SkillUsage[evolvedID] = 0
+			p.WorldNotice(fmt.Sprintf("SKILL ASCENSION: %s has evolved into %s!", skillName, GlobalSkills[evolvedID].Name))
+		}
+	}
+	p.Save()
 }
 
 func (p *Player) LearnSkill(skillID string) {
@@ -495,10 +601,16 @@ func (p *Player) LearnSkill(skillID string) {
 	met := false
 	if skill.ReqBoss != "" && p.MonsterKills[strings.ToLower(skill.ReqBoss)] > 0 { met = true }
 	if skill.ReqLevel > 0 && p.Level >= skill.ReqLevel { met = true }
-	if skill.Rank == "Forbidden" && p.Taboo < 10 { met = false }
+	if skill.Rank == "Forbidden" && p.Taboo >= 10 { met = true }
+	
+	req := strings.ToLower(skill.UnlockRequirement)
+	origin := strings.ToLower(p.SystemOrigin)
+	if strings.Contains(req, "origin") && strings.Contains(req, origin) { met = true }
+	if strings.Contains(req, "evolution") && strings.Contains(req, origin) { met = true }
+
 	if met {
-		p.Skills = append(p.Skills, skillID)
-		fmt.Printf("🎊 Learned %s!\n", skill.Name); p.Save()
+		p.AddSkill(skillID)
+		p.Save()
 	} else {
 		fmt.Printf("🚫 Requirements not met: %s\n", skill.UnlockRequirement)
 	}
@@ -511,12 +623,14 @@ func (p *Player) EquipSkill(skillID string) {
 	for i, eq := range p.EquippedSkills {
 		if eq == skillID {
 			p.EquippedSkills = append(p.EquippedSkills[:i], p.EquippedSkills[i+1:]...)
-			fmt.Printf("⚪ Unequipped %s.\n", GlobalSkills[skillID].Name); p.Save(); return
+			p.WorldNotice(fmt.Sprintf("Skill Unequipped: %s", GlobalSkills[skillID].Name))
+			p.Save(); return
 		}
 	}
 	if len(p.EquippedSkills) >= p.SkillSlots { return }
 	p.EquippedSkills = append(p.EquippedSkills, skillID)
-	fmt.Printf("🟢 Equipped %s.\n", GlobalSkills[skillID].Name); p.Save()
+	p.WorldNotice(fmt.Sprintf("Skill Equipped: %s", GlobalSkills[skillID].Name))
+	p.Save()
 }
 
 func (p *Player) CheckTitles() {
@@ -524,8 +638,11 @@ func (p *Player) CheckTitles() {
 		if p.Kills >= t.KillsNeeded {
 			owned := false; for _, o := range p.Titles { if o == id { owned = true; break } }
 			if !owned {
-				p.Titles = append(p.Titles, id); p.Attack += t.AttackBonus; p.MaxHealth += t.HPBonus; p.Health += t.HPBonus
-				p.WorldNotice(fmt.Sprintf("Title '%s' verified.", t.Name))
+				p.Titles = append(p.Titles, id)
+				p.Attack += t.AttackBonus; p.MaxHealth += t.HPBonus; p.Health += t.HPBonus
+				fmt.Printf("\n🏆 [NEW TITLE]: %s UNLOCKED!\n", t.Name)
+				p.WorldNotice(fmt.Sprintf("Title '%s' verified. Permanent stat bonus applied.", t.Name))
+				p.Save()
 			}
 		}
 	}
@@ -564,10 +681,14 @@ func (p *Player) ShowHelp() {
 	fmt.Println("   !subordinates - View your allies")
 	fmt.Println("\n   ━━━ *COMBAT & SKILLS* ━━━")
 	fmt.Println("   !enter        - Challenge Gate")
-	fmt.Println("   !skills       - View collection")
-	fmt.Println("   !equip <id>   - Set active skill")
+	fmt.Println("   !skills       - View collection and requirements")
+	fmt.Println("   !equip <id>   - Set skill to an active slot")
 	fmt.Println("   !unequip <#>  - Remove skill from slot")
 	fmt.Println("   !learn <id>   - Unlock new ability")
+	fmt.Println("\n   ━━━ *SKILL USAGE* ━━━")
+	fmt.Println("   🔥 ACTIVE: Use !fight1, !fight2, etc. during combat.")
+	fmt.Println("   👁️ PASSIVE: (e.g. Great Sage) Active automatically if EQUIPPED.")
+	fmt.Println("   🌀 AUTO: Analysis/Appraisal also works during !mine/!explore.")
 }
 
 func (p *Player) HealFull() { p.Health = p.MaxHealth; p.Stamina = p.MaxStamina; p.Magic = p.MaxMagic; p.Save() }
@@ -590,11 +711,12 @@ func LoadPlayer() *Player {
 	if p.MonsterKills == nil { p.MonsterKills = make(map[string]int) }
 	if p.SkillCooldowns == nil { p.SkillCooldowns = make(map[string]int) }
 	if p.SkillLevels == nil { p.SkillLevels = make(map[string]int) }
+	if p.SkillUsage == nil { p.SkillUsage = make(map[string]int) }
 	if p.Subordinates == nil { p.Subordinates = []Subordinate{} }
 	if p.Structures == nil { p.Structures = make(map[string]bool) }
 	if p.SystemOrigin == "" { p.SystemOrigin = "Human" }
 	if p.MaxMagic == 0 { p.MaxMagic = 100; p.Magic = 100 }
-	p.UpdateRank(); p.UpdateHunterRank()
+	p.UpdateRank(); p.UpdateHunterRank(); p.UpdateSkillSlots()
 	return &p
 }
 
@@ -602,7 +724,11 @@ func (p *Player) TrackQuest(qType, id string, qty int) {
 	for _, q := range GlobalQuests {
 		if q.TargetType == qType && q.TargetID == id {
 			if p.QuestProgress[q.ID] < q.TargetQty {
-				p.QuestProgress[q.ID] += qty
+				if qType == "level" {
+					if qty > p.QuestProgress[q.ID] { p.QuestProgress[q.ID] = qty }
+				} else {
+					p.QuestProgress[q.ID] += qty
+				}
 				if p.QuestProgress[q.ID] >= q.TargetQty {
 					p.WorldNotice(fmt.Sprintf("Mission '%s' concluded.", q.Name)); p.Inventory["gold"] += q.RewardGold; p.GainXP(q.RewardXP)
 				}
@@ -612,7 +738,14 @@ func (p *Player) TrackQuest(qType, id string, qty int) {
 }
 
 func (p *Player) ListQuests() {
-	for _, q := range GlobalQuests { fmt.Printf("[%s] %s - %d/%d\n", q.ID, q.Name, p.QuestProgress[q.ID], q.TargetQty) }
+	for _, q := range GlobalQuests {
+		progress := p.QuestProgress[q.ID]
+		if progress >= q.TargetQty {
+			fmt.Printf("✅ [%s] %s - COMPLETED\n", q.ID, q.Name)
+		} else {
+			fmt.Printf("🔄 [%s] %s - %d/%d\n", q.ID, q.Name, progress, q.TargetQty)
+		}
+	}
 }
 
 func (p *Player) ShowInventory() {
@@ -625,19 +758,90 @@ func (p *Player) StartRegeneration() {
 	go func() { for range ticker.C { p.Regenerate() } }()
 }
 
+func (p *Player) StartSubordinateAutonomy() {
+	ticker := time.NewTicker(5 * time.Minute)
+	go func() {
+		for range ticker.C {
+			for i := range p.Subordinates {
+				p.SubordinateAction(&p.Subordinates[i])
+			}
+			p.Save()
+		}
+	}()
+}
+
+func (p *Player) SubordinateAction(s *Subordinate) {
+	if time.Since(s.LastAction) < 5*time.Minute { return }
+	s.LastAction = time.Now()
+
+	action := rand.Intn(100)
+	if action < 40 { // Mining
+		locs := []string{"surface", "cave", "abyss", "nether", "void"}
+		locID := locs[rand.Intn(len(locs))]
+		loc := Locations[locID]
+		if s.Level >= loc.RequiredLevel {
+			fmt.Printf("⛏️ Subordinate '%s' is mining in the %s...\n", s.Name, loc.Name)
+			for item, prob := range loc.LootTable {
+				if rand.Float64() <= prob {
+					p.Inventory[item]++
+					fmt.Printf("   🎁 '%s' found: %s\n", s.Name, item)
+				}
+			}
+			p.GainXP(5)
+			p.SubordinateGainXPForOne(s, 20)
+		}
+	} else if action < 70 { // Raiding
+		raids := []string{"goblin_camp", "bandit_fort", "shadow_keep"}
+		raidID := raids[rand.Intn(len(raids))]
+		raid := BotSettlements[raidID]
+		if s.Level >= raid.Level {
+			fmt.Printf("⚔️ Subordinate '%s' is raiding %s!\n", s.Name, raid.Name)
+			for item, qty := range raid.LootTable {
+				p.Inventory[item] += qty
+				fmt.Printf("   💰 '%s' plundered: %s x%d\n", s.Name, item, qty)
+			}
+			p.GainXP(raid.Level * 10)
+			p.SubordinateGainXPForOne(s, raid.Level*50)
+		}
+	}
+}
+
 func (p *Player) SubordinateGainXP(amount int) {
 	for i := range p.Subordinates {
-		s := &p.Subordinates[i]
-		if s.NextXP == 0 { s.NextXP = 100 }
-		s.XP += amount
-		if s.XP >= s.NextXP {
-			s.Level++
-			s.XP -= s.NextXP
-			s.NextXP = int(float64(s.NextXP) * 1.5)
-			s.Attack += 5
-			s.Defense += 5
-			p.WorldNotice(fmt.Sprintf("Subordinate '%s' has reached Level %d", s.Name, s.Level))
-			p.CheckSubordinateEvolution(s)
+		p.SubordinateGainXPForOne(&p.Subordinates[i], amount)
+	}
+}
+
+func (p *Player) SubordinateGainXPForOne(s *Subordinate, amount int) {
+	if s.NextXP == 0 { s.NextXP = 100 }
+	s.XP += amount
+	if s.XP >= s.NextXP {
+		s.Level++
+		s.XP -= s.NextXP
+		s.NextXP = int(float64(s.NextXP) * 1.5)
+		s.Attack += 10
+		s.Defense += 10
+		p.WorldNotice(fmt.Sprintf("Subordinate '%s' has reached Level %d", s.Name, s.Level))
+		p.CheckSubordinateEvolution(s)
+		p.CheckSubordinateSkills(s)
+	}
+}
+
+func (p *Player) CheckSubordinateSkills(s *Subordinate) {
+	speciesSkills := map[string][]struct{lvl int; id string}{
+		"slime": {{1, "predator"}, {5, "water_blade"}, {15, "gluttony"}, {30, "black_lightning"}},
+		"spider": {{1, "appraisal"}, {5, "poison_fang"}, {15, "evil_eye"}, {30, "heresy_magic"}},
+		"alpha wolf": {{1, "power_strike"}, {10, "venom_coat"}},
+	}
+	
+	for _, ss := range speciesSkills[s.Species] {
+		if s.Level >= ss.lvl {
+			owned := false
+			for _, sk := range s.Skills { if sk == ss.id { owned = true; break } }
+			if !owned {
+				s.Skills = append(s.Skills, ss.id)
+				p.WorldNotice(fmt.Sprintf("Subordinate '%s' learned: %s", s.Name, GlobalSkills[ss.id].Name))
+			}
 		}
 	}
 }
@@ -659,7 +863,110 @@ func (p *Player) CheckSubordinateEvolution(s *Subordinate) {
 }
 
 func (p *Player) AutoAnalyze(itemID string) {
-	fmt.Printf("[Analysis]: Item '%s' successfully analyzed. Optimization data stored.\n", itemID)
+	lvl := 1
+	if l, ok := p.SkillLevels["great_sage"]; ok { lvl = l }
+	if l, ok := p.SkillLevels["raphael"]; ok { lvl = l + 10 }
+	if l, ok := p.SkillLevels["wisdom"]; ok { lvl = l + 10 }
+
+	rarity := "Common"; price := 5
+	switch itemID {
+	case "diamond", "abyss_crystal", "netherite": rarity = "Epic"; price = 100
+	case "void_essence", "star_matter", "void_core": rarity = "Legendary"; price = 500
+	case "void_crown", "life_stone", "demon_soul": rarity = "Mythic"; price = 5000
+	case "iron", "gold", "quartz": rarity = "Rare"; price = 25
+	}
+
+	fmt.Printf("\n[🧠 ANALYSIS]: '%s' identified.", strings.ToUpper(itemID))
+	if lvl >= 4 { fmt.Printf(" | Rarity: %s", rarity) }
+	if lvl >= 7 { fmt.Printf(" | Market Value: 💰 %d Gold", price) }
+	if lvl >= 10 {
+		desc := "Standard material."
+		if r, ok := Recipes[itemID]; ok { desc = fmt.Sprintf("Used to craft %s.", r.Name) }
+		fmt.Printf("\n   📜 %s", desc)
+	}
+	fmt.Println()
+}
+
+func (p *Player) DuplicateSkill(subName, skillID string) {
+	if !p.HasSkill("shub_niggurath") {
+		fmt.Println("❌ Harvest Lord Shub-Niggurath required.")
+		return
+	}
+	skillID = strings.ToLower(skillID)
+	if p.HasSkill(skillID) {
+		fmt.Println("❌ Skill already owned.")
+		return
+	}
+
+	var targetSub *Subordinate
+	for i := range p.Subordinates {
+		if strings.EqualFold(p.Subordinates[i].Name, subName) {
+			targetSub = &p.Subordinates[i]
+			break
+		}
+	}
+
+	if targetSub == nil {
+		fmt.Printf("❌ Subordinate '%s' not found.\n", subName)
+		return
+	}
+
+	found := false
+	for _, s := range targetSub.Skills {
+		if s == skillID {
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		fmt.Printf("❌ Subordinate does not possess skill '%s'.\n", skillID)
+		return
+	}
+
+	p.AddSkill(skillID)
+	p.WorldNotice(fmt.Sprintf("SKILL DUPLICATED: '%s' has been harvested from %s.", GlobalSkills[skillID].Name, targetSub.Name))
+	p.Save()
+}
+
+func (p *Player) CreateSkill(skillA, skillB string) {
+	if !p.HasSkill("shub_niggurath") {
+		fmt.Println("❌ Harvest Lord Shub-Niggurath required.")
+		return
+	}
+	if !p.HasSkill(skillA) || !p.HasSkill(skillB) {
+		fmt.Println("❌ Source skills not owned.")
+		return
+	}
+	if p.Magic < 200 {
+		fmt.Println("❌ Insufficient Magic (200 MP needed).")
+		return
+	}
+
+	p.Magic -= 200
+	// Pick a random skill the player doesn't have from high tiers
+	possible := []string{}
+	for id, s := range GlobalSkills {
+		if (s.Rank == "A" || s.Rank == "S" || s.Rank == "Ultimate") && !p.HasSkill(id) {
+			possible = append(possible, id)
+		}
+	}
+
+	if len(possible) == 0 {
+		fmt.Println("❌ No new insights attainable at this time.")
+		return
+	}
+
+	newSkill := possible[rand.Intn(len(possible))]
+	p.AddSkill(newSkill)
+	p.WorldNotice(fmt.Sprintf("SKILL CREATION: Shub-Niggurath has birthed a new ability: %s!", GlobalSkills[newSkill].Name))
+	p.Save()
+}
+
+func (p *Player) HasSkill(id string) bool {
+	id = strings.ToLower(id)
+	for _, s := range p.Skills { if s == id { return true } }
+	return false
 }
 
 func (p *Player) Regenerate() {
@@ -704,9 +1011,13 @@ func (p *Player) Raid(targetID string) {
 	p.Stamina -= 30
 	p.WorldNotice(fmt.Sprintf("Commencing Raid on %s", t.Name))
 	for _, d := range t.Defenders { if !p.Combat(&d, false) { return } }
-	for id, qty := range t.LootTable { p.Inventory[id] += qty }
+	fmt.Println("\n💰 [LOOT ACQUIRED]:")
+	for id, qty := range t.LootTable {
+		p.Inventory[id] += qty
+		fmt.Printf("   - %s x%d\n", strings.Replace(id, "_", " ", -1), qty)
+	}
 	p.GainXP(100 + t.Level*10); p.Save()
-	p.WorldNotice(fmt.Sprintf("Raid on %s successful. Loot acquired.", t.Name))
+	p.WorldNotice(fmt.Sprintf("Raid on %s successful.", t.Name))
 }
 
 func (p *Player) ListShop() {
@@ -794,8 +1105,9 @@ func (p *Player) Move(dir string) {
 	if !p.Exploring { return }
 	if p.Stamina < 2 { fmt.Println("😫 Exhausted!"); return }
 	p.Stamina -= 2
+	p.ExplorationDepth++
 	dir = strings.ToUpper(dir)
-	fmt.Printf("\n👣 You move %s...\n", map[string]string{"W":"Forward","A":"Left","D":"Right","S":"Backward"}[dir])
+	fmt.Printf("\n👣 You move %s... (Depth: %d)\n", map[string]string{"W":"Forward","A":"Left","D":"Right","S":"Backward"}[dir], p.ExplorationDepth)
 	hasAnalysis := false
 	for _, sID := range p.EquippedSkills { if sID == "great_sage" || sID == "wisdom" { hasAnalysis = true; break } }
 	event := rand.Intn(100)
@@ -812,7 +1124,10 @@ func (p *Player) FoundChest(hasAnalysis bool) {
 }
 
 func (p *Player) TriggerTrap(hasAnalysis bool) {
-	if hasAnalysis && rand.Float64() < 0.7 { fmt.Println("⚠️ [System]: TRAP DODGED."); return }
+	if hasAnalysis {
+		for _, sID := range p.EquippedSkills { if sID == "trap_sense" { p.SkillUsage[sID]++; if p.SkillUsage[sID] >= 10 { p.UpgradeSkill(sID, true) } } }
+		if rand.Float64() < 0.7 { fmt.Println("⚠️ [System]: TRAP DODGED."); return }
+	}
 	fmt.Println("⚠️ [TRAP] Pressure plate!"); dmg := 10 + rand.Intn(15); p.Health -= dmg
 	fmt.Printf("💥 Arrows hit! (❤️ %d HP left)\n", p.Health)
 }
@@ -862,6 +1177,9 @@ func (p *Player) Mine(locName string) {
 	// Start Mining Action
 	p.Stamina -= 10
 	p.ToolDurability -= 1
+
+	// Passive Usage: Miner's Instinct
+	for _, sID := range p.EquippedSkills { if sID == "miners_instinct" { p.SkillUsage[sID]++; if p.SkillUsage[sID] >= 10 { p.UpgradeSkill(sID, true) } } }
 	
 	if rand.Float64() <= loc.EncounterChance {
 		if !p.Combat(&loc.EncounterTable[rand.Intn(len(loc.EncounterTable))], false) {
