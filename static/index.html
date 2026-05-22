@@ -5,291 +5,295 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>THE SYSTEM - RPG Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --neon-cyan: #00f2ff;
             --neon-blue: #0066ff;
-            --dark-bg: #050b14;
-            --panel-bg: rgba(10, 25, 41, 0.8);
+            --neon-red: #ff2a2a;
+            --dark-abyss: #050505;
+            --panel-grey: #111111;
         }
+
         body {
-            background-color: var(--dark-bg);
+            background-color: var(--dark-abyss);
             color: #fff;
             font-family: 'Rajdhani', sans-serif;
             background-image: 
-                radial-gradient(circle at 50% 50%, rgba(0, 102, 255, 0.1) 0%, transparent 80%),
-                linear-gradient(rgba(0, 242, 255, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 242, 255, 0.05) 1px, transparent 1px);
-            background-size: cover, 40px 40px, 40px 40px;
+                radial-gradient(circle at 50% 50%, rgba(0, 102, 255, 0.05) 0%, transparent 80%),
+                linear-gradient(rgba(0, 242, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 242, 255, 0.02) 1px, transparent 1px);
+            background-size: cover, 50px 50px, 50px 50px;
             margin: 0;
-            padding: 0;
+            overflow: hidden;
         }
-        
-        /* Container Scroll */
+
         .system-container {
             height: 100vh;
             overflow-y: auto;
             overflow-x: hidden;
-            scrollbar-width: thin;
-            scrollbar-color: var(--neon-blue) transparent;
-            padding-bottom: 50px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            padding: 2rem;
         }
-        .system-container::-webkit-scrollbar { width: 6px; }
-        .system-container::-webkit-scrollbar-thumb { background: var(--neon-blue); border-radius: 10px; }
+        .system-container::-webkit-scrollbar { display: none; }
 
-        .system-font { font-family: 'Orbitron', sans-serif; }
-        .neon-border {
-            border: 2px solid var(--neon-blue);
-            box-shadow: 0 0 15px rgba(0, 102, 255, 0.3), inset 0 0 15px rgba(0, 102, 255, 0.2);
-            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
-        }
-        .neon-text {
-            color: var(--neon-cyan);
-            text-shadow: 0 0 10px rgba(0, 242, 255, 0.5);
-        }
-        .progress-bar {
-            height: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-            overflow: hidden;
+        .font-orbitron { font-family: 'Orbitron', sans-serif; }
+
+        /* Sharp, Glowing Borders */
+        .system-panel {
+            background: rgba(17, 17, 17, 0.9);
+            border: 1px solid rgba(0, 242, 255, 0.2);
             position: relative;
-        }
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--neon-blue), var(--neon-cyan));
-            box-shadow: 0 0 10px var(--neon-cyan);
-            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .stat-panel {
-            background: var(--panel-bg);
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
             backdrop-filter: blur(10px);
         }
-        
-        /* Inner Scroll Areas */
-        .scroll-area {
-            overflow-y: auto;
-            max-height: 300px;
-            scrollbar-width: thin;
-            scrollbar-color: rgba(0, 242, 255, 0.2) transparent;
-            padding-right: 5px;
+        .system-panel::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 2px; height: 30%;
+            background: var(--neon-cyan);
+            box-shadow: 0 0 10px var(--neon-cyan);
         }
-        .scroll-area::-webkit-scrollbar { width: 4px; }
-        .scroll-area::-webkit-scrollbar-thumb { background: rgba(0, 242, 255, 0.3); }
 
-        .inventory-slot {
-            background: rgba(0, 102, 255, 0.05);
-            border: 1px solid rgba(0, 242, 255, 0.2);
+        .neon-text {
+            color: var(--neon-cyan);
+            text-shadow: 0 0 15px rgba(0, 242, 255, 0.7);
+        }
+
+        /* Progress Bars */
+        .bar-container {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            position: relative;
+            margin-top: 4px;
+        }
+        .bar-fill {
+            height: 100%;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        .bar-fill::after {
+            content: '';
+            position: absolute;
+            right: 0; top: 0;
+            height: 100%; width: 4px;
+            background: #fff;
+            box-shadow: 0 0 10px #fff;
+        }
+
+        .hp-fill { background: linear-gradient(90deg, #600, #ff2a2a); box-shadow: 0 0 10px #ff2a2a; }
+        .mp-fill { background: linear-gradient(90deg, #004, #9349ff); box-shadow: 0 0 10px #9349ff; }
+        .sta-fill { background: linear-gradient(90deg, #660, #ffcc00); box-shadow: 0 0 10px #ffcc00; }
+        .xp-fill { background: linear-gradient(90deg, #044, #00f2ff); box-shadow: 0 0 10px #00f2ff; }
+
+        /* Inventory */
+        .inv-slot {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             aspect-ratio: 1/1;
-            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
         }
-        .inventory-slot:hover {
-            background: rgba(0, 242, 255, 0.1);
+        .inv-slot:hover {
             border-color: var(--neon-cyan);
+            background: rgba(0, 242, 255, 0.05);
         }
-        .header-bg {
-            background: linear-gradient(180deg, rgba(0, 102, 255, 0.2) 0%, transparent 100%);
+
+        /* Subordinate Cards */
+        .sub-card {
+            border-left: 3px solid var(--neon-blue);
+            background: linear-gradient(90deg, rgba(0, 102, 255, 0.1), transparent);
         }
+
+        /* Scanline Animation */
+        @keyframes scan {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(100%); }
+        }
+        .scanline {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100px;
+            background: linear-gradient(rgba(0, 242, 255, 0), rgba(0, 242, 255, 0.02), rgba(0, 242, 255, 0));
+            pointer-events: none;
+            animation: scan 10s linear infinite;
+        }
+
+        .scroll-v {
+            overflow-y: auto;
+            scrollbar-width: none;
+        }
+        .scroll-v::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body>
-    <div class="system-container p-4 md:p-10">
-        <div class="max-w-7xl mx-auto">
-            <!-- System Header -->
-            <div class="header-bg p-6 mb-8 border-b-2 border-cyan-500/30 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+    <div class="scanline"></div>
+    <div class="system-container">
+        <div class="max-w-[1600px] mx-auto">
+            
+            <!-- SYSTEM HEADER -->
+            <header class="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-12 border-b border-white/10 pb-6 gap-6">
                 <div>
-                    <h1 class="system-font text-4xl lg:text-6xl font-bold tracking-tighter mb-2">
-                        <span class="text-gray-400">PLAYER:</span> <span id="player-name" class="neon-text">---</span>
-                    </h1>
-                    <div class="flex gap-4 items-center">
-                        <span class="px-3 py-1 bg-cyan-500/20 border border-cyan-500 text-cyan-400 system-font text-sm uppercase tracking-widest" id="status-text">INITIALIZING...</span>
-                        <span class="text-xl text-blue-300 font-bold" id="origin-display">ORIGIN: HUMAN</span>
+                    <div class="text-xs font-orbitron text-cyan-500 tracking-[0.5em] mb-1">SYSTEM INTERFACE v4.2</div>
+                    <h1 class="text-6xl font-orbitron font-black tracking-tighter neon-text uppercase" id="player-name">---</h1>
+                    <div class="flex gap-4 mt-2">
+                        <span class="px-3 py-1 bg-white/5 border border-white/20 text-[10px] font-orbitron uppercase tracking-widest text-gray-400" id="status-text">Synchronizing...</span>
+                        <span class="text-xl font-bold text-blue-400 italic" id="origin-display">ORIGIN: ---</span>
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-8 text-right">
-                    <div>
-                        <div class="system-font text-xs text-blue-400 uppercase mb-1">Mine Rank</div>
-                        <div class="text-3xl font-bold" id="rank-val">[E]</div>
-                        <div class="text-sm text-gray-500">LVL <span id="level-val">0</span></div>
-                    </div>
-                    <div>
-                        <div class="system-font text-xs text-red-400 uppercase mb-1">Hunter Rank</div>
-                        <div class="text-3xl font-bold text-red-500" id="hunter-rank-val">[E]</div>
-                        <div class="text-sm text-gray-500">LVL <span id="hunter-level-val">0</span></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Main Interface -->
-            <div class="grid grid-cols-12 gap-6">
                 
-                <!-- Left Column: Vitals & Core Stats -->
-                <div class="col-span-12 lg:col-span-4 space-y-6">
+                <div class="flex gap-12">
+                    <div class="text-right">
+                        <div class="text-[10px] font-orbitron text-gray-500 uppercase">Mine Rank</div>
+                        <div class="text-4xl font-orbitron font-bold" id="rank-val">--</div>
+                        <div class="text-xs text-cyan-400">LVL <span id="level-val">0</span></div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-[10px] font-orbitron text-gray-500 uppercase">Hunter Rank</div>
+                        <div class="text-4xl font-orbitron font-bold text-red-500" id="hunter-rank-val">--</div>
+                        <div class="text-xs text-red-400">LVL <span id="hunter-level-val">0</span></div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="grid grid-cols-12 gap-8">
+                
+                <!-- LEFT COLUMN: VITALS -->
+                <div class="col-span-12 lg:col-span-4 space-y-8">
                     
-                    <!-- System Identity Card -->
-                    <div class="stat-panel neon-border p-6 relative overflow-hidden">
-                        <div class="absolute top-0 right-0 p-2 text-[10px] text-blue-900 system-font uppercase">Verification ID: 882-X</div>
-                        <h2 class="system-font text-lg text-blue-400 mb-4 flex items-center gap-2">
-                            <span class="w-2 h-2 bg-blue-400 animate-pulse"></span> SYSTEM IDENTITY
+                    <!-- BIOMETRICS -->
+                    <div class="system-panel p-8">
+                        <h2 class="font-orbitron text-sm text-cyan-400 tracking-widest mb-8 flex justify-between">
+                            <span>BIOMETRIC STATUS</span>
+                            <span class="text-[10px] text-gray-600">VERIFIED</span>
                         </h2>
-                        <div class="space-y-4">
+                        
+                        <div class="space-y-8">
                             <div>
-                                <div class="flex justify-between text-sm uppercase text-gray-400 mb-1">Mine Progression</div>
-                                <div class="progress-bar"><div id="xp-fill" class="progress-fill" style="width: 0%"></div></div>
-                                <div class="text-right text-xs mt-1 text-blue-300" id="xp-text">0 / 0</div>
+                                <div class="flex justify-between text-sm mb-1 uppercase font-bold tracking-wider">
+                                    <span class="text-red-500">Vitality (HP)</span>
+                                    <span id="hp-text">-- / --</span>
+                                </div>
+                                <div class="bar-container"><div id="hp-fill" class="bar-fill hp-fill" style="width: 0%"></div></div>
                             </div>
+
                             <div>
-                                <div class="flex justify-between text-sm uppercase text-gray-400 mb-1">Hunter Progression</div>
-                                <div class="progress-bar"><div id="hunter-xp-fill" class="progress-fill !from-red-600 !to-red-400" style="width: 0%"></div></div>
-                                <div class="text-right text-xs mt-1 text-red-300" id="hunter-xp-text">0 / 0</div>
+                                <div class="flex justify-between text-sm mb-1 uppercase font-bold tracking-wider">
+                                    <span class="text-yellow-500">Stamina (SP)</span>
+                                    <span id="stamina-text">-- / --</span>
+                                </div>
+                                <div class="bar-container"><div id="stamina-fill" class="bar-fill sta-fill" style="width: 0%"></div></div>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-sm mb-1 uppercase font-bold tracking-wider">
+                                    <span class="text-purple-500">Magicules (MP)</span>
+                                    <span id="mp-text">-- / --</span>
+                                </div>
+                                <div class="bar-container"><div id="mp-fill" class="bar-fill mp-fill" style="width: 0%"></div></div>
+                            </div>
+
+                            <div class="pt-4 border-t border-white/5">
+                                <div class="flex justify-between text-[10px] text-gray-500 uppercase font-orbitron mb-1">
+                                    <span>Experience Growth</span>
+                                    <span id="xp-text">-- / --</span>
+                                </div>
+                                <div class="bar-container h-[2px]"><div id="xp-fill" class="bar-fill xp-fill" style="width: 0%"></div></div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Vitals Panel -->
-                    <div class="stat-panel neon-border p-6">
-                        <h2 class="system-font text-lg text-red-400 mb-6 flex items-center gap-2">
-                            <span class="w-2 h-2 bg-red-400 animate-pulse"></span> BIOMETRIC VITALS
-                        </h2>
-                        <div class="space-y-6">
+                    <!-- ATTRIBUTES -->
+                    <div class="system-panel p-8">
+                        <h2 class="font-orbitron text-sm text-gray-400 tracking-widest mb-6">COMBAT PARAMETERS</h2>
+                        <div class="grid grid-cols-2 gap-y-6">
                             <div>
-                                <div class="flex justify-between items-end mb-2">
-                                    <span class="text-xl uppercase font-bold text-red-500 tracking-wider">Health</span>
-                                    <span class="text-2xl font-bold" id="hp-text">100 / 100</span>
-                                </div>
-                                <div class="h-4 bg-gray-900 border border-red-900/50 rounded-sm overflow-hidden">
-                                    <div id="hp-fill" class="h-full bg-red-600 shadow-[0_0_15px_rgba(220,38,38,0.5)] transition-all duration-500" style="width: 100%"></div>
-                                </div>
+                                <div class="text-[10px] text-gray-500 uppercase">Attack</div>
+                                <div class="text-3xl font-orbitron font-bold text-red-500" id="attack-val">--</div>
                             </div>
                             <div>
-                                <div class="flex justify-between items-end mb-2">
-                                    <span class="text-xl uppercase font-bold text-yellow-500 tracking-wider">Stamina</span>
-                                    <span class="text-2xl font-bold" id="stamina-text">50 / 50</span>
-                                </div>
-                                <div class="h-4 bg-gray-900 border border-yellow-900/50 rounded-sm overflow-hidden">
-                                    <div id="stamina-fill" class="h-full bg-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.5)] transition-all duration-500" style="width: 100%"></div>
-                                </div>
+                                <div class="text-[10px] text-gray-500 uppercase">Defense</div>
+                                <div class="text-3xl font-orbitron font-bold text-blue-400" id="defense-val">--</div>
                             </div>
                             <div>
-                                <div class="flex justify-between items-end mb-2">
-                                    <span class="text-xl uppercase font-bold text-purple-500 tracking-wider">Magic (MP)</span>
-                                    <span class="text-2xl font-bold" id="mp-text">100 / 100</span>
-                                </div>
-                                <div class="h-4 bg-gray-900 border border-purple-900/50 rounded-sm overflow-hidden">
-                                    <div id="mp-fill" class="h-full bg-purple-600 shadow-[0_0_15px_rgba(147,51,234,0.5)] transition-all duration-500" style="width: 100%"></div>
-                                </div>
+                                <div class="text-[10px] text-gray-500 uppercase">Kills</div>
+                                <div class="text-3xl font-orbitron font-bold text-orange-500" id="kills-val">--</div>
+                            </div>
+                            <div>
+                                <div class="text-[10px] text-gray-500 uppercase">Taboo</div>
+                                <div class="text-3xl font-orbitron font-bold text-purple-600" id="taboo-val">--</div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Attributes Panel -->
-                    <div class="stat-panel neon-border p-6">
-                        <h2 class="system-font text-lg text-gray-400 mb-4">COMBAT ATTRIBUTES</h2>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="bg-white/5 p-3 border-l-4 border-red-500">
-                                <div class="text-xs text-gray-500 uppercase">Attack Power</div>
-                                <div class="text-3xl font-bold text-red-400" id="attack-val">10</div>
-                            </div>
-                            <div class="bg-white/5 p-3 border-l-4 border-blue-500">
-                                <div class="text-xs text-gray-500 uppercase">Defense Value</div>
-                                <div class="text-3xl font-bold text-blue-400" id="defense-val">0</div>
-                            </div>
-                            <div class="bg-white/5 p-3 border-l-4 border-purple-500">
-                                <div class="text-xs text-gray-500 uppercase">Taboo Level</div>
-                                <div class="text-3xl font-bold text-purple-400" id="taboo-val">0</div>
-                            </div>
-                            <div class="bg-white/5 p-3 border-l-4 border-green-500">
-                                <div class="text-xs text-gray-500 uppercase">Tool Integrity</div>
-                                <div class="text-3xl font-bold text-green-400" id="durability-val">50</div>
-                            </div>
-                            <div class="bg-white/5 p-3 border-l-4 border-orange-500">
-                                <div class="text-xs text-gray-500 uppercase">Total Kills</div>
-                                <div class="text-3xl font-bold text-orange-400" id="kills-val">0</div>
-                            </div>
+                    <!-- ACTIVITY LOG -->
+                    <div class="system-panel p-6 bg-red-500/5 !border-red-500/20">
+                        <h2 class="font-orbitron text-xs text-red-500 mb-4">SYSTEM NOTIFICATIONS</h2>
+                        <div id="action-log" class="text-[11px] font-mono space-y-2 h-[150px] scroll-v text-red-400/70">
+                            <!-- logs -->
                         </div>
                     </div>
                 </div>
 
-                <!-- Right Column: Inventory, Skills & World -->
-                <div class="col-span-12 lg:col-span-8 space-y-6">
+                <!-- RIGHT COLUMN: INTERFACE -->
+                <div class="col-span-12 lg:col-span-8 space-y-8">
                     
-                    <!-- Subordinates Panel -->
-                    <div class="stat-panel neon-border p-6">
-                        <h2 class="system-font text-lg text-blue-400 mb-4 flex justify-between items-center">
-                            <span>NAMED SUBORDINATES</span>
-                            <span class="text-xs text-gray-500 uppercase" id="sub-count">Total: 0</span>
+                    <!-- SUBORDINATES -->
+                    <div class="system-panel p-8">
+                        <h2 class="font-orbitron text-sm text-blue-400 mb-6 flex justify-between items-center">
+                            <span>SHADOW ARMY / ALLIES</span>
+                            <span class="text-xs text-gray-600 uppercase" id="sub-count">COUNT: 0</span>
                         </h2>
-                        <div id="subs-list" class="flex flex-nowrap gap-4 overflow-x-auto pb-4 scroll-area">
-                            <!-- cards -->
+                        <div id="subs-list" class="flex gap-4 overflow-x-auto pb-4 scroll-v">
+                            <!-- sub cards -->
                         </div>
                     </div>
 
-                    <!-- Action Log Panel -->
-                    <div class="stat-panel neon-border p-6">
-                        <h2 class="system-font text-lg text-red-500 mb-4 italic">SYSTEM ACTIVITY LOG</h2>
-                        <div id="action-log" class="space-y-1 font-mono text-[10px] h-32 overflow-y-auto scroll-area border-l border-red-900/30 pl-4">
-                            <!-- lines -->
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Skills Panel -->
-                        <div class="stat-panel neon-border p-6">
-                            <h2 class="system-font text-lg text-purple-400 mb-4 italic flex justify-between items-center">
-                                <span>ACTIVE SKILLS</span>
-                                <span class="text-xs text-gray-500 uppercase" id="skill-slots-val">Slots: 0/0</span>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- ACTIVE SKILLS -->
+                        <div class="system-panel p-8">
+                            <h2 class="font-orbitron text-sm text-cyan-400 mb-6 flex justify-between">
+                                <span>EQUIPPED ABILITIES</span>
+                                <span class="text-[10px] text-gray-600" id="skill-slots-val">0/0</span>
                             </h2>
-                            <div id="skills-list" class="space-y-3 scroll-area">
+                            <div id="skills-list" class="space-y-3">
                                 <!-- items -->
                             </div>
                         </div>
 
-                        <!-- Mastered Skills Panel -->
-                        <div class="stat-panel neon-border p-6 mt-6">
-                            <h2 class="system-font text-lg text-blue-500 mb-4 italic">MASTERED SKILLS</h2>
-                            <div id="mastered-skills-list" class="flex flex-wrap gap-2 scroll-area max-h-[200px]">
-                                <!-- items -->
-                            </div>
-                        </div>
-
-                        <!-- Titles Panel -->
-                        <div class="stat-panel neon-border p-6">
-                            <h2 class="system-font text-lg text-yellow-500 mb-4 italic">ACHIEVED TITLES</h2>
-                            <div id="titles-list" class="flex flex-wrap gap-2 scroll-area">
-                                <!-- items -->
+                        <!-- TITLES -->
+                        <div class="system-panel p-8">
+                            <h2 class="font-orbitron text-sm text-yellow-500 mb-6">ACHIEVED TITLES</h2>
+                            <div id="titles-list" class="flex flex-wrap gap-2 h-[120px] scroll-v">
+                                <!-- titles -->
                             </div>
                         </div>
                     </div>
 
-                    <!-- Inventory Grid -->
-                    <div class="stat-panel neon-border p-6">
-                        <h2 class="system-font text-lg text-cyan-400 mb-4 flex justify-between items-center">
+                    <!-- INVENTORY -->
+                    <div class="system-panel p-8">
+                        <h2 class="font-orbitron text-sm text-cyan-400 mb-6 flex justify-between">
                             <span>STORAGE INTERFACE</span>
-                            <span class="text-xs text-gray-500 uppercase" id="inventory-count">Items: 0</span>
+                            <span class="text-[10px] text-gray-600" id="inventory-count">ITEMS: 0</span>
                         </h2>
-                        <!-- Large scrollable grid -->
-                        <div class="scroll-area max-h-[400px]">
-                            <div id="inventory-grid" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
-                                <!-- slots -->
-                            </div>
+                        <div id="inventory-grid" class="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-2 h-[220px] scroll-v">
+                            <!-- slots -->
                         </div>
                     </div>
 
-                    <!-- Structures Panel -->
-                    <div class="stat-panel neon-border p-6">
-                        <h2 class="system-font text-lg text-green-500 mb-4">ESTABLISHED STRUCTURES</h2>
-                        <div id="structures-list" class="flex flex-wrap gap-3 scroll-area">
-                            <!-- items -->
+                    <!-- MASTERED SKILLS -->
+                    <div class="system-panel p-8 bg-blue-500/5">
+                        <h2 class="font-orbitron text-xs text-blue-500 mb-6">LIBRARY OF MASTERED SKILLS</h2>
+                        <div id="mastered-skills-list" class="grid grid-cols-2 md:grid-cols-3 gap-3 h-[180px] scroll-v">
+                            <!-- mastered -->
                         </div>
                     </div>
                 </div>
             </div>
-
-            <footer class="mt-12 text-center">
-                <div class="inline-block px-6 py-2 border border-blue-900/50 text-blue-900 system-font text-sm uppercase tracking-[0.5em]">
-                    System Status: Synchronized | World: Minecraft Crossover
-                </div>
-            </footer>
         </div>
     </div>
 
@@ -320,13 +324,13 @@
                         if (el) el.innerText = val;
                     };
 
-                    setVal('player-name', p.name.toUpperCase());
+                    setVal('player-name', p.name);
                     setVal('level-val', p.level);
-                    setVal('rank-val', `[${p.rank}]`);
+                    setVal('rank-val', p.rank);
                     setVal('origin-display', `ORIGIN: ${p.system_origin.toUpperCase()}`);
                     
                     setVal('hunter-level-val', p.hunter_level);
-                    setVal('hunter-rank-val', `[${p.hunter_rank}]`);
+                    setVal('hunter-rank-val', p.hunter_rank);
 
                     const updateBar = (fillId, textId, curr, max) => {
                         const fill = document.getElementById(fillId);
@@ -339,26 +343,20 @@
                     };
 
                     updateBar('xp-fill', 'xp-text', p.xp, p.xp_to_next);
-                    updateBar('hunter-xp-fill', 'hunter-xp-text', p.hunter_xp, p.hunter_xp_to_next);
-                    
                     setVal('hp-text', `${p.health} / ${p.max_health}`);
-                    const hpFill = document.getElementById('hp-fill');
-                    if (hpFill) hpFill.style.width = `${(p.health / p.max_health) * 100}%`;
+                    document.getElementById('hp-fill').style.width = `${(p.health / p.max_health) * 100}%`;
                     
                     setVal('stamina-text', `${p.stamina} / ${p.max_stamina}`);
-                    const staminaFill = document.getElementById('stamina-fill');
-                    if (staminaFill) staminaFill.style.width = `${(p.stamina / p.max_stamina) * 100}%`;
+                    document.getElementById('stamina-fill').style.width = `${(p.stamina / p.max_stamina) * 100}%`;
 
                     setVal('mp-text', `${p.magic} / ${p.max_magic}`);
-                    const mpFill = document.getElementById('mp-fill');
-                    if (mpFill) mpFill.style.width = `${(p.magic / p.max_magic) * 100}%`;
+                    document.getElementById('mp-fill').style.width = `${(p.magic / p.max_magic) * 100}%`;
 
                     setVal('attack-val', p.attack);
                     setVal('defense-val', p.defense);
                     setVal('taboo-val', p.taboo || 0);
                     setVal('kills-val', p.kills || 0);
-                    setVal('durability-val', p.tool_durability);
-                    setVal('skill-slots-val', `Slots: ${p.equipped_skills ? p.equipped_skills.length : 0} / ${p.skill_slots}`);
+                    setVal('skill-slots-val', `${p.equipped_skills ? p.equipped_skills.length : 0} / ${p.skill_slots}`);
 
                     const renderList = (id, items, decorator) => {
                         const el = document.getElementById(id);
@@ -367,110 +365,86 @@
                         if (items && items.length > 0) {
                             items.forEach(it => el.appendChild(decorator(it)));
                         } else {
-                            el.innerHTML = '<span class="text-gray-600 italic text-sm">N/A</span>';
+                            el.innerHTML = '<span class="text-gray-700 italic text-[10px] uppercase tracking-widest">No Data</span>';
                         }
                     };
 
-
                     renderList('subs-list', p.subordinates, s => {
                         const d = document.createElement('div');
-                        d.className = 'p-3 bg-blue-500/10 border border-blue-500/30 w-48 flex-shrink-0';
+                        d.className = 'p-4 border-l-2 border-blue-500 bg-white/5 w-60 flex-shrink-0';
                         const skills = s.skills && s.skills.length > 0 ? s.skills.map(id => id.split('_').join(' ').toUpperCase()).join(', ') : 'None';
                         d.innerHTML = `
-                            <div class="flex justify-between items-center mb-1">
-                                <div class="text-blue-400 font-bold truncate pr-2">${s.name}</div>
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="text-blue-400 font-bold text-sm tracking-tighter">${s.name}</div>
                                 <div class="text-[10px] text-blue-300 font-bold">LV.${s.level}</div>
                             </div>
-                            <div class="text-[9px] text-gray-500 uppercase mb-2 border-b border-blue-500/10 pb-1">${s.species}</div>
-                            <div class="flex justify-between text-[10px] mb-2">
-                                <span>ATK: ${s.attack}</span>
-                                <span>DEF: ${s.defense}</span>
+                            <div class="text-[9px] text-gray-500 uppercase mb-3">${s.species}</div>
+                            <div class="grid grid-cols-2 text-[10px] mb-3">
+                                <span>ATK: <span class="text-blue-300">${s.attack}</span></span>
+                                <span>DEF: <span class="text-blue-300">${s.defense}</span></span>
                             </div>
-                            <div class="text-[9px] text-gray-600 uppercase mb-1">Abilities:</div>
-                            <div class="text-[10px] text-blue-200 italic line-clamp-2 leading-tight">${skills}</div>
+                            <div class="text-[9px] text-gray-600 uppercase mb-1">Mastery:</div>
+                            <div class="text-[10px] text-blue-100/60 italic leading-tight truncate">${skills}</div>
                         `;
                         return d;
                     });
-                    document.getElementById('sub-count').innerText = `Total: ${p.subordinates ? p.subordinates.length : 0}`;
-
-                    renderList('titles-list', p.titles, t => {
-                        const s = document.createElement('span');
-                        s.className = 'px-2 py-1 bg-yellow-500/10 border border-yellow-500/30 text-yellow-500 text-xs system-font uppercase';
-                        s.innerText = t.replace('_', ' ');
-                        return s;
-                    });
+                    setVal('sub-count', `COUNT: ${p.subordinates ? p.subordinates.length : 0}`);
 
                     renderList('skills-list', p.equipped_skills, sID => {
                         const d = document.createElement('div');
-                        d.className = 'p-3 bg-blue-500/5 border border-blue-500/20 flex justify-between items-center group hover:bg-blue-500/10 transition-colors';
+                        d.className = 'px-4 py-2 border-l-2 border-cyan-500 bg-cyan-500/5 flex justify-between items-center';
                         const name = sID.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-                        d.innerHTML = `<span class="text-blue-400 font-bold">${name}</span><span class="text-[10px] text-blue-900 system-font">ACTIVE</span>`;
+                        d.innerHTML = `<span class="text-cyan-400 font-bold text-sm uppercase">${name}</span><span class="text-[8px] font-orbitron text-cyan-900">ACTIVE</span>`;
                         return d;
                     });
 
                     renderList('mastered-skills-list', p.skills, sID => {
-                        const s = document.createElement('div');
-                        s.className = 'px-3 py-1 bg-blue-900/20 border border-blue-500/30 text-blue-400 text-xs flex justify-between gap-4 items-center';
+                        const d = document.createElement('div');
+                        d.className = 'px-3 py-2 bg-white/5 border border-white/5 text-[11px] flex justify-between items-center';
                         const name = sID.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
                         const lvl = p.skill_levels[sID] || 1;
-                        s.innerHTML = `<span>${name}</span><span class="text-blue-200 font-bold">LV.${lvl}</span>`;
+                        d.innerHTML = `<span class="text-gray-400">${name}</span><span class="text-blue-500 font-bold">LV.${lvl}</span>`;
+                        return d;
+                    });
+
+                    renderList('titles-list', p.titles, t => {
+                        const s = document.createElement('span');
+                        s.className = 'px-3 py-1 bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 text-[10px] font-orbitron uppercase';
+                        s.innerText = t.replace('_', ' ');
                         return s;
                     });
 
-                    renderList('structures-list', p.structures ? Object.keys(p.structures) : [], s => {
-                        const b = document.createElement('div');
-                        b.className = 'p-3 bg-green-500/10 border border-green-500/30 w-full flex justify-between items-center';
-                        const perks = {
-                            "house": "+2 HP Regen",
-                            "farm": "+5 Stamina Regen",
-                            "forge": "+10 Attack",
-                            "enchanting_table": "+50% XP Gain",
-                            "vault": "+50 Max HP",
-                            "castle": "+20 ATK, +100 HP, +50 STA"
-                        };
-                        const perk = perks[s] || '';
-                        b.innerHTML = `<span class="text-green-400 font-bold uppercase">${s}</span><span class="text-xs text-green-300 italic">${perk}</span>`;
-                        return b;
-                    });
-
-                    // Inventory - Dynamically scale slots based on items + buffer
+                    // Inventory
                     const grid = document.getElementById('inventory-grid');
                     grid.innerHTML = '';
                     const items = Object.entries(p.inventory).filter(([_, qty]) => qty > 0);
-                    const slots = Math.max(24, Math.ceil((items.length + 8) / 8) * 8); 
-                    
-                    document.getElementById('inventory-count').innerText = `Items: ${items.length}`;
-                    
+                    const slots = Math.max(30, Math.ceil((items.length + 10) / 10) * 10); 
+                    setVal('inventory-count', `ITEMS: ${items.length}`);
                     for (let i = 0; i < slots; i++) {
                         const slot = document.createElement('div');
-                        slot.className = 'inventory-slot relative flex items-center justify-center group';
+                        slot.className = 'inv-slot relative';
                         if (items[i]) {
                             const [id, qty] = items[i];
                             const emoji = itemEmojis[id] || "📦";
-                            slot.innerHTML = `<span class="text-3xl z-10">${emoji}</span><span class="absolute bottom-1 right-1 text-xs font-bold text-white bg-black/50 px-1 rounded z-20">${qty}</span>`;
-                            slot.title = id.replace('_', ' ').toUpperCase();
+                            slot.innerHTML = `<span class="text-2xl">${emoji}</span><span class="absolute bottom-1 right-1 text-[9px] font-bold px-1 bg-black/80">${qty}</span>`;
                         }
                         grid.appendChild(slot);
                     }
 
-                    document.getElementById('status-text').innerText = 'CONNECTED';
-                    document.getElementById('status-text').className = 'px-3 py-1 bg-cyan-500/20 border border-cyan-500 text-cyan-400 system-font text-sm uppercase tracking-widest';
-
+                    // Logs
                     const logEl = document.getElementById('action-log');
                     if (logEl && p.action_log) {
                         logEl.innerHTML = '';
                         p.action_log.forEach(entry => {
                             const line = document.createElement('div');
-                            line.className = 'text-gray-400 hover:text-red-400 transition-colors cursor-default';
-                            line.innerText = entry;
+                            line.innerText = `> ${entry}`;
                             logEl.appendChild(line);
                         });
                     }
+
+                    setVal('status-text', 'System Online');
                 })
-                .catch(err => {
-                    document.getElementById('status-text').innerText = 'OFFLINE';
-                    document.getElementById('status-text').className = 'px-3 py-1 bg-red-500/20 border border-red-500 text-red-400 system-font text-sm uppercase tracking-widest';
-                });
+                .catch(() => setVal('status-text', 'System Offline'));
         }
 
         setInterval(updateDashboard, 1000);
