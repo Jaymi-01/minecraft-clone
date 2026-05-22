@@ -36,7 +36,7 @@ func main() {
 	player.StartGateSpawning()
 	StartServer(player) // Start the Web Dashboard
 
-	fmt.Println("Available Commands: !mine <location>, !enter, !status, !craft [item], !equip <id>, !unequip <slot#>, !dupskill <id>, !learn <id>, !titles, !build [structure], !shop, !buy <item>, !use <item>, !raid [target], !quests, !subordinates, !name <species> <name>, !stats, !inventory, !origin <slime|spider>, !evolve, !help, !exit")
+	fmt.Println("Available Commands: !mine <location>, !enter, !status, !craft [item], !equip <id>, !unequip <slot#>, !dupskill <id>, !learn <id>, !duplicate <sub_name> <id>, !create <id1> <id2>, !titles, !build [structure], !shop, !buy <item>, !use <item>, !raid [target], !quests, !subordinates, !name <species> <name>, !stats, !inventory, !origin <slime|spider>, !evolve, !help, !exit")
 
 	for {
 		fmt.Print("\n> ")
@@ -114,7 +114,19 @@ func main() {
 				player.ListSkills()
 				fmt.Println("🔮 Usage: !dupskill <skill_id>")
 			} else {
-				player.UpgradeSkill(parts[1])
+				player.UpgradeSkill(parts[1], false)
+			}
+		case "!duplicate":
+			if len(parts) < 3 {
+				fmt.Println("🧬 Usage: !duplicate <sub_name> <skill_id> (Requires Shub-Niggurath)")
+			} else {
+				player.DuplicateSkill(parts[1], parts[2])
+			}
+		case "!create":
+			if len(parts) < 3 {
+				fmt.Println("🧬 Usage: !create <skill_id_1> <skill_id_2> (Requires Shub-Niggurath, Costs 200 MP)")
+			} else {
+				player.CreateSkill(parts[1], parts[2])
 			}
 		case "!skills":
 			player.ListSkills()
