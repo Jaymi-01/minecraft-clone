@@ -1,5 +1,7 @@
 package main
 
+import "time"
+
 // Item represents a game item.
 type Item struct {
 	ID   string
@@ -97,6 +99,7 @@ type Player struct {
 	EquippedSkills []string        `json:"equipped_skills"`
 	SkillSlots     int             `json:"skill_slots"`
 	SkillLevels    map[string]int  `json:"skill_levels"`
+	SkillUsage     map[string]int  `json:"skill_usage"`
 	SkillCooldowns map[string]int  `json:"skill_cooldowns"`
 	Subordinates   []Subordinate   `json:"subordinates"`
 	CurrentGate    *Gate           `json:"current_gate"`
@@ -106,13 +109,15 @@ type Player struct {
 }
 
 type Subordinate struct {
-	Name    string `json:"name"`
-	Species string `json:"species"`
-	Attack  int    `json:"attack"`
-	Defense int    `json:"defense"`
-	Level   int    `json:"level"`
-	XP      int    `json:"xp"`
-	NextXP  int    `json:"next_xp"`
+	Name       string    `json:"name"`
+	Species    string    `json:"species"`
+	Attack     int       `json:"attack"`
+	Defense    int       `json:"defense"`
+	Level      int       `json:"level"`
+	XP         int       `json:"xp"`
+	NextXP     int       `json:"next_xp"`
+	Skills     []string  `json:"skills"`
+	LastAction time.Time `json:"last_action"`
 }
 
 type Title struct {
