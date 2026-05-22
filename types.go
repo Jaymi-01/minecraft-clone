@@ -121,12 +121,14 @@ type Subordinate struct {
 }
 
 type Title struct {
-	ID          string
-	Name        string
-	KillsNeeded int
-	PerkDesc    string
-	AttackBonus int
-	HPBonus     int
+	ID           string
+	Name         string
+	KillsNeeded  int
+	PerkDesc     string
+	AttackBonus  int
+	DefenseBonus int
+	HPBonus      int
+	MPBonus      int
 }
 
 type Skill struct {
