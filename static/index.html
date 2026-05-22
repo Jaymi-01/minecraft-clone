@@ -219,8 +219,16 @@
                             <span>NAMED SUBORDINATES</span>
                             <span class="text-xs text-gray-500 uppercase" id="sub-count">Total: 0</span>
                         </h2>
-                        <div id="subs-list" class="flex flex-wrap gap-4 scroll-area">
+                        <div id="subs-list" class="flex flex-nowrap gap-4 overflow-x-auto pb-4 scroll-area">
                             <!-- cards -->
+                        </div>
+                    </div>
+
+                    <!-- Action Log Panel -->
+                    <div class="stat-panel neon-border p-6">
+                        <h2 class="system-font text-lg text-red-500 mb-4 italic">SYSTEM ACTIVITY LOG</h2>
+                        <div id="action-log" class="space-y-1 font-mono text-[10px] h-32 overflow-y-auto scroll-area border-l border-red-900/30 pl-4">
+                            <!-- lines -->
                         </div>
                     </div>
 
@@ -447,6 +455,17 @@
 
                     document.getElementById('status-text').innerText = 'CONNECTED';
                     document.getElementById('status-text').className = 'px-3 py-1 bg-cyan-500/20 border border-cyan-500 text-cyan-400 system-font text-sm uppercase tracking-widest';
+
+                    const logEl = document.getElementById('action-log');
+                    if (logEl && p.action_log) {
+                        logEl.innerHTML = '';
+                        p.action_log.forEach(entry => {
+                            const line = document.createElement('div');
+                            line.className = 'text-gray-400 hover:text-red-400 transition-colors cursor-default';
+                            line.innerText = entry;
+                            logEl.appendChild(line);
+                        });
+                    }
                 })
                 .catch(err => {
                     document.getElementById('status-text').innerText = 'OFFLINE';
