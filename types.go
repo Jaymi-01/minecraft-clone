@@ -102,6 +102,8 @@ type Player struct {
 	SkillUsage     map[string]int  `json:"skill_usage"`
 	SkillCooldowns map[string]int  `json:"skill_cooldowns"`
 	Subordinates   []Subordinate   `json:"subordinates"`
+	EquippedWeapon string          `json:"equipped_weapon"`
+	EquippedArmor  string          `json:"equipped_armor"`
 	CurrentGate    *Gate           `json:"current_gate"`
 	SystemOrigin   string          `json:"system_origin"`
 	Exploring      bool            `json:"exploring"`

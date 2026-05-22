@@ -171,24 +171,97 @@ func (p *Player) ManualSpawnGate(rank string) {
 	p.WorldNotice(fmt.Sprintf("A %s-Rank Gate has manifested. Boss: %s", rank, gate.Boss.Name))
 }
 
+func (p *Player) GetEquippedWeaponDamage() int {
+	if p.EquippedWeapon == "" { return 0 }
+	if r, ok := Recipes[p.EquippedWeapon]; ok { return r.ResultValue }
+	return 0
+}
+
+func (p *Player) GetEquippedArmorDefense() int {
+	if p.EquippedArmor == "" { return 0 }
+	if r, ok := Recipes[p.EquippedArmor]; ok { return r.ResultValue }
+	return 0
+}
+
+func (p *Player) EquipItem(itemID string) {
+	itemID = strings.ToLower(itemID)
+	if p.Inventory[itemID] <= 0 {
+		fmt.Printf("❌ You do not possess '%s'.\n", itemID)
+		return
+	}
+
+	recipe, ok := Recipes[itemID]
+	if !ok {
+		// Check Merchant Inventory if not in Recipes (for bought-only items)
+		if si, ok := MerchantInventory[itemID]; ok {
+			// This part needs Si to have type info, currently it doesn't.
+			// Let's assume Recipes is the main source of gear stats.
+			_ = si
+		}
+		fmt.Println("❌ This item cannot be equipped.")
+		return
+	}
+
+	if p.Level < recipe.RequiredLevel {
+		fmt.Printf("🚫 Minimum Level %d required to equip this.\n", recipe.RequiredLevel)
+		return
+	}
+
+	switch recipe.ResultType {
+	case "weapon":
+		if p.EquippedWeapon != "" { p.UnequipItem("weapon") }
+		p.EquippedWeapon = itemID
+		p.WorldNotice(fmt.Sprintf("Equipped Weapon: %s", recipe.Name))
+	case "armor":
+		if p.EquippedArmor != "" { p.UnequipItem("armor") }
+		p.EquippedArmor = itemID
+		p.WorldNotice(fmt.Sprintf("Equipped Armor: %s", recipe.Name))
+	default:
+		fmt.Println("❌ This item type cannot be equipped.")
+		return
+	}
+	p.Save()
+}
+
+func (p *Player) UnequipItem(slotType string) {
+	switch strings.ToLower(slotType) {
+	case "weapon":
+		if p.EquippedWeapon == "" { return }
+		name := p.EquippedWeapon
+		if r, ok := Recipes[p.EquippedWeapon]; ok { name = r.Name }
+		p.EquippedWeapon = ""
+		fmt.Printf("⚪ Unequipped %s.\n", name)
+	case "armor":
+		if p.EquippedArmor == "" { return }
+		name := p.EquippedArmor
+		if r, ok := Recipes[p.EquippedArmor]; ok { name = r.Name }
+		p.EquippedArmor = ""
+		fmt.Printf("⚪ Unequipped %s.\n", name)
+	}
+	p.Save()
+}
+
 func (p *Player) ChooseOrigin(origin string) {
 	origin = strings.ToLower(origin)
 	if p.SystemOrigin != "Human" {
 		fmt.Printf("❌ Origin already fixed as: %s\n", p.SystemOrigin)
 		return
 	}
-	if p.Level < 5 {
-		fmt.Println("🚫 Minimum Level 5 required for System Integration.")
+	if p.Level < 10 {
+		fmt.Println("🚫 Minimum Level 10 required for System Integration.")
 		return
 	}
 	switch origin {
 	case "slime":
 		p.SystemOrigin = "Slime"
+		p.AddSkill("lightning")
+		p.AddSkill("water_jet")
 		p.AddSkill("predator")
 		p.AddSkill("great_sage")
 		p.WorldNotice("Unique Path: SLIME - Predator and Great Sage acquired")
 	case "spider":
 		p.SystemOrigin = "Spider"
+		p.AddSkill("venom_spit")
 		p.AddSkill("appraisal")
 		p.AddSkill("spider_thread")
 		p.WorldNotice("Unique Path: SPIDER - Appraisal and Spider Thread acquired")
@@ -339,8 +412,13 @@ func (p *Player) Combat(m *Monster, isGate bool) bool {
 		if input == "!recover" { p.HealFull(); fmt.Println("⚡ [CHEAT] Restored!"); continue }
 
 		damageToMonster := 0; actionTaken := false
-		baseAtk := int(float64(p.Attack+p.GetBestSwordDamage()+bonusAtkFromPassives) * damageMultiplier)
+		bonusAtk := p.GetEquippedWeaponDamage()
+		bonusDef := p.GetEquippedArmorDefense()
+		
+		baseAtk := int(float64(p.Attack+bonusAtk+bonusAtkFromPassives) * damageMultiplier)
 		if isGate { baseAtk += p.HunterLevel * 2 } else { baseAtk += p.Level }
+		
+		currentDefense := p.Defense + bonusDef
 
 		if input == "!fight" {
 			damageToMonster = baseAtk + rand.Intn(5)
@@ -410,7 +488,7 @@ func (p *Player) Combat(m *Monster, isGate bool) bool {
 			if isGate { p.GainHunterXP(20 + rand.Intn(15)) } else { p.GainXP(15 + rand.Intn(10)) }
 			return true
 		}
-		baseDamage := m.Damage + rand.Intn(5); finalDamage := baseDamage - p.Defense
+		baseDamage := m.Damage + rand.Intn(5); finalDamage := baseDamage - currentDefense
 		if tempDefense > 0 { finalDamage = int(float64(finalDamage) * (1.0 - float64(tempDefense)/100.0)) }
 		if finalDamage < 1 { finalDamage = 1 }; p.Health -= finalDamage
 		fmt.Printf("👹 %s hits for %d. (%d HP left)\n", m.Name, finalDamage, p.Health)
@@ -433,6 +511,22 @@ func (p *Player) Combat(m *Monster, isGate bool) bool {
 func (p *Player) EnterGate(isAdmin bool) {
 	if p.CurrentGate == nil { fmt.Println("📭 No gate."); return }
 	gate := p.CurrentGate
+	
+	// Strict Level 10+ Sword Requirement
+	if gate.MinLevel >= 10 {
+		hasIronSword := false
+		if p.EquippedWeapon == "iron_sword" || p.EquippedWeapon == "diamond_sword" || p.EquippedWeapon == "void_sword" {
+			hasIronSword = true
+		}
+		// Also check specialized blades
+		if strings.HasPrefix(p.EquippedWeapon, "d_") { hasIronSword = true }
+
+		if !hasIronSword {
+			fmt.Println("🚫 DANGEROUS MANIFESTATION: An 'Iron Sword' or better is REQUIRED to enter Level 10+ Gates.")
+			return
+		}
+	}
+
 	if !isAdmin && p.Level < gate.MinLevel { fmt.Printf("🚫 Min Level %d required!\n", gate.MinLevel); return }
 	if p.Stamina < 20 { fmt.Println("😫 Low stamina!"); return }
 	p.Stamina -= 20
@@ -1056,16 +1150,29 @@ func (p *Player) ListShop() {
 
 func (p *Player) Buy(itemID string) {
 	it, ok := MerchantInventory[strings.ToLower(itemID)]; if !ok || p.Inventory["gold"] < it.Price { return }
+	
+	// Level Check for Gear
+	if r, ok := Recipes[it.ID]; ok && p.Level < r.RequiredLevel {
+		fmt.Printf("🚫 Min Level %d required to purchase this gear.\n", r.RequiredLevel)
+		return
+	}
+
 	p.Inventory["gold"] -= it.Price
 	p.WorldNotice(fmt.Sprintf("Purchased %s for 💰 %d gold.", it.Name, it.Price))
+	
 	switch it.ID {
-	case "golden_apple": p.Health += 100; if p.Health > p.MaxHealth { p.Health = p.MaxHealth }
-	case "energy_drink": p.Stamina += 50; if p.Stamina > p.MaxStamina { p.Stamina = p.MaxStamina }
+	case "health_potion": p.Inventory["health_potion"]++
+	case "mega_health": p.Inventory["mega_health"]++
+	case "magic_potion": p.Inventory["magic_potion"]++
+	case "elixir": p.Inventory["elixir"]++
 	case "repair_kit": p.ToolDurability = 500
-	case "mystery_box":
-		loot := []string{"iron", "gold", "diamond", "quartz", "netherite"}
-		for i := 0; i < 3; i++ { p.Inventory[loot[rand.Intn(len(loot))]] += 5 + rand.Intn(10) }
-	default: p.Inventory[it.ID]++
+	case "life_stone": p.Inventory["life_stone"]++
+	default: 
+		p.Inventory[it.ID]++
+		// If it's gear, notify to equip
+		if r, ok := Recipes[it.ID]; ok && (r.ResultType == "weapon" || r.ResultType == "armor") {
+			fmt.Printf("💡 Type '!equip %s' to use your new gear.\n", it.ID)
+		}
 	}
 	p.Save()
 }
@@ -1078,22 +1185,56 @@ func (p *Player) Craft(itemName string) {
 	r, ok := Recipes[strings.ToLower(itemName)]; if !ok || p.Level < r.RequiredLevel { return }
 	for id, qty := range r.Ingredients { if p.Inventory[id] < qty { return } }
 	for id, qty := range r.Ingredients { p.Inventory[id] -= qty; if p.Inventory[id] == 0 { delete(p.Inventory, id) } }
+	
 	switch r.ResultType {
 	case "tool": p.ToolDurability = r.ResultValue; p.Inventory[strings.ToLower(itemName)] = 1
-	case "weapon", "food", "stamina_food": p.Inventory[strings.ToLower(itemName)]++
-	case "armor": p.Defense += r.ResultValue; p.Inventory[strings.ToLower(itemName)] = 1
+	case "weapon", "armor", "food", "stamina_food": p.Inventory[strings.ToLower(itemName)]++
 	}
+	
 	p.WorldNotice(fmt.Sprintf("Successfully crafted: %s", r.Name))
+	if r.ResultType == "weapon" || r.ResultType == "armor" {
+		fmt.Printf("💡 Type '!equip %s' to use your new gear.\n", strings.ToLower(itemName))
+	}
 	p.GainXP(10 + rand.Intn(5)); p.Save()
 }
 
 func (p *Player) Use(itemName string) {
-	k := strings.ToLower(itemName); r, ok := Recipes[k]; if !ok || p.Inventory[k] <= 0 { return }
-	p.Inventory[k]--; if p.Inventory[k] == 0 { delete(p.Inventory, k) }
-	if r.ResultType == "food" { p.Health += r.ResultValue; if p.Health > p.MaxHealth { p.Health = p.MaxHealth } }
-	if r.ResultType == "stamina_food" { p.Stamina += r.ResultValue; if p.Stamina > p.MaxStamina { p.Stamina = p.MaxStamina } }
-	p.WorldNotice(fmt.Sprintf("Used item: %s", r.Name))
-	p.Save()
+	k := strings.ToLower(itemName)
+	if p.Inventory[k] <= 0 { fmt.Println("❌ Item not found."); return }
+
+	used := false
+	switch k {
+	case "health_potion":
+		p.Health += 50; used = true
+	case "mega_health":
+		p.Health += 200; used = true
+	case "magic_potion":
+		p.Magic += 50; used = true
+	case "elixir":
+		p.Health = p.MaxHealth; p.Magic = p.MaxMagic; used = true
+	case "bread":
+		p.Health += 20; used = true
+	case "stamina_potion":
+		p.Stamina += 30; used = true
+	default:
+		// Fallback to Recipe logic if exists
+		if r, ok := Recipes[k]; ok {
+			if r.ResultType == "food" { p.Health += r.ResultValue; used = true }
+			if r.ResultType == "stamina_food" { p.Stamina += r.ResultValue; used = true }
+		}
+	}
+
+	if used {
+		p.Inventory[k]--
+		if p.Inventory[k] == 0 { delete(p.Inventory, k) }
+		if p.Health > p.MaxHealth { p.Health = p.MaxHealth }
+		if p.Stamina > p.MaxStamina { p.Stamina = p.MaxStamina }
+		if p.Magic > p.MaxMagic { p.Magic = p.MaxMagic }
+		p.WorldNotice(fmt.Sprintf("Used item: %s", k))
+		p.Save()
+	} else {
+		fmt.Println("❌ This item cannot be used directly.")
+	}
 }
 
 func (p *Player) ListBuildable() {

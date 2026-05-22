@@ -40,7 +40,6 @@
 
         .font-orbitron { font-family: 'Orbitron', sans-serif; }
 
-        /* Sharp, Glowing Borders */
         .system-panel {
             background: rgba(17, 17, 17, 0.9);
             border: 1px solid rgba(0, 242, 255, 0.2);
@@ -62,7 +61,6 @@
             text-shadow: 0 0 15px rgba(0, 242, 255, 0.7);
         }
 
-        /* Progress Bars */
         .bar-container {
             height: 6px;
             background: rgba(255, 255, 255, 0.05);
@@ -87,8 +85,8 @@
         .mp-fill { background: linear-gradient(90deg, #004, #9349ff); box-shadow: 0 0 10px #9349ff; }
         .sta-fill { background: linear-gradient(90deg, #660, #ffcc00); box-shadow: 0 0 10px #ffcc00; }
         .xp-fill { background: linear-gradient(90deg, #044, #00f2ff); box-shadow: 0 0 10px #00f2ff; }
+        .hxp-fill { background: linear-gradient(90deg, #600, #ff4400); box-shadow: 0 0 10px #ff4400; }
 
-        /* Inventory */
         .inv-slot {
             background: rgba(255, 255, 255, 0.02);
             border: 1px solid rgba(255, 255, 255, 0.05);
@@ -103,17 +101,6 @@
             background: rgba(0, 242, 255, 0.05);
         }
 
-        /* Subordinate Cards */
-        .sub-card {
-            border-left: 3px solid var(--neon-blue);
-            background: linear-gradient(90deg, rgba(0, 102, 255, 0.1), transparent);
-        }
-
-        /* Scanline Animation */
-        @keyframes scan {
-            from { transform: translateY(-100%); }
-            to { transform: translateY(100%); }
-        }
         .scanline {
             position: fixed;
             top: 0; left: 0;
@@ -122,11 +109,9 @@
             pointer-events: none;
             animation: scan 10s linear infinite;
         }
+        @keyframes scan { from { transform: translateY(-100%); } to { transform: translateY(100%); } }
 
-        .scroll-v {
-            overflow-y: auto;
-            scrollbar-width: none;
-        }
+        .scroll-v { overflow-y: auto; scrollbar-width: none; }
         .scroll-v::-webkit-scrollbar { display: none; }
     </style>
 </head>
@@ -135,10 +120,9 @@
     <div class="system-container">
         <div class="max-w-[1600px] mx-auto">
             
-            <!-- SYSTEM HEADER -->
             <header class="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-12 border-b border-white/10 pb-6 gap-6">
                 <div>
-                    <div class="text-xs font-orbitron text-cyan-500 tracking-[0.5em] mb-1">SYSTEM INTERFACE v4.2</div>
+                    <div class="text-xs font-orbitron text-cyan-500 tracking-[0.5em] mb-1">SYSTEM INTERFACE v5.0</div>
                     <h1 class="text-6xl font-orbitron font-black tracking-tighter neon-text uppercase" id="player-name">---</h1>
                     <div class="flex gap-4 mt-2">
                         <span class="px-3 py-1 bg-white/5 border border-white/20 text-[10px] font-orbitron uppercase tracking-widest text-gray-400" id="status-text">Synchronizing...</span>
@@ -161,17 +145,9 @@
             </header>
 
             <div class="grid grid-cols-12 gap-8">
-                
-                <!-- LEFT COLUMN: VITALS -->
                 <div class="col-span-12 lg:col-span-4 space-y-8">
-                    
-                    <!-- BIOMETRICS -->
                     <div class="system-panel p-8">
-                        <h2 class="font-orbitron text-sm text-cyan-400 tracking-widest mb-8 flex justify-between">
-                            <span>BIOMETRIC STATUS</span>
-                            <span class="text-[10px] text-gray-600">VERIFIED</span>
-                        </h2>
-                        
+                        <h2 class="font-orbitron text-sm text-cyan-400 tracking-widest mb-8">BIOMETRIC STATUS</h2>
                         <div class="space-y-8">
                             <div>
                                 <div class="flex justify-between text-sm mb-1 uppercase font-bold tracking-wider">
@@ -180,7 +156,6 @@
                                 </div>
                                 <div class="bar-container"><div id="hp-fill" class="bar-fill hp-fill" style="width: 0%"></div></div>
                             </div>
-
                             <div>
                                 <div class="flex justify-between text-sm mb-1 uppercase font-bold tracking-wider">
                                     <span class="text-yellow-500">Stamina (SP)</span>
@@ -188,7 +163,6 @@
                                 </div>
                                 <div class="bar-container"><div id="stamina-fill" class="bar-fill sta-fill" style="width: 0%"></div></div>
                             </div>
-
                             <div>
                                 <div class="flex justify-between text-sm mb-1 uppercase font-bold tracking-wider">
                                     <span class="text-purple-500">Magicules (MP)</span>
@@ -196,18 +170,23 @@
                                 </div>
                                 <div class="bar-container"><div id="mp-fill" class="bar-fill mp-fill" style="width: 0%"></div></div>
                             </div>
-
                             <div class="pt-4 border-t border-white/5">
                                 <div class="flex justify-between text-[10px] text-gray-500 uppercase font-orbitron mb-1">
-                                    <span>Experience Growth</span>
+                                    <span>Mine Progress</span>
                                     <span id="xp-text">-- / --</span>
                                 </div>
                                 <div class="bar-container h-[2px]"><div id="xp-fill" class="bar-fill xp-fill" style="width: 0%"></div></div>
                             </div>
+                            <div>
+                                <div class="flex justify-between text-[10px] text-gray-500 uppercase font-orbitron mb-1">
+                                    <span>Hunter Progress</span>
+                                    <span id="hxp-text">-- / --</span>
+                                </div>
+                                <div class="bar-container h-[2px]"><div id="hxp-fill" class="bar-fill hxp-fill" style="width: 0%"></div></div>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- ATTRIBUTES -->
                     <div class="system-panel p-8">
                         <h2 class="font-orbitron text-sm text-gray-400 tracking-widest mb-6">COMBAT PARAMETERS</h2>
                         <div class="grid grid-cols-2 gap-y-6">
@@ -220,77 +199,56 @@
                                 <div class="text-3xl font-orbitron font-bold text-blue-400" id="defense-val">--</div>
                             </div>
                             <div>
-                                <div class="text-[10px] text-gray-500 uppercase">Kills</div>
-                                <div class="text-3xl font-orbitron font-bold text-orange-500" id="kills-val">--</div>
+                                <div class="text-[10px] text-gray-500 uppercase">Weapon</div>
+                                <div class="text-sm font-bold text-cyan-400 truncate" id="equipped-weapon">NONE</div>
                             </div>
                             <div>
-                                <div class="text-[10px] text-gray-500 uppercase">Taboo</div>
-                                <div class="text-3xl font-orbitron font-bold text-purple-600" id="taboo-val">--</div>
+                                <div class="text-[10px] text-gray-500 uppercase">Armor</div>
+                                <div class="text-sm font-bold text-blue-300 truncate" id="equipped-armor">NONE</div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- ACTIVITY LOG -->
                     <div class="system-panel p-6 bg-red-500/5 !border-red-500/20">
                         <h2 class="font-orbitron text-xs text-red-500 mb-4">SYSTEM NOTIFICATIONS</h2>
-                        <div id="action-log" class="text-[11px] font-mono space-y-2 h-[150px] scroll-v text-red-400/70">
-                            <!-- logs -->
-                        </div>
+                        <div id="action-log" class="text-[11px] font-mono space-y-2 h-[150px] scroll-v text-red-400/70"></div>
                     </div>
                 </div>
 
-                <!-- RIGHT COLUMN: INTERFACE -->
                 <div class="col-span-12 lg:col-span-8 space-y-8">
-                    
-                    <!-- SUBORDINATES -->
                     <div class="system-panel p-8">
                         <h2 class="font-orbitron text-sm text-blue-400 mb-6 flex justify-between items-center">
-                            <span>SHADOW ARMY / ALLIES</span>
+                            <span>SHADOW ARMY</span>
                             <span class="text-xs text-gray-600 uppercase" id="sub-count">COUNT: 0</span>
                         </h2>
-                        <div id="subs-list" class="flex gap-4 overflow-x-auto pb-4 scroll-v">
-                            <!-- sub cards -->
-                        </div>
+                        <div id="subs-list" class="flex gap-4 overflow-x-auto pb-4 scroll-v"></div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <!-- ACTIVE SKILLS -->
                         <div class="system-panel p-8">
                             <h2 class="font-orbitron text-sm text-cyan-400 mb-6 flex justify-between">
                                 <span>EQUIPPED ABILITIES</span>
                                 <span class="text-[10px] text-gray-600" id="skill-slots-val">0/0</span>
                             </h2>
-                            <div id="skills-list" class="space-y-3">
-                                <!-- items -->
-                            </div>
+                            <div id="skills-list" class="space-y-3"></div>
                         </div>
-
-                        <!-- TITLES -->
                         <div class="system-panel p-8">
                             <h2 class="font-orbitron text-sm text-yellow-500 mb-6">ACHIEVED TITLES</h2>
-                            <div id="titles-list" class="flex flex-wrap gap-2 h-[120px] scroll-v">
-                                <!-- titles -->
-                            </div>
+                            <div id="titles-list" class="flex flex-wrap gap-2 h-[120px] scroll-v"></div>
                         </div>
                     </div>
 
-                    <!-- INVENTORY -->
                     <div class="system-panel p-8">
                         <h2 class="font-orbitron text-sm text-cyan-400 mb-6 flex justify-between">
                             <span>STORAGE INTERFACE</span>
                             <span class="text-[10px] text-gray-600" id="inventory-count">ITEMS: 0</span>
                         </h2>
-                        <div id="inventory-grid" class="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-2 h-[220px] scroll-v">
-                            <!-- slots -->
-                        </div>
+                        <div id="inventory-grid" class="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-2 h-[220px] scroll-v"></div>
                     </div>
 
-                    <!-- MASTERED SKILLS -->
                     <div class="system-panel p-8 bg-blue-500/5">
                         <h2 class="font-orbitron text-xs text-blue-500 mb-6">LIBRARY OF MASTERED SKILLS</h2>
-                        <div id="mastered-skills-list" class="grid grid-cols-2 md:grid-cols-3 gap-3 h-[180px] scroll-v">
-                            <!-- mastered -->
-                        </div>
+                        <div id="mastered-skills-list" class="grid grid-cols-2 md:grid-cols-3 gap-3 h-[180px] scroll-v"></div>
                     </div>
                 </div>
             </div>
@@ -319,18 +277,20 @@
             fetch('/api/player?t=' + Date.now())
                 .then(response => response.json())
                 .then(p => {
-                    const setVal = (id, val) => {
-                        const el = document.getElementById(id);
-                        if (el) el.innerText = val;
-                    };
-
+                    const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
                     setVal('player-name', p.name);
                     setVal('level-val', p.level);
                     setVal('rank-val', p.rank);
                     setVal('origin-display', `ORIGIN: ${p.system_origin.toUpperCase()}`);
-                    
                     setVal('hunter-level-val', p.hunter_level);
                     setVal('hunter-rank-val', p.hunter_rank);
+                    setVal('attack-val', p.attack);
+                    setVal('defense-val', p.defense);
+                    setVal('taboo-val', p.taboo || 0);
+                    setVal('kills-val', p.kills || 0);
+                    setVal('skill-slots-val', `${p.equipped_skills ? p.equipped_skills.length : 0} / ${p.skill_slots}`);
+                    setVal('equipped-weapon', (p.equipped_weapon || 'NONE').replace('_', ' ').toUpperCase());
+                    setVal('equipped-armor', (p.equipped_armor || 'NONE').replace('_', ' ').toUpperCase());
 
                     const updateBar = (fillId, textId, curr, max) => {
                         const fill = document.getElementById(fillId);
@@ -343,30 +303,18 @@
                     };
 
                     updateBar('xp-fill', 'xp-text', p.xp, p.xp_to_next);
+                    updateBar('hxp-fill', 'hxp-text', p.hunter_xp, p.hunter_xp_to_next);
                     setVal('hp-text', `${p.health} / ${p.max_health}`);
                     document.getElementById('hp-fill').style.width = `${(p.health / p.max_health) * 100}%`;
-                    
                     setVal('stamina-text', `${p.stamina} / ${p.max_stamina}`);
                     document.getElementById('stamina-fill').style.width = `${(p.stamina / p.max_stamina) * 100}%`;
-
                     setVal('mp-text', `${p.magic} / ${p.max_magic}`);
                     document.getElementById('mp-fill').style.width = `${(p.magic / p.max_magic) * 100}%`;
 
-                    setVal('attack-val', p.attack);
-                    setVal('defense-val', p.defense);
-                    setVal('taboo-val', p.taboo || 0);
-                    setVal('kills-val', p.kills || 0);
-                    setVal('skill-slots-val', `${p.equipped_skills ? p.equipped_skills.length : 0} / ${p.skill_slots}`);
-
                     const renderList = (id, items, decorator) => {
-                        const el = document.getElementById(id);
-                        if (!el) return;
-                        el.innerHTML = '';
-                        if (items && items.length > 0) {
-                            items.forEach(it => el.appendChild(decorator(it)));
-                        } else {
-                            el.innerHTML = '<span class="text-gray-700 italic text-[10px] uppercase tracking-widest">No Data</span>';
-                        }
+                        const el = document.getElementById(id); if (!el) return; el.innerHTML = '';
+                        if (items && items.length > 0) items.forEach(it => el.appendChild(decorator(it)));
+                        else el.innerHTML = '<span class="text-gray-700 italic text-[10px] uppercase tracking-widest">No Data</span>';
                     };
 
                     renderList('subs-list', p.subordinates, s => {
@@ -375,7 +323,7 @@
                         const skills = s.skills && s.skills.length > 0 ? s.skills.map(id => id.split('_').join(' ').toUpperCase()).join(', ') : 'None';
                         d.innerHTML = `
                             <div class="flex justify-between items-start mb-2">
-                                <div class="text-blue-400 font-bold text-sm tracking-tighter">${s.name}</div>
+                                <div class="text-blue-400 font-bold text-sm truncate">${s.name}</div>
                                 <div class="text-[10px] text-blue-300 font-bold">LV.${s.level}</div>
                             </div>
                             <div class="text-[9px] text-gray-500 uppercase mb-3">${s.species}</div>
@@ -383,8 +331,8 @@
                                 <span>ATK: <span class="text-blue-300">${s.attack}</span></span>
                                 <span>DEF: <span class="text-blue-300">${s.defense}</span></span>
                             </div>
-                            <div class="text-[9px] text-gray-600 uppercase mb-1">Mastery:</div>
-                            <div class="text-[10px] text-blue-100/60 italic leading-tight truncate">${skills}</div>
+                            <div class="text-[9px] text-gray-600 uppercase mb-1">Abilities:</div>
+                            <div class="text-[10px] text-blue-100/60 italic truncate leading-tight">${skills}</div>
                         `;
                         return d;
                     });
@@ -414,24 +362,20 @@
                         return s;
                     });
 
-                    // Inventory
-                    const grid = document.getElementById('inventory-grid');
-                    grid.innerHTML = '';
-                    const items = Object.entries(p.inventory).filter(([_, qty]) => qty > 0);
-                    const slots = Math.max(30, Math.ceil((items.length + 10) / 10) * 10); 
-                    setVal('inventory-count', `ITEMS: ${items.length}`);
-                    for (let i = 0; i < slots; i++) {
-                        const slot = document.createElement('div');
-                        slot.className = 'inv-slot relative';
-                        if (items[i]) {
-                            const [id, qty] = items[i];
+                    const grid = document.getElementById('inventory-grid'); grid.innerHTML = '';
+                    const invItems = Object.entries(p.inventory).filter(([_, qty]) => qty > 0);
+                    const totalSlots = Math.max(40, Math.ceil((invItems.length + 10) / 10) * 10);
+                    setVal('inventory-count', `ITEMS: ${invItems.length}`);
+                    for (let i = 0; i < totalSlots; i++) {
+                        const slot = document.createElement('div'); slot.className = 'inv-slot relative';
+                        if (invItems[i]) {
+                            const [id, qty] = invItems[i];
                             const emoji = itemEmojis[id] || "📦";
                             slot.innerHTML = `<span class="text-2xl">${emoji}</span><span class="absolute bottom-1 right-1 text-[9px] font-bold px-1 bg-black/80">${qty}</span>`;
                         }
                         grid.appendChild(slot);
                     }
 
-                    // Logs
                     const logEl = document.getElementById('action-log');
                     if (logEl && p.action_log) {
                         logEl.innerHTML = '';
@@ -441,12 +385,10 @@
                             logEl.appendChild(line);
                         });
                     }
-
                     setVal('status-text', 'System Online');
                 })
                 .catch(() => setVal('status-text', 'System Offline'));
         }
-
         setInterval(updateDashboard, 1000);
         updateDashboard();
     </script>

@@ -76,7 +76,7 @@ func main() {
 			player.ListSubordinates()
 		case "!origin":
 			if len(parts) < 2 {
-				fmt.Println("🧬 Choose your System Origin: slime, spider (Unlocked at Level 5)")
+				fmt.Println("🧬 Choose your System Origin: slime, spider (Unlocked at Level 10)")
 			} else {
 				player.ChooseOrigin(parts[1])
 			}
@@ -97,19 +97,28 @@ func main() {
 			player.ShowStats()
 		case "!equip":
 			if len(parts) < 2 {
-				player.ListSkills()
-				fmt.Println("🔮 Usage: !equip <skill_id>")
+				fmt.Println("🔮 Usage: !equip <id> (Skill or Item)")
 			} else {
-				player.EquipSkill(parts[1])
+				id := parts[1]
+				// Try skill first
+				isSkill := false
+				for _, s := range player.Skills { if s == id { isSkill = true; break } }
+				if isSkill {
+					player.EquipSkill(id)
+				} else {
+					player.EquipItem(id)
+				}
 			}
 		case "!unequip":
 			if len(parts) < 2 {
-				player.ListSkills()
-				fmt.Println("🔮 Usage: !unequip <slot_number>")
+				fmt.Println("🔮 Usage: !unequip <slot_number|weapon|armor>")
 			} else {
 				var slot int
-				fmt.Sscanf(parts[1], "%d", &slot)
-				player.UnequipSkill(slot)
+				if n, err := fmt.Sscanf(parts[1], "%d", &slot); err == nil && n == 1 {
+					player.UnequipSkill(slot)
+				} else {
+					player.UnequipItem(parts[1])
+				}
 			}
 		case "!dupskill":
 			if len(parts) < 2 {
