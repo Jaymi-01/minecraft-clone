@@ -67,6 +67,19 @@ type Quest struct {
 	Description string
 }
 
+type TrainingProgress struct {
+	Pushups  int       `json:"pushups"`
+	Situps   int       `json:"situps"`
+	Squats   int       `json:"squats"`
+	Running  int       `json:"running"`
+	LastReset time.Time `json:"last_reset"`
+}
+
+type ProductionLog struct {
+	LastProduced time.Time `json:"last_produced"`
+	PendingItems map[string]int `json:"pending_items"`
+}
+
 // Player represents the player's state.
 type Player struct {
 	Name           string          `json:"name"`
@@ -102,8 +115,13 @@ type Player struct {
 	SkillUsage     map[string]int  `json:"skill_usage"`
 	SkillCooldowns map[string]int  `json:"skill_cooldowns"`
 	Subordinates   []Subordinate   `json:"subordinates"`
+	Squad          []string        `json:"squad"` // Names of subs in party
 	EquippedWeapon string          `json:"equipped_weapon"`
 	EquippedArmor  string          `json:"equipped_armor"`
+	ItemRarities   map[string]string `json:"item_rarities"` // item_id -> rarity
+	ItemLevels     map[string]int    `json:"item_levels"`   // item_id -> +1, +2
+	Training       TrainingProgress  `json:"training"`
+	Production     ProductionLog     `json:"production"`
 	CurrentGate    *Gate           `json:"current_gate"`
 	SystemOrigin   string          `json:"system_origin"`
 	Exploring      bool            `json:"exploring"`
