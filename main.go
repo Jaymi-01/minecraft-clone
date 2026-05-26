@@ -34,6 +34,7 @@ func main() {
 	player.StartRegeneration()
 	player.StartRaids()
 	player.StartGateSpawning()
+	player.StartSubordinateAutonomy()
 	StartServer(player) // Start the Web Dashboard
 
 	fmt.Println("Available Commands: !mine <location>, !enter, !status, !craft [item], !equip <id>, !unequip <slot#>, !dupskill <id>, !learn <id>, !duplicate <sub_name> <id>, !create <id1> <id2>, !titles, !build [structure], !shop, !buy <item>, !use <item>, !raid [target], !quests, !subordinates, !name <species> <name>, !stats, !inventory, !origin <slime|spider>, !evolve, !help, !exit")
