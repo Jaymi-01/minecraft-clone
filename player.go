@@ -841,6 +841,7 @@ func (p *Player) SyncStats() {
 			newMaxHealth += t.HPBonus
 			newDefense += t.DefenseBonus
 			newMaxMagic += t.MPBonus
+			newMaxStamina += t.StaminaBonus
 		}
 	}
 
