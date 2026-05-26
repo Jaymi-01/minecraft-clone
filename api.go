@@ -17,12 +17,6 @@ var globalPlayer *Player
 func StartServer(p *Player) {
 	globalPlayer = p
 	
-	// Start Game Cycles
-	p.StartRegeneration()
-	p.StartRaids()
-	p.StartGateSpawning()
-	p.StartSubordinateAutonomy()
-
 	// Register Handlers
 	http.HandleFunc("/api/player", playerHandler)
 	public, _ := fs.Sub(staticFiles, "static")
