@@ -105,7 +105,7 @@ var GlobalTitles = map[string]Title{
 	"taboo_priest": { ID: "taboo_priest", Name: "🕯️ High Priest of Taboo", KillsNeeded: 0, PerkDesc: "+1500 MP, +100 Attack", AttackBonus: 100, MPBonus: 1500 },
 	"taboo_prophet": { ID: "taboo_prophet", Name: "🌑 Abyssal Prophet", KillsNeeded: 0, PerkDesc: "+5000 MP, +300 Attack", AttackBonus: 300, MPBonus: 5000 },
 	"slime_emperor": { ID: "slime_emperor", Name: "💧 Slime Emperor", KillsNeeded: 0, PerkDesc: "+100 Attack, +1000 MP", AttackBonus: 100, MPBonus: 1000 },
-	"labyrinth_walker": { ID: "labyrinth_walker", Name: "🕵️ Labyrinth Walker", KillsNeeded: 0, PerkDesc: "+50 Defense, +200 Stamina", DefenseBonus: 50 },
+	"labyrinth_walker": { ID: "labyrinth_walker", Name: "🕵️ Labyrinth Walker", KillsNeeded: 0, PerkDesc: "+50 Defense, +200 Stamina", DefenseBonus: 50, StaminaBonus: 200 },
 	"world_conqueror": { ID: "world_conqueror", Name: "🌍 World Conqueror", KillsNeeded: 0, PerkDesc: "+500 Attack, +10000 HP", AttackBonus: 500, HPBonus: 10000 },
 	"supreme_hunter": { ID: "supreme_hunter", Name: "🏹 Supreme Hunter", KillsNeeded: 0, PerkDesc: "+200 Attack, +500 Defense", AttackBonus: 200, DefenseBonus: 500 },
 }
