@@ -15,7 +15,8 @@ $Targets = @(
     @{ OS = 'windows'; Arch = 'amd64'; Suffix = '.exe'; Name = 'Windows' },
     @{ OS = 'linux';   Arch = 'amd64'; Suffix = '';     Name = 'Linux' },
     @{ OS = 'darwin';  Arch = 'amd64'; Suffix = '';     Name = 'Mac_Intel' },
-    @{ OS = 'darwin';  Arch = 'arm64'; Suffix = '';     Name = 'Mac_M1_M2' }
+    @{ OS = 'darwin';  Arch = 'arm64'; Suffix = '';     Name = 'Mac_M1_M2' },
+    @{ OS = 'android'; Arch = 'arm64'; Suffix = '';     Name = 'Android' }
 )
 
 # 3. Compile and Zip each target
