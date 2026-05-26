@@ -45,6 +45,11 @@ func NewPlayer(name string) *Player {
 		SkillUsage:     make(map[string]int),
 		SkillCooldowns: make(map[string]int),
 		Subordinates:   []Subordinate{},
+		Squad:          []string{},
+		ItemRarities:   make(map[string]string),
+		ItemLevels:     make(map[string]int),
+		Training:       TrainingProgress{LastReset: time.Now()},
+		Production:     ProductionLog{LastProduced: time.Now(), PendingItems: make(map[string]int)},
 		SystemOrigin:   "Human",
 	}
 }
