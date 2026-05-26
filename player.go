@@ -336,10 +336,12 @@ func (p *Player) Combat(m *Monster, isGate bool) bool {
 	rulerPrideTurns := 0
 	appraisalActive := false
 	parallelMindsActive := false
+	immortalityActive := false
 
 	for _, sID := range p.EquippedSkills {
 		if sID == "appraisal" || sID == "wisdom" { appraisalActive = true }
 		if sID == "parallel_minds" { parallelMindsActive = true }
+		if sID == "immortality" { immortalityActive = true }
 		
 		// Passive Usage: Combat Passives
 		skill := GlobalSkills[sID]
@@ -384,13 +386,14 @@ func (p *Player) Combat(m *Monster, isGate bool) bool {
 		}
 
 		bonusAtkFromPassives := 0
+		bonusDefFromPassives := 0
 		critChance := 0.05
 		for _, sID := range p.EquippedSkills {
 			skill := GlobalSkills[sID]
 			if skill.Type == "passive" {
 				if sID == "critical_eye" { critChance += 0.15 }
-				if sID == "great_sage" { p.Defense += 10; critChance += 0.1 }
-				if sID == "raphael" { p.Defense += 50; critChance += 0.3 }
+				if sID == "great_sage" { bonusDefFromPassives += 10; critChance += 0.1 }
+				if sID == "raphael" { bonusDefFromPassives += 50; critChance += 0.3 }
 				if sID == "battle_hardened" {
 					missingHPPercent := float64(p.MaxHealth-p.Health) / float64(p.MaxHealth)
 					bonusAtkFromPassives += int(float64(p.Attack) * missingHPPercent)
@@ -418,7 +421,7 @@ func (p *Player) Combat(m *Monster, isGate bool) bool {
 		baseAtk := int(float64(p.Attack+bonusAtk+bonusAtkFromPassives) * damageMultiplier)
 		if isGate { baseAtk += p.HunterLevel * 2 } else { baseAtk += p.Level }
 		
-		currentDefense := p.Defense + bonusDef
+		currentDefense := p.Defense + bonusDef + bonusDefFromPassives
 
 		if input == "!fight" {
 			damageToMonster = baseAtk + rand.Intn(5)
@@ -492,6 +495,11 @@ func (p *Player) Combat(m *Monster, isGate bool) bool {
 		if tempDefense > 0 { finalDamage = int(float64(finalDamage) * (1.0 - float64(tempDefense)/100.0)) }
 		if finalDamage < 1 { finalDamage = 1 }; p.Health -= finalDamage
 		fmt.Printf("👹 %s hits for %d. (%d HP left)\n", m.Name, finalDamage, p.Health)
+
+		if p.Health <= 0 && immortalityActive {
+			p.Health = 1
+			p.WorldNotice("IMMORTALITY TRIGGERED: Individual survived a lethal blow.")
+		}
 	}
 
 	if p.Health <= 0 {
@@ -813,6 +821,46 @@ func (p *Player) Save() {
 	os.WriteFile("player_data.json", data, 0644)
 }
 
+func (p *Player) SyncStats() {
+	// Base Stats
+	newMaxHealth := 100 + ((p.Level - 1) * 10)
+	newMaxStamina := 50 + ((p.Level - 1) * 10)
+	newMaxMagic := 100 + ((p.Level - 1) * 20)
+	newAttack := 10
+	newDefense := 0
+
+	// Title Bonuses
+	for _, tID := range p.Titles {
+		if t, ok := GlobalTitles[tID]; ok {
+			newAttack += t.AttackBonus
+			newMaxHealth += t.HPBonus
+			newDefense += t.DefenseBonus
+			newMaxMagic += t.MPBonus
+		}
+	}
+
+	// Structure Bonuses
+	if p.Structures["vault"] { newMaxHealth += 50 }
+	if p.Structures["castle"] {
+		newAttack += 20
+		newMaxHealth += 100
+		newMaxStamina += 50
+	}
+	if p.Structures["forge"] { newAttack += 10 }
+
+	// Apply
+	p.MaxHealth = newMaxHealth
+	p.MaxStamina = newMaxStamina
+	p.MaxMagic = newMaxMagic
+	p.Attack = newAttack
+	p.Defense = newDefense
+
+	// Bounds Check
+	if p.Health > p.MaxHealth { p.Health = p.MaxHealth }
+	if p.Stamina > p.MaxStamina { p.Stamina = p.MaxStamina }
+	if p.Magic > p.MaxMagic { p.Magic = p.MaxMagic }
+}
+
 func LoadPlayer() *Player {
 	data, err := os.ReadFile("player_data.json")
 	if err != nil {
@@ -830,7 +878,9 @@ func LoadPlayer() *Player {
 	if p.Structures == nil { p.Structures = make(map[string]bool) }
 	if p.SystemOrigin == "" { p.SystemOrigin = "Human" }
 	if p.MaxMagic == 0 { p.MaxMagic = 100; p.Magic = 100 }
+	
 	p.UpdateRank(); p.UpdateHunterRank(); p.UpdateSkillSlots()
+	p.SyncStats() // Ensure all title/level bonuses are correct
 	return &p
 }
 
@@ -1337,10 +1387,12 @@ func (p *Player) Mine(locName string) {
 	}
 	if p.Stamina < 10 {
 		fmt.Println("😫 You are too exhausted to mine! (Stamina < 10)")
+		p.WorldNotice("EXHAUSTED: STAMINA DEPLETED")
 		return
 	}
 	if p.ToolDurability <= 0 {
 		fmt.Println("❌ Your tool is broken! Craft a new one or use a Repair Kit.")
+		p.WorldNotice("TOOL BROKEN: REPAIRS REQUIRED")
 		return
 	}
 
