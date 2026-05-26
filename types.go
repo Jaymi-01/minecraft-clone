@@ -150,6 +150,7 @@ type Title struct {
 	DefenseBonus int
 	HPBonus      int
 	MPBonus      int
+	StaminaBonus int
 }
 
 type Skill struct {
