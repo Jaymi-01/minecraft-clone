@@ -27,26 +27,21 @@ func LoadPlayer() *Player {
 	data, err := os.ReadFile("player_data.json")
 	if err != nil { data, err = os.ReadFile("player_data.json.bak"); if err != nil { return NewPlayer("Adventurer") } }
 	var p Player; json.Unmarshal(data, &p)
-	
 	if p.Inventory == nil { p.Inventory = make(map[string]int) }
 	if p.QuestProgress == nil { p.QuestProgress = make(map[string]int) }
 	if p.MonsterKills == nil { p.MonsterKills = make(map[string]int) }
 	if p.SkillLevels == nil { p.SkillLevels = make(map[string]int) }
 	if p.SkillUsage == nil { p.SkillUsage = make(map[string]int) }
-	if p.SkillCooldowns == nil { p.SkillCooldowns = make(map[string]int) }
 	if p.Subordinates == nil { p.Subordinates = []Subordinate{} }
 	if p.Squad == nil { p.Squad = []string{} }
 	if p.Attributes == nil { p.Attributes = make(map[string]bool) }
 	if p.StatusEffects == nil { p.StatusEffects = make(map[string]int) }
 	if p.Structures == nil { p.Structures = make(map[string]bool) }
-	if p.ItemRarities == nil { p.ItemRarities = make(map[string]string) }
-	if p.ItemLevels == nil { p.ItemLevels = make(map[string]int) }
-	
 	p.UpdateRank(); p.UpdateHunterRank(); p.UpdateSkillSlots(); p.SyncStats()
 	return &p
 }
 
-func (p *Player) WorldNotice(msg string) { fmt.Printf("\n<< NOTICE: %s >>\n", strings.ToUpper(msg)); p.LogAction(msg) }
+func (p *Player) WorldNotice(msg string) { fmt.Printf("\n<< SYSTEM: %s >>\n", strings.ToUpper(msg)); p.LogAction(msg) }
 func (p *Player) LogAction(msg string) { t := time.Now().Format("15:04:05"); p.ActionLog = append([]string{fmt.Sprintf("[%s] %s", t, msg)}, p.ActionLog...); if len(p.ActionLog) > 30 { p.ActionLog = p.ActionLog[:30] } }
 
 func (p *Player) UpdateRank() { if p.Level >= 150 { p.Rank = "SS" } else if p.Level >= 100 { p.Rank = "S" } else if p.Level >= 75 { p.Rank = "A" } else if p.Level >= 50 { p.Rank = "B" } else if p.Level >= 30 { p.Rank = "C" } else if p.Level >= 15 { p.Rank = "D" } else { p.Rank = "E" } }
@@ -55,11 +50,25 @@ func (p *Player) UpdateSkillSlots() { p.SkillSlots = 5 + (p.Level / 5); if p.Att
 
 func (p *Player) GainXP(amount int) {
 	if p.Structures["enchanting_table"] { amount = int(float64(amount) * 1.5) }; p.XP += amount
-	for p.XP >= p.XPToNext { p.Level++; p.XP -= p.XPToNext; p.XPToNext = int(float64(p.XPToNext) * 1.5); p.SyncStats(); p.WorldNotice(fmt.Sprintf("Level %d reached.", p.Level)) }; p.Save()
+	fmt.Printf("[✨ +%d EXPERIENCE POINTS]\n", amount)
+	for p.XP >= p.XPToNext {
+		p.Level++; p.XP -= p.XPToNext; p.XPToNext = int(float64(p.XPToNext) * 1.5)
+		p.UpdateRank(); p.UpdateSkillSlots(); p.SyncStats()
+		p.WorldNotice(fmt.Sprintf("CONGRATULATIONS: You have reached Level %d. Limits broken.", p.Level))
+		if p.Level%10 == 0 { fmt.Println("🔥 [SYSTEM]: Stat synchronization complete. Significant growth detected.") }
+	}
+	p.Save()
 }
 
 func (p *Player) GainHunterXP(amount int) {
-	p.HunterXP += amount; for p.HunterXP >= p.HunterXPToNext { p.HunterLevel++; p.HunterXP -= p.HunterXPToNext; p.HunterXPToNext = int(float64(p.HunterXPToNext) * 1.5); p.UpdateHunterRank(); p.WorldNotice(fmt.Sprintf("Hunter Lv%d achieved.", p.HunterLevel)) }; p.Save()
+	p.HunterXP += amount
+	fmt.Printf("[🏹 +%d HUNTER XP]\n", amount)
+	for p.HunterXP >= p.HunterXPToNext {
+		p.HunterLevel++; p.HunterXP -= p.HunterXPToNext; p.HunterXPToNext = int(float64(p.HunterXPToNext) * 1.5)
+		p.UpdateHunterRank()
+		p.WorldNotice(fmt.Sprintf("HUNTER PROMOTION: Rank %s achieved (Level %d).", p.HunterRank, p.HunterLevel))
+	}
+	p.Save()
 }
 
 func (p *Player) SyncStats() {
