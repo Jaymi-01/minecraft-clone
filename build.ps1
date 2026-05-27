@@ -16,7 +16,7 @@ $Targets = @(
     @{ OS = 'linux';   Arch = 'amd64'; Suffix = '';     Name = 'Linux' },
     @{ OS = 'darwin';  Arch = 'amd64'; Suffix = '';     Name = 'Mac_Intel' },
     @{ OS = 'darwin';  Arch = 'arm64'; Suffix = '';     Name = 'Mac_M1_M2' },
-    @{ OS = 'android'; Arch = 'arm64'; Suffix = '';     Name = 'Android' }
+    @{ OS = 'linux';   Arch = 'arm64'; Suffix = '';     Name = 'Termux_ARM64' }
 )
 
 # 3. Compile and Zip each target
