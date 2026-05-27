@@ -65,6 +65,108 @@ var MerchantInventory = map[string]ShopItem{
 	"life_stone":    { ID: "life_stone", Name: "💎 Life Stone", Price: 10000, Desc: "Cheat death once." },
 }
 
+var ElementalSkillShopInventory = map[string]struct{ID string; Name string; Price int; Desc string}{
+	"fire_bolt":   {ID: "fire_bolt", Name: "🔥 Fire Bolt", Price: 500, Desc: "Basic fire magic."},
+	"water_jet":    {ID: "water_jet", Name: "💧 Water Jet", Price: 500, Desc: "Basic water magic."},
+	"spark":        {ID: "spark", Name: "⚡ Spark", Price: 500, Desc: "Basic lightning magic."},
+	"pebble_shot":  {ID: "pebble_shot", Name: "🪨 Pebble Shot", Price: 500, Desc: "Basic earth magic."},
+	"breeze":       {ID: "breeze", Name: "🌬️ Breeze", Price: 500, Desc: "Basic wind magic."},
+}
+
+var TabooShopInventory = map[string]struct{ID string; Name string; Price int; Desc string}{
+	"dark_attribute":          {ID: "dark_attribute", Name: "🌑 Dark Attribute", Price: 50, Desc: "Allows merging with high-tier elemental skills."},
+	"decay_attribute":         {ID: "decay_attribute", Name: "🍄 Decay Attribute", Price: 50, Desc: "Unlocks the forbidden Rot skill tree."},
+	"taboo_resonance":         {ID: "taboo_resonance", Name: "🌌 Taboo Resonance", Price: 50, Desc: "1% elemental dmg per Taboo Level."},
+	"shadow_army_expansion":   {ID: "shadow_army_expansion", Name: "👥 Shadow Army Expansion", Price: 75, Desc: "+3 Max Skill Slots."},
+	"soul_absorption":         {ID: "soul_absorption", Name: "👻 Soul Absorption", Price: 100, Desc: "Active: Drain 25% target HP."},
+	"immortality":             {ID: "immortality", Name: "♾️ Immortality", Price: 150, Desc: "Passive: Survive lethal blow at 1 HP."},
+	"shub_niggurath":          {ID: "shub_niggurath", Name: "🧬 Harvest Lord Shub-Niggurath", Price: 200, Desc: "Skill Creation mastery."},
+}
+
+var GlobalSkills = map[string]Skill{
+	// --- Fire Tree ---
+	"fire_bolt":       { ID: "fire_bolt", Name: "🔥 Fire Bolt", DmgBonus: 30, MPCost: 10, Rank: "E", Type: "active", Category: "attack", UnlockRequirement: "Elemental Shop" },
+	"flame_lance":     { ID: "flame_lance", Name: "🔥 Flame Lance", DmgBonus: 100, MPCost: 40, Rank: "D", Type: "active", Category: "attack", UnlockRequirement: "Evolve Fire Bolt" },
+	"prominence_burn": { ID: "prominence_burn", Name: "☀️ Prominence Burn", DmgBonus: 800, MPCost: 250, Rank: "A", Type: "active", Category: "attack", UnlockRequirement: "Evolve Flame Lance" },
+	"inferno":         { ID: "inferno", Name: "🔥💀 Inferno", DmgBonus: 2500, MPCost: 800, Rank: "Ultimate", Type: "active", Category: "attack", UnlockRequirement: "Evolve Prominence Burn" },
+	"hellfire":        { ID: "hellfire", Name: "🔥🌑 Hellfire", DmgBonus: 3500, MPCost: 1000, Rank: "Ultimate", Type: "active", Category: "attack", UnlockRequirement: "Merge Dark + Prominence Burn" },
+
+	// --- Water Tree ---
+	"water_jet":     { ID: "water_jet", Name: "💧 Water Jet", DmgBonus: 30, MPCost: 10, Rank: "E", Type: "active", Category: "attack", UnlockRequirement: "Elemental Shop" },
+	"water_blade":   { ID: "water_blade", Name: "💧 Water Blade", DmgBonus: 90, MPCost: 35, Rank: "D", Type: "active", Category: "attack", UnlockRequirement: "Evolve Water Jet" },
+	"tsunami":       { ID: "tsunami", Name: "🌊 Tsunami", DmgBonus: 700, MPCost: 200, Rank: "B", Type: "active", Category: "attack", UnlockRequirement: "Evolve Water Blade" },
+	"oceanic_wrath": { ID: "oceanic_wrath", Name: "🔱 Oceanic Wrath", DmgBonus: 1500, MPCost: 450, Rank: "S", Type: "active", Category: "attack", UnlockRequirement: "Evolve Tsunami" },
+	"abyss_tide":    { ID: "abyss_tide", Name: "🌊🌑 Abyss Tide", DmgBonus: 4000, MPCost: 1100, Rank: "Ultimate", Type: "active", Category: "attack", UnlockRequirement: "Merge Dark + Oceanic Wrath" },
+
+	// --- Lightning Tree ---
+	"spark":           { ID: "spark", Name: "⚡ Spark", DmgBonus: 25, MPCost: 8, Rank: "E", Type: "active", Category: "attack", UnlockRequirement: "Elemental Shop" },
+	"chain_lightning": { ID: "chain_lightning", Name: "⚡ Chain Lightning", DmgBonus: 110, MPCost: 50, Rank: "D", Type: "active", Category: "attack", UnlockRequirement: "Evolve Spark" },
+	"volt_strike":     { ID: "volt_strike", Name: "⚡ Volt Strike", DmgBonus: 600, MPCost: 180, Rank: "B", Type: "active", Category: "attack", UnlockRequirement: "Evolve Chain Lightning" },
+	"indra_judgement": { ID: "indra_judgement", Name: "⚡⚖️ Indra's Judgement", DmgBonus: 2000, MPCost: 600, Rank: "S", Type: "active", Category: "attack", UnlockRequirement: "Evolve Volt Strike" },
+	"black_lightning": { ID: "black_lightning", Name: "⚡🌑 Black Lightning", DmgBonus: 5000, MPCost: 1200, Rank: "Ultimate", Type: "active", Category: "attack", UnlockRequirement: "Merge Dark + Indra's Judgement" },
+
+	// --- Earth Tree ---
+	"pebble_shot":   { ID: "pebble_shot", Name: "🪨 Pebble Shot", DmgBonus: 35, MPCost: 12, Rank: "E", Type: "active", Category: "attack", UnlockRequirement: "Elemental Shop" },
+	"earth_wall":    { ID: "earth_wall", Name: "🧱 Earth Wall", DmgBonus: 0, MPCost: 25, Rank: "D", Type: "active", Category: "defense", UnlockRequirement: "Evolve Pebble Shot" },
+	"gravel_storm":  { ID: "gravel_storm", Name: "🌪️ Gravel Storm", DmgBonus: 400, MPCost: 150, Rank: "B", Type: "active", Category: "attack", UnlockRequirement: "Evolve Earth Wall" },
+	"terraforming":  { ID: "terraforming", Name: "🌍 Terraforming", DmgBonus: 1200, MPCost: 500, Rank: "S", Type: "active", Category: "attack", UnlockRequirement: "Evolve Gravel Storm" },
+
+	// --- Wind Tree ---
+	"breeze":         { ID: "breeze", Name: "🌬️ Breeze", DmgBonus: 20, MPCost: 5, Rank: "E", Type: "active", Category: "attack", UnlockRequirement: "Elemental Shop" },
+	"wind_cutter":    { ID: "wind_cutter", Name: "🌬️ Wind Cutter", DmgBonus: 80, MPCost: 30, Rank: "D", Type: "active", Category: "attack", UnlockRequirement: "Evolve Breeze" },
+	"cyclone":        { ID: "cyclone", Name: "🌪️ Cyclone", DmgBonus: 500, MPCost: 160, Rank: "B", Type: "active", Category: "attack", UnlockRequirement: "Evolve Wind_cutter" },
+	"tempest":        { ID: "tempest", Name: "🌬️🌪️ Tempest", DmgBonus: 1800, MPCost: 600, Rank: "S", Type: "active", Category: "attack", UnlockRequirement: "Evolve Cyclone" },
+
+	// --- Warrior Tree ---
+	"power_strike":   { ID: "power_strike", Name: "⚔️ Power Strike", DmgBonus: 50, MPCost: 15, Rank: "E", Type: "active", Category: "attack", UnlockRequirement: "Defeat Gate Boss" },
+	"heavy_cleave":   { ID: "heavy_cleave", Name: "🪓 Heavy Cleave", DmgBonus: 120, MPCost: 30, Rank: "D", Type: "active", Category: "attack", UnlockRequirement: "Evolve Power Strike" },
+	"armor_break":    { ID: "armor_break", Name: "🛡️ Armor Break", DmgBonus: 250, MPCost: 60, Rank: "C", Type: "active", Category: "attack", UnlockRequirement: "Evolve Heavy Cleave" },
+	"earth_shatter":  { ID: "earth_shatter", Name: "🌍 Earth Shatter", DmgBonus: 600, MPCost: 150, Rank: "B", Type: "active", Category: "attack", UnlockRequirement: "Evolve Armor Break" },
+	"meteor_strike":  { ID: "meteor_strike", Name: "☄️ Meteor Strike", DmgBonus: 1500, MPCost: 400, Rank: "A", Type: "active", Category: "attack", UnlockRequirement: "Evolve Earth Shatter" },
+	"world_severing": { ID: "world_severing", Name: "🗡️ World-Severing Slash", DmgBonus: 4000, MPCost: 1000, Rank: "S", Type: "active", Category: "attack", UnlockRequirement: "Evolve Meteor Strike" },
+	"void_slash":     { ID: "void_slash", Name: "🌑 Void Slash", DmgBonus: 8000, MPCost: 2500, Rank: "Ultimate", Type: "active", Category: "attack", UnlockRequirement: "Merge Dark + World-Severing" },
+
+	// --- Spider (Kumoko) ---
+	"venom_spit":     { ID: "venom_spit", Name: "🐍 Venom Spit", DmgBonus: 30, Rank: "D", Type: "active", Category: "attack", UnlockRequirement: "Spider Origin" },
+	"poison_fang":    { ID: "poison_fang", Name: "🐍 Poison Fang", DmgBonus: 150, Rank: "C", Type: "active", Category: "attack", UnlockRequirement: "Evolve Venom Spit" },
+	"deadly_venom":   { ID: "deadly_venom", Name: "☠️ Deadly Venom", DmgBonus: 600, Rank: "A", Type: "active", Category: "attack", UnlockRequirement: "Evolve Poison Fang" },
+	"rot_attack":     { ID: "rot_attack", Name: "🍄 Rot Attack", DmgBonus: 6000, MPCost: 1500, Rank: "Forbidden", Type: "active", Category: "attack", UnlockRequirement: "Merge Decay + Deadly Venom" },
+	"spider_thread":  { ID: "spider_thread", Name: "🕸️ Spider Thread", MPCost: 10, Rank: "Unique", Type: "active", Category: "defense", UnlockRequirement: "Spider Origin" },
+	"steel_thread":   { ID: "steel_thread", Name: "🧶 Steel Thread", DmgBonus: 200, MPCost: 50, Rank: "A", Type: "active", Category: "attack", UnlockRequirement: "Evolve Spider Thread" },
+	"divine_thread":  { ID: "divine_thread", Name: "✨ Divine Thread", DmgBonus: 1500, MPCost: 400, Rank: "Ultimate", Type: "active", Category: "attack", UnlockRequirement: "Evolve Steel Thread" },
+	"appraisal":      { ID: "appraisal", Name: "👁️ Appraisal", Rank: "Unique", Type: "passive", Category: "utility", UnlockRequirement: "Spider Origin" },
+	"evil_eye":       { ID: "evil_eye", Name: "🧿 Evil Eye of Statis", DmgBonus: 200, Rank: "B", Type: "active", Category: "attack", UnlockRequirement: "Spider Origin" },
+	"abyss_magic":    { ID: "abyss_magic", Name: "🕳️ Abyss Magic", DmgBonus: 8000, Rank: "Ultimate", Type: "active", Category: "attack", UnlockRequirement: "Evolve Evil Eye" },
+	"dim_maneuver":   { ID: "dim_maneuver", Name: "🌌 Dimensional Maneuver", MPCost: 150, Rank: "S", Type: "active", Category: "utility", UnlockRequirement: "Spider Evolution: Arachne" },
+	"egg_revival":    { ID: "egg_revival", Name: "🥚 Egg Revivification", Rank: "Ultimate", Type: "passive", Category: "defense", UnlockRequirement: "Spider Evolution: God" },
+	"sariel":         { ID: "sariel", Name: "🦉 Wisdom King Sariel", Rank: "Ultimate", Type: "passive", Category: "utility", UnlockRequirement: "Evolve Appraisal" },
+
+	// --- Slime (Rimuru) ---
+	"predator":       { ID: "predator", Name: "🌀 Predator", DmgBonus: 100, Rank: "Unique", Type: "active", Category: "attack", UnlockRequirement: "Slime Origin" },
+	"gluttony":       { ID: "gluttony", Name: "👿 Gluttony", DmgBonus: 300, Rank: "Unique", Type: "active", Category: "attack", UnlockRequirement: "Evolve Predator" },
+	"beelzebuth":     { ID: "beelzebuth", Name: "👹 Gluttonous King Beelzebuth", DmgBonus: 1200, Rank: "Ultimate", Type: "active", Category: "attack", UnlockRequirement: "Evolve Gluttony" },
+	"great_sage":     { ID: "great_sage", Name: "🧠 Great Sage", Rank: "Unique", Type: "passive", Category: "utility", UnlockRequirement: "Slime Origin" },
+	"raphael":        { ID: "raphael", Name: "📚 Wisdom King Raphael", Rank: "Ultimate", Type: "passive", Category: "utility", UnlockRequirement: "Evolve Great Sage" },
+	"shub_niggurath": { ID: "shub_niggurath", Name: "🧬 Harvest Lord Shub-Niggurath", Rank: "Ultimate", Type: "passive", Category: "utility", UnlockRequirement: "Taboo Shop" },
+
+	// --- General ---
+	"natures_touch": { ID: "natures_touch", Name: "💚 Nature's Touch", MPCost: 20, Rank: "E", Type: "active", Category: "heal", UnlockRequirement: "Defeat Gate Boss" },
+	"bone_armor":    { ID: "bone_armor", Name: "🦴 Bone Armor", MPCost: 20, Rank: "E", Type: "active", Category: "defense", UnlockRequirement: "Defeat Gate Boss" },
+}
+
+var SkillEvolutions = map[string]string{
+	"fire_bolt": "flame_lance", "flame_lance": "prominence_burn", "prominence_burn": "inferno",
+	"water_jet": "water_blade", "water_blade": "tsunami", "tsunami": "oceanic_wrath",
+	"spark": "chain_lightning", "chain_lightning": "volt_strike", "volt_strike": "indra_judgement",
+	"pebble_shot": "earth_wall", "earth_wall": "gravel_storm", "gravel_storm": "terraforming",
+	"breeze": "wind_cutter", "wind_cutter": "cyclone", "cyclone": "tempest",
+	"power_strike": "heavy_cleave", "heavy_cleave": "armor_break", "armor_break": "earth_shatter", "earth_shatter": "meteor_strike", "meteor_strike": "world_severing",
+	"venom_spit": "poison_fang", "poison_fang": "deadly_venom",
+	"spider_thread": "steel_thread", "steel_thread": "divine_thread",
+	"appraisal": "sariel", "great_sage": "raphael", "predator": "gluttony", "gluttony": "beelzebuth",
+	"evil_eye": "abyss_magic",
+}
+
 var GlobalQuests = []Quest{
 	{ID: "wood_gatherer", Name: "🌲 Wood Gatherer", TargetType: "item", TargetID: "wood", TargetQty: 50, RewardXP: 100, RewardGold: 20, Description: "Collect 50 Wood."},
 	{ID: "slime_hunter", Name: "🟢 Slime Hunter", TargetType: "combat", TargetID: "🟢 Slime", TargetQty: 5, RewardXP: 150, RewardGold: 30, Description: "Defeat 5 Slimes."},
@@ -108,88 +210,4 @@ var GlobalTitles = map[string]Title{
 	"labyrinth_walker": { ID: "labyrinth_walker", Name: "🕵️ Labyrinth Walker", KillsNeeded: 0, PerkDesc: "+50 Defense, +200 Stamina", DefenseBonus: 50, StaminaBonus: 200 },
 	"world_conqueror": { ID: "world_conqueror", Name: "🌍 World Conqueror", KillsNeeded: 0, PerkDesc: "+500 Attack, +10000 HP", AttackBonus: 500, HPBonus: 10000 },
 	"supreme_hunter": { ID: "supreme_hunter", Name: "🏹 Supreme Hunter", KillsNeeded: 0, PerkDesc: "+200 Attack, +500 Defense", AttackBonus: 200, DefenseBonus: 500 },
-}
-
-var GlobalSkills = map[string]Skill{
-	"power_strike": { ID: "power_strike", Name: "⚔️ Power Strike", DmgBonus: 50, MPCost: 15, Rank: "E", Type: "active", Category: "attack", Level: 1, UnlockRequirement: "Defeat Gate Boss", ReqLevel: 1 },
-	"heavy_cleave": { ID: "heavy_cleave", Name: "🪓 Heavy Cleave", DmgBonus: 100, MPCost: 25, Rank: "D", Type: "active", Category: "attack", Level: 1, UnlockRequirement: "Evolve Power Strike" },
-	"armor_break":  { ID: "armor_break", Name: "🛡️ Armor Break", DmgBonus: 180, MPCost: 40, Rank: "C", Type: "active", Category: "attack", Level: 1, UnlockRequirement: "Evolve Heavy Cleave" },
-	"earth_shatter": { ID: "earth_shatter", Name: "🌍 Earth Shatter", DmgBonus: 350, MPCost: 60, Rank: "B", Type: "active", Category: "attack", Level: 1, UnlockRequirement: "Evolve Armor Break" },
-	"meteor_strike": { ID: "meteor_strike", Name: "☄️ Meteor Strike", DmgBonus: 700, MPCost: 100, Rank: "A", Type: "active", Category: "attack", Level: 1, UnlockRequirement: "Evolve Earth Shatter" },
-	"world_severing_slash": { ID: "world_severing_slash", Name: "🗡️ World-Severing Slash", DmgBonus: 1500, MPCost: 250, Rank: "S", Type: "active", Category: "attack", Level: 1, UnlockRequirement: "Evolve Meteor Strike" },
-
-	"soul_reap": { ID: "soul_reap", Name: "💀 Soul Reap", DmgBonus: 200, MPCost: 50, Rank: "B", Type: "active", Category: "attack", Level: 1, UnlockRequirement: "Kill wither king", ReqBoss: "wither king" },
-	"shadow_extraction": { ID: "shadow_extraction", Name: "👥 Shadow Extraction", DmgBonus: 0, MPCost: 100, Rank: "A", Type: "active", Category: "utility", Level: 1, UnlockRequirement: "Evolve Soul Reap" },
-	"arise": { ID: "arise", Name: "👑 Arise", DmgBonus: 1000, MPCost: 300, Rank: "S", Type: "active", Category: "attack", Level: 1, UnlockRequirement: "Evolve Shadow Extraction" },
-	"monarchs_domain": { ID: "monarchs_domain", Name: "🌌 Monarch's Domain", DmgBonus: 5000, MPCost: 1000, Rank: "Ultimate", Type: "active", Category: "attack", Level: 1, UnlockRequirement: "Evolve Arise" },
-
-	"void_slash": { ID: "void_slash", Name: "🌑 Void Slash", DmgBonus: 500, MPCost: 150, Rank: "A", Type: "active", Category: "attack", Level: 1, UnlockRequirement: "Kill void sovereign", ReqBoss: "void sovereign" },
-	"spatial_severance": { ID: "spatial_severance", Name: "✂️ Spatial Severance", DmgBonus: 1200, MPCost: 400, Rank: "S", Type: "active", Category: "attack", Level: 1, UnlockRequirement: "Evolve Void Slash" },
-	"dimension_fault": { ID: "dimension_fault", Name: "🔮 Dimension Fault", DmgBonus: 8000, MPCost: 2000, Rank: "Ultimate", Type: "active", Category: "attack", Level: 1, UnlockRequirement: "Evolve Spatial Severance" },
-
-	"fireball": { ID: "fireball", Name: "🔥 Fireball", DmgBonus: 40, MPCost: 10, Rank: "E", Type: "active", Category: "attack", Level: 1, UnlockRequirement: "Defeat Gate Boss", ReqLevel: 1 },
-	"flame_pillar": { ID: "flame_pillar", Name: "🌋 Flame Pillar", DmgBonus: 120, MPCost: 30, Rank: "C", Type: "active", Category: "attack", Level: 1, UnlockRequirement: "Evolve Fireball" },
-	"hellfire": { ID: "hellfire", Name: "🔥 Hellfire", DmgBonus: 300, MPCost: 80, Rank: "B", Type: "active", Category: "attack", Level: 1, UnlockRequirement: "Evolve Flame Pillar" },
-	"dragon_breath": { ID: "dragon_breath", Name: "🐲 Dragon's Breath", DmgBonus: 800, MPCost: 200, Rank: "A", Type: "active", Category: "attack", Level: 1, UnlockRequirement: "Evolve Hellfire" },
-	"prominence_burn": { ID: "prominence_burn", Name: "☀️ Prominence Burn", DmgBonus: 2500, MPCost: 500, Rank: "S", Type: "active", Category: "attack", Level: 1, UnlockRequirement: "Evolve Dragon's Breath" },
-
-	"lightning": { ID: "lightning", Name: "⚡ Lightning", DmgBonus: 40, MPCost: 15, Rank: "D", Type: "active", Category: "attack", Level: 1, UnlockRequirement: "Slime Origin" },
-	"black_lightning": { ID: "black_lightning", Name: "⚡ Black Lightning", DmgBonus: 400, MPCost: 80, Rank: "A", Type: "active", Category: "attack", Level: 1, UnlockRequirement: "Evolve Lightning" },
-	"storm_magic": { ID: "storm_magic", Name: "🌪️ Storm Magic", DmgBonus: 1200, MPCost: 250, Rank: "S", Type: "active", Category: "attack", Level: 1, UnlockRequirement: "Evolve Black Lightning" },
-	"veldora": { ID: "veldora", Name: "🐉 Storm King Veldora", DmgBonus: 6000, MPCost: 1500, Rank: "Ultimate", Type: "active", Category: "attack", Level: 1, UnlockRequirement: "Evolve Storm Magic" },
-
-	"water_jet": { ID: "water_jet", Name: "💧 Water Jet", DmgBonus: 35, MPCost: 10, Rank: "D", Type: "active", Category: "attack", Level: 1, UnlockRequirement: "Slime Origin" },
-	"water_blade": { ID: "water_blade", Name: "💧 Water Blade", DmgBonus: 150, MPCost: 50, Rank: "B", Type: "active", Category: "attack", Level: 1, UnlockRequirement: "Evolve Water Jet" },
-	"tidal_surge": { ID: "tidal_surge", Name: "🌊 Tidal Surge", DmgBonus: 200, MPCost: 100, Rank: "C", Type: "active", Category: "attack", Level: 1, UnlockRequirement: "Evolve Water Blade" },
-	"tsunami": { ID: "tsunami", Name: "🌊 Tsunami", DmgBonus: 600, MPCost: 300, Rank: "B", Type: "active", Category: "attack", Level: 1, UnlockRequirement: "Evolve Tidal Surge" },
-	"oceanic_wrath": { ID: "oceanic_wrath", Name: "🔱 Oceanic Wrath", DmgBonus: 2000, MPCost: 800, Rank: "A", Type: "active", Category: "attack", Level: 1, UnlockRequirement: "Evolve Tsunami" },
-
-	"venom_spit": { ID: "venom_spit", Name: "🐍 Venom Spit", DmgBonus: 30, MPCost: 10, Rank: "D", Type: "active", Category: "attack", Level: 1, UnlockRequirement: "Spider Origin" },
-	"poison_fang": { ID: "poison_fang", Name: "🐍 Poison Fang", DmgBonus: 100, MPCost: 40, Rank: "C", Type: "active", Category: "attack", Level: 1, UnlockRequirement: "Evolve Venom Spit" },
-	"deadly_venom": { ID: "deadly_venom", Name: "☠️ Deadly Venom", DmgBonus: 400, MPCost: 150, Rank: "A", Type: "active", Category: "attack", Level: 1, UnlockRequirement: "Evolve Poison Fang" },
-	"rot_attack": { ID: "rot_attack", Name: "🍄 Rot Attack", DmgBonus: 2000, MPCost: 500, Rank: "Forbidden", Type: "active", Category: "attack", Level: 1, UnlockRequirement: "Evolve Deadly Venom" },
-
-	"predator": { ID: "predator", Name: "🌀 Predator", DmgBonus: 100, MPCost: 50, Rank: "Unique", Type: "active", Category: "attack", Level: 1, UnlockRequirement: "Slime Origin" },
-	"gluttony": { ID: "gluttony", Name: "👿 Gluttony", DmgBonus: 300, MPCost: 150, Rank: "Unique", Type: "active", Category: "attack", Level: 1, UnlockRequirement: "Evolve Predator" },
-	"beelzebuth": { ID: "beelzebuth", Name: "👹 Gluttonous King Beelzebuth", DmgBonus: 1000, MPCost: 400, Rank: "Ultimate", Type: "active", Category: "attack", Level: 1, UnlockRequirement: "Evolve Gluttony" },
-
-	"great_sage": { ID: "great_sage", Name: "🧠 Great Sage", Rank: "Unique", Type: "passive", Category: "utility", Level: 1, UnlockRequirement: "Slime Origin" },
-	"raphael": { ID: "raphael", Name: "📚 Wisdom King Raphael", Rank: "Ultimate", Type: "passive", Category: "utility", Level: 1, UnlockRequirement: "Evolve Great Sage" },
-	
-	"appraisal": { ID: "appraisal", Name: "👁️ Appraisal", Rank: "Unique", Type: "passive", Category: "utility", Level: 1, UnlockRequirement: "Spider Origin" },
-	"wisdom_king_sariel": { ID: "wisdom_king_sariel", Name: "🦉 Wisdom King (Sariel System)", Rank: "Ultimate", Type: "passive", Category: "utility", Level: 1, UnlockRequirement: "Evolve Appraisal" },
-
-	"spider_thread": { ID: "spider_thread", Name: "🕸️ Spider Thread", MPCost: 10, Rank: "Unique", Type: "active", Category: "defense", Level: 1, UnlockRequirement: "Spider Origin" },
-	"universal_thread": { ID: "universal_thread", Name: "🧶 Universal Thread", DmgBonus: 200, MPCost: 50, Rank: "A", Type: "active", Category: "attack", Level: 1, UnlockRequirement: "Evolve Spider Thread" },
-	"divine_thread": { ID: "divine_thread", Name: "✨ Divine Thread", DmgBonus: 1500, MPCost: 300, Rank: "Ultimate", Type: "active", Category: "attack", Level: 1, UnlockRequirement: "Evolve Universal Thread" },
-
-	"multilayer_barrier": { ID: "multilayer_barrier", Name: "🛡️ Multilayer Barrier", MPCost: 40, Rank: "A", Type: "active", Category: "defense", Level: 1, UnlockRequirement: "Slime Origin" },
-	"uriel": { ID: "uriel", Name: "🛡️ Covenant King Uriel", MPCost: 200, Rank: "Ultimate", Type: "active", Category: "defense", Level: 1, UnlockRequirement: "Evolve Multilayer Barrier" },
-
-	"shub_niggurath": { ID: "shub_niggurath", Name: "🧬 Harvest Lord Shub-Niggurath", Rank: "Ultimate", Type: "passive", Category: "utility", Level: 1, UnlockRequirement: "Slime Evolution: True Dragon" },
-	"immortality": { ID: "immortality", Name: "♾️ Immortality", Rank: "Forbidden", Type: "passive", Category: "defense", Level: 1, UnlockRequirement: "Spider Evolution: God" },
-	
-	"evil_eye": { ID: "evil_eye", Name: "🧿 Evil Eye of Statis", DmgBonus: 200, MPCost: 150, Rank: "B", Type: "active", Category: "attack", Level: 1, UnlockRequirement: "Spider Origin" },
-	"abyss_magic": { ID: "abyss_magic", Name: "🕳️ Abyss Magic", DmgBonus: 4000, MPCost: 1000, Rank: "Ultimate", Type: "active", Category: "attack", Level: 1, UnlockRequirement: "Evolve Evil Eye" },
-	"heresy_magic": { ID: "heresy_magic", Name: "🌌 Heresy Magic", DmgBonus: 1000, MPCost: 300, Rank: "Forbidden", Type: "active", Category: "attack", Level: 1, UnlockRequirement: "Taboo Level 10" },
-
-	"natures_touch": { ID: "natures_touch", Name: "💚 Nature's Touch", MPCost: 20, Rank: "E", Type: "active", Category: "heal", Level: 1, UnlockRequirement: "Defeat Gate Boss", ReqLevel: 1 },
-	"bone_armor": { ID: "bone_armor", Name: "🦴 Bone Armor", MPCost: 20, Rank: "E", Type: "active", Category: "defense", Level: 1, UnlockRequirement: "Defeat Gate Boss", ReqLevel: 1 },
-	"miners_instinct": { ID: "miners_instinct", Name: "⛏️ Miner's Instinct", Rank: "E", Type: "passive", Category: "utility", Level: 1, UnlockRequirement: "Achievement: miner_50" },
-	"trap_sense": { ID: "trap_sense", Name: "🔍 Trap Sense", Rank: "D", Type: "passive", Category: "defense", Level: 1, UnlockRequirement: "Clear spiders nest (0/5)" },
-	"critical_eye": { ID: "critical_eye", Name: "👁️ Critical Eye", Rank: "C", Type: "passive", Category: "attack", Level: 1, UnlockRequirement: "Clear crystal depths (0/5)" },
-}
-
-var SkillEvolutions = map[string]string{
-	"power_strike": "heavy_cleave", "heavy_cleave": "armor_break", "armor_break": "earth_shatter", "earth_shatter": "meteor_strike", "meteor_strike": "world_severing_slash",
-	"fireball": "flame_pillar", "flame_pillar": "hellfire", "hellfire": "dragon_breath", "dragon_breath": "prominence_burn",
-	"water_jet": "water_blade", "water_blade": "tidal_surge", "tidal_surge": "tsunami", "tsunami": "oceanic_wrath",
-	"lightning": "black_lightning", "black_lightning": "storm_magic", "storm_magic": "veldora",
-	"venom_spit": "poison_fang", "poison_fang": "deadly_venom", "deadly_venom": "rot_attack",
-	"soul_reap": "shadow_extraction", "shadow_extraction": "arise", "arise": "monarchs_domain",
-	"void_slash": "spatial_severance", "spatial_severance": "dimension_fault",
-	"predator": "gluttony", "gluttony": "beelzebuth",
-	"great_sage": "raphael", "appraisal": "wisdom_king_sariel",
-	"spider_thread": "universal_thread", "universal_thread": "divine_thread",
-	"multilayer_barrier": "uriel", "evil_eye": "abyss_magic",
 }
