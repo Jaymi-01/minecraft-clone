@@ -19,10 +19,11 @@ type Location struct {
 }
 
 type Monster struct {
-	Name      string
-	Health    int
-	Damage    int
-	LootTable map[string]float64
+	Name          string             `json:"name"`
+	Health        int                `json:"health"`
+	Damage        int                `json:"damage"`
+	LootTable     map[string]float64 `json:"loot_table"`
+	StatusEffects map[string]int     `json:"status_effects"` // effect -> duration
 }
 
 type Recipe struct {
@@ -126,7 +127,9 @@ type Player struct {
 	SystemOrigin   string          `json:"system_origin"`
 	Exploring      bool            `json:"exploring"`
 	ExplorationDepth int           `json:"exploration_depth"`
-	ActionLog      []string        `json:"action_log"`
+	ActionLog        []string        `json:"action_log"`
+	StatusEffects    map[string]int  `json:"status_effects"` // effect -> duration
+	Attributes       map[string]bool `json:"attributes"`     // e.g., "dark": true
 }
 
 type Subordinate struct {
