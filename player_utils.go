@@ -7,9 +7,9 @@ import (
 
 func (p *Player) EquipItem(id string) {
 	id = strings.ToLower(id); r, ok := Recipes[id]; if !ok || p.Inventory[id] <= 0 { return }
-	if p.Level < r.RequiredLevel { fmt.Printf("🚫 Need Level %d.\n", r.RequiredLevel); return }
+	if p.Level < r.RequiredLevel { fmt.Printf("🚫 [SYSTEM]: Strength insufficient. Level %d required.\n", r.RequiredLevel); return }
 	if r.ResultType == "weapon" { p.EquippedWeapon = id } else if r.ResultType == "armor" { p.EquippedArmor = id }
-	p.WorldNotice("Equipped: " + r.Name); p.Save()
+	p.WorldNotice("EQUIPPED: " + r.Name); p.Save()
 }
 
 func (p *Player) UnequipItem(slot string) {
@@ -25,8 +25,8 @@ func (p *Player) GetEquippedArmorDefense() int {
 }
 
 func (p *Player) GainTaboo(amount int) {
-	p.Taboo += amount; p.WorldNotice(fmt.Sprintf("Taboo Level increased to %d", p.Taboo))
-	if p.Taboo == 10 { p.WorldNotice("Forbidden threshold crossed.") }; p.CheckTitles()
+	p.Taboo += amount; p.WorldNotice(fmt.Sprintf("TABOO INFLUENCE increased to %d", p.Taboo))
+	if p.Taboo >= 10 { p.WorldNotice("FORBIDDEN THRESHOLD CROSSED: The System is watching.") }; p.CheckTitles()
 }
 
 func (p *Player) CheckTitles() {
@@ -41,22 +41,56 @@ func (p *Player) CheckTitles() {
 			}
 			if met {
 				found := false; for _, owned := range p.Titles { if owned == id { found = true; break } }
-				if !found { p.Titles = append(p.Titles, id); p.SyncStats(); p.WorldNotice("New Title: " + t.Name) }
+				if !found { p.Titles = append(p.Titles, id); p.SyncStats(); p.WorldNotice("TITLE GRANTED: " + t.Name) }
 			}
 		}
 	}
 }
 
 func (p *Player) ShowHelp() {
-	fmt.Println("\n--- 📖 SYSTEM GUIDE ---")
-	fmt.Println("   !mine <loc>   - Gather resources")
-	fmt.Println("   !status / !s  - View profile")
-	fmt.Println("   !inventory / !i- Check items")
-	fmt.Println("   !shop / !buy  - Purchase gear")
-	fmt.Println("   !elementalshop- Master elements")
-	fmt.Println("   !tabooshop    - Forbidden sanctum")
-	fmt.Println("   !merge <attr> <skill> - Evolve skills")
-	fmt.Println("   !squad add <n>- Manage combat party")
+	fmt.Println("\n--- 📖 [SYSTEM COMMAND DIRECTORY] ---")
+	fmt.Println("   --- CORE ---")
+	fmt.Println("   !status / !s      - Display comprehensive identification data.")
+	fmt.Println("   !inventory / !i   - Access dimensional storage.")
+	fmt.Println("   !skills / !sk     - View integrated skill archive.")
+	fmt.Println("   !titles           - List achieved accolades.")
+	fmt.Println("   !quests / !q      - Check current mission objectives.")
+	
+	fmt.Println("\n   --- PROGRESSION ---")
+	fmt.Println("   !mine <location>  - Extract resources from mapped sectors.")
+	fmt.Println("   !explore          - Enter the Great Labyrinth.")
+	fmt.Println("   !enter            - Breach the current Gate manifestation.")
+	fmt.Println("   !origin <type>    - Finalize reincarnation logic (Lvl 10).")
+	fmt.Println("   !evolve           - Transcend to the next existence tier.")
+	
+	fmt.Println("\n   --- EQUIPMENT & MASTERY ---")
+	fmt.Println("   !equip <id>       - Synchronize gear or skill to active slots.")
+	fmt.Println("   !unequip <slot>   - De-synchronize gear or skill.")
+	fmt.Println("   !use <item_id>    - Consume material for restoration.")
+	fmt.Println("   !upgrade <sk_id>  - Enhance skill level using Skill Points.")
+	fmt.Println("   !dupskill <n> <id>- Harvest and duplicate skill from subordinate.")
+	fmt.Println("   !learn <skill_id> - Integrate new skill data.")
+	fmt.Println("   !craft <item_id>  - Synthesize gear at the system forge.")
+	fmt.Println("   !merge <attr> <sk>- Fuse forbidden attributes with mastered skills.")
+	
+	fmt.Println("\n   --- ECONOMY & DOMAIN ---")
+	fmt.Println("   !shop             - Access merchant network.")
+	fmt.Println("   !buy <id>         - Acquire standard instruments.")
+	fmt.Println("   !elementalshop    - Contract with fundamental elements.")
+	fmt.Println("   !tabooshop        - Access the Forbidden Sanctum.")
+	fmt.Println("   !raid <target>    - Commence assault on hostile settlements.")
+	fmt.Println("   !squad <list|add> - Manage the Shadow Army vanguard.")
+	fmt.Println("   !help             - Re-display this directory.")
 }
 
-func (p *Player) Use(id string) { if p.Inventory[id] > 0 { p.Inventory[id]--; p.HealFull() } }
+func (p *Player) Use(id string) { 
+	id = strings.ToLower(id)
+	if p.Inventory[id] <= 0 { fmt.Printf("❌ [SYSTEM]: Item '%s' not found in storage.\n", id); return }
+	
+	p.Inventory[id]--
+	if p.Inventory[id] == 0 { delete(p.Inventory, id) }
+	
+	p.HealFull()
+	p.WorldNotice(fmt.Sprintf("RESTORED: Existence stabilized via %s.", strings.ToUpper(id)))
+	p.Save()
+}
