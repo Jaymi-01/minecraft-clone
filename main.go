@@ -23,9 +23,11 @@ func main() {
 	player.StartRaids()
 	player.StartGateSpawning()
 	player.StartSubordinateAutonomy()
+	player.StartCaravanCycle()
 	StartServer(player)
 
 	for {
+		player.CheckTrainingReset()
 		if player.Exploring {
 			fmt.Printf("\n📍 [LABYRINTH DEPTH %d] Actions: W (Forward), A (Left), D (Right), S (Backward), !emerge\nChoice: ", player.ExplorationDepth)
 		} else {
@@ -118,6 +120,10 @@ func main() {
 			if len(parts) < 2 { fmt.Println("🌌 Usage: !buytaboo <id>") } else { player.BuyTabooSkill(parts[1]) }
 		case "!shop":
 			player.ListShop()
+		case "!caravan":
+			player.ListCaravan()
+		case "!buycaravan":
+			if len(parts) < 2 { fmt.Println("🛒 Usage: !buycaravan <id>") } else { player.BuyFromCaravan(parts[1]) }
 		case "!buy":
 			if len(parts) < 2 { fmt.Println("💰 Usage: !buy <id>") } else { player.Buy(parts[1]) }
 		case "!elementalshop":
@@ -130,12 +136,38 @@ func main() {
 			if len(parts) < 2 { fmt.Println("🧬 Usage: !origin <slime|spider>") } else { player.ChooseOrigin(parts[1]) }
 		case "!evolve":
 			player.Evolve()
+		case "!jobtrial":
+			player.StartJobTrial()
+		case "!shadowexchange":
+			if player.Job != "Shadow Monarch" { 
+				fmt.Println("❌ [SYSTEM]: This command is exclusive to the SHADOW MONARCH.") 
+			} else if len(parts) < 3 {
+				fmt.Println("👥 Usage: !shadowexchange <current_member> <new_member>")
+			} else {
+				player.ShadowExchange(parts[1], parts[2])
+			}
 		case "!explore":
 			player.StartExploration()
+		case "!enhance":
+			if len(parts) < 2 { fmt.Println("⚒️ Usage: !enhance <item_id>") } else { player.EnhanceItem(parts[1]) }
+		case "!socket":
+			if len(parts) < 3 { fmt.Println("⚒️ Usage: !socket <item_id> <rune_id>") } else { player.SocketRune(parts[1], parts[2]) }
 		case "!craft":
 			if len(parts) < 2 { player.ListDCraftable() } else { player.Craft(parts[1]) }
 		case "!raid":
 			if len(parts) < 2 { player.ListRaids() } else { player.Raid(parts[1]) }
+		case "!arise":
+			player.Arise()
+		case "!promote":
+			if len(parts) < 2 { fmt.Println("🤝 Usage: !promote <shadow_name>") } else { player.PromoteShadow(parts[1]) }
+		case "!domain":
+			if len(parts) < 2 {
+				player.ListDomain()
+			} else if parts[1] == "build" && len(parts) > 2 {
+				player.BuildDomainStructure(parts[2])
+			} else if parts[1] == "claim" {
+				player.ClaimPassiveIncome()
+			}
 		case "!squad":
 			if len(parts) < 2 { fmt.Println("👥 !squad <add|remove|list>") } else {
 				if parts[1] == "add" && len(parts) > 2 { 
@@ -148,6 +180,8 @@ func main() {
 			}
 		case "!name":
 			if len(parts) < 3 { fmt.Println("🤝 Usage: !name <species> <given_name>") } else { player.NameSubordinate(parts[1], parts[2]) }
+		case "!train":
+			if len(parts) < 2 { fmt.Println("🏋️ Usage: !train <pushups|situps|squats|running>") } else { player.Train(parts[1]) }
 		case "!help", "!h", "?":
 			player.ShowHelp()
 		case "!recover":
