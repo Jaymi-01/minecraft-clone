@@ -54,11 +54,18 @@ func (p *Player) Combat(m *Monster, isGate bool) bool {
 				fmt.Printf("[!fight%d: %s (MP: %d)] ", i+1, skill.Name, skill.MPCost)
 			}
 		}
-		fmt.Print("\nCOMMAND: ")
+		fmt.Print("COMMAND: ")
 		input, _ := reader.ReadString('\n'); input = strings.TrimSpace(input)
+		if input == "!recover" { 
+			p.HealFull()
+			p.Stamina = p.MaxStamina
+			fmt.Println("⚡ [CHEAT]: Existence restored to peak state (HP/MP/Stamina).")
+			continue 
+		}
 		damage := 0; action := false; usedSkillName := ""
 
 		if input == "!fight" {
+
 			damage = p.Attack + p.GetEquippedWeaponDamage() + squadAtk + rand.Intn(5)
 			if parallelActive { damage *= 2; fmt.Println("🧠 [PARALLEL MINDS]: Dual strike logic applied!") }
 			if rand.Float64() <= critChance { damage = int(float64(damage) * 1.5); fmt.Println("🎯 [CRITICAL HIT]: Precise strike landed!") }
