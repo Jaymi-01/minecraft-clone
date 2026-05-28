@@ -36,6 +36,8 @@ func (p *Player) Evolve() {
 	case "Demon Slime":
 		if p.Level >= 60 { p.SystemOrigin = "Ultimate Slime (True Dragon)"; evolved = true }
 	case "Spider":
+		if p.Level >= 20 { p.SystemOrigin = "Small Poison Taratect"; evolved = true }
+	case "Small Poison Taratect":
 		if p.Level >= 30 { p.SystemOrigin = "Arachne"; p.AddSkill("dim_maneuver"); evolved = true }
 	case "Arachne":
 		if p.Level >= 60 { p.SystemOrigin = "God (Shiraori)"; p.AddSkill("egg_revival"); evolved = true }
