@@ -132,8 +132,13 @@ func (p *Player) StartGateSpawning() {
 
 func (p *Player) SpawnGate() {
 	ranks := []string{"E", "D", "C", "B", "A", "S", "SS"}
-	r := ranks[rand.Intn(len(ranks))]; g := Gates[r]
-	bosses := GateBosses[r]; if len(bosses) > 0 { g.Boss = bosses[rand.Intn(len(bosses))] }
-	p.CurrentGate = &g
+	r := ranks[rand.Intn(len(ranks))]
+	g := Gates[r]
+	newGate := g
+	bosses := GateBosses[r]
+	if len(bosses) > 0 {
+		newGate.Boss = bosses[rand.Intn(len(bosses))]
+	}
+	p.CurrentGate = &newGate
 	p.WorldNotice(fmt.Sprintf("A Rank %s Gate has manifested in the world! Recommended Level: %d", r, g.MinLevel))
 }
