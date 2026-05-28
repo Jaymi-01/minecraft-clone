@@ -51,6 +51,8 @@ func main() {
 		switch command {
 		case "!skills", "!sk":
 			player.ListSkills()
+		case "!allskills":
+			player.ListAllSystemSkills()
 		case "!subordinates", "!subs":
 			player.ListSubordinates()
 		case "!titles":
@@ -142,6 +144,8 @@ func main() {
 					player.ListSquad() 
 				}
 			}
+		case "!name":
+			if len(parts) < 3 { fmt.Println("🤝 Usage: !name <species> <given_name>") } else { player.NameSubordinate(parts[1], parts[2]) }
 		case "!help", "!h", "?":
 			player.ShowHelp()
 		case "!recover":
