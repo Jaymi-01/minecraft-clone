@@ -77,12 +77,29 @@ func main() {
 				if isSkill { player.EquipSkill(id) } else { player.EquipItem(id) }
 			}
 		case "!unequip":
-			if len(parts) < 2 { fmt.Println("🔮 Usage: !unequip <slot_number|weapon|armor>") } else {
+			if len(parts) < 2 { fmt.Println("🔮 Usage: !unequip <slot_number|skill_id|weapon|armor>") } else {
+				id := parts[1]
 				var slot int
-				if n, err := fmt.Sscanf(parts[1], "%d", &slot); err == nil && n == 1 {
+				if n, err := fmt.Sscanf(id, "%d", &slot); err == nil && n == 1 {
 					player.UnequipSkill(slot)
+				} else if id == "weapon" || id == "armor" {
+					player.UnequipItem(id)
 				} else {
-					player.UnequipItem(parts[1])
+					// Try to unequip by skill ID
+					found := false
+					for i, eq := range player.EquippedSkills {
+						if eq == id {
+							player.UnequipSkill(i + 1)
+							found = true
+							break
+						}
+					}
+					if !found {
+						// Maybe it's a weapon/armor ID they typed?
+						if player.EquippedWeapon == id { player.UnequipItem("weapon") } else if player.EquippedArmor == id { player.UnequipItem("armor") } else {
+							fmt.Printf("❌ [SYSTEM]: '%s' is not currently equipped in any slot.\n", id)
+						}
+					}
 				}
 			}
 		case "!upgrade":
@@ -146,10 +163,15 @@ func main() {
 					player.WorldNotice(fmt.Sprintf("EVAL: itemvar.%s = %d", itemName, player.Inventory[itemName]))
 				}
 			} else if strings.HasPrefix(command, "eval.giveusergatevar") {
-				gateType := strings.TrimPrefix(command, "eval.giveusergatevar")
-				if g, ok := Gates[strings.ToUpper(gateType)]; ok {
-					player.CurrentGate = &g
-					player.WorldNotice("EVAL: gatevar.manifest = " + gateType)
+				gateType := strings.ToUpper(strings.TrimPrefix(command, "eval.giveusergatevar"))
+				if g, ok := Gates[gateType]; ok {
+					newGate := g
+					bosses := GateBosses[gateType]
+					if len(bosses) > 0 {
+						newGate.Boss = bosses[rand.Intn(len(bosses))]
+					}
+					player.CurrentGate = &newGate
+					player.WorldNotice(fmt.Sprintf("EVAL: gatevar.manifest = %s (Boss: %s)", gateType, newGate.Boss.Name))
 				}
 			} else if strings.HasPrefix(command, "eval.giveusertaboovar") {
 				qtyStr := strings.TrimPrefix(command, "eval.giveusertaboovar")
