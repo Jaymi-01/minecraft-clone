@@ -69,10 +69,10 @@ type Quest struct {
 }
 
 type TrainingProgress struct {
-	Pushups  int       `json:"pushups"`
-	Situps   int       `json:"situps"`
-	Squats   int       `json:"squats"`
-	Running  int       `json:"running"`
+	Pushups   int       `json:"pushups"`
+	Situps    int       `json:"situps"`
+	Squats    int       `json:"squats"`
+	Running   int       `json:"running"`
 	LastReset time.Time `json:"last_reset"`
 }
 
@@ -121,7 +121,12 @@ type Player struct {
 	EquippedArmor  string          `json:"equipped_armor"`
 	ItemRarities   map[string]string `json:"item_rarities"` // item_id -> rarity
 	ItemLevels     map[string]int    `json:"item_levels"`   // item_id -> +1, +2
+	ItemRunes      map[string][]string `json:"item_runes"`  // item_id -> ["lifesteal", etc.]
 	Training       TrainingProgress  `json:"training"`
+	TrainingCompletedToday bool      `json:"training_completed_today"`
+	PenaltyActive  bool              `json:"penalty_active"`
+	AriseActive    bool              `json:"arise_active"`
+	AriseMonster   *Monster          `json:"arise_monster"`
 	Production     ProductionLog     `json:"production"`
 	CurrentGate    *Gate           `json:"current_gate"`
 	SystemOrigin   string          `json:"system_origin"`
@@ -130,11 +135,20 @@ type Player struct {
 	ActionLog        []string        `json:"action_log"`
 	StatusEffects    map[string]int  `json:"status_effects"` // effect -> duration
 	Attributes       map[string]bool `json:"attributes"`     // e.g., "dark": true
+	InCombat         bool            `json:"in_combat"`      // Prevents background interruptions
+	Job              string          `json:"job"`            // "Shadow Monarch", etc.
+	TrialActive      bool            `json:"trial_active"`
+	CaravanActive    bool            `json:"caravan_active"`
+	CaravanInventory map[string]ShopItem `json:"caravan_inventory"`
+	DomainLevel      int               `json:"domain_level"`
+	DomainStructures map[string]int    `json:"domain_structures"` // structure_id -> level
+	LastIncomeClaim  time.Time         `json:"last_income_claim"`
 }
 
 type Subordinate struct {
 	Name       string    `json:"name"`
 	Species    string    `json:"species"`
+	Rank       string    `json:"rank"` // Soldier, Elite, Knight, etc.
 	Attack     int       `json:"attack"`
 	Defense    int       `json:"defense"`
 	Level      int       `json:"level"`
@@ -165,7 +179,9 @@ type Skill struct {
 	Desc              string
 	Rank              string // E, D, C, B, A, S
 	Type              string // "active", "passive"
-	Category          string // "attack", "defense", "heal"
+	Category          string // "attack", "defense", "heal", "utility"
+	StatusEffect      string // "burn", "paralyze", "restrain"
+	StatusChance      float64
 	Level             int
 	UnlockRequirement string
 	ReqBoss           string
