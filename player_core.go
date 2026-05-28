@@ -10,14 +10,29 @@ import (
 
 func NewPlayer(name string) *Player {
 	return &Player{
-		Name:           name,
-		Health:         100, MaxHealth: 100, Attack: 10, Defense: 0, Stamina: 50, MaxStamina: 50, Magic: 100, MaxMagic: 100,
-		Level:          1, XP: 0, XPToNext: 100, HunterLevel: 1, HunterRank: "E", Inventory: map[string]int{"wood_pickaxe": 1, "gold": 100},
-		ToolDurability: 50, Structures: make(map[string]bool), QuestProgress: make(map[string]int), Rank: "E", MonsterKills: make(map[string]int),
-		SkillLevels: make(map[string]int), SkillUsage: make(map[string]int), SkillCooldowns: make(map[string]int),
-		Subordinates: []Subordinate{}, Squad: []string{}, ItemRarities: make(map[string]string), ItemLevels: make(map[string]int),
-		Training: TrainingProgress{LastReset: time.Now()}, Production: ProductionLog{LastProduced: time.Now(), PendingItems: make(map[string]int)},
-		SystemOrigin: "Human", Attributes: make(map[string]bool), StatusEffects: make(map[string]int),
+		Name:             name,
+		Health:           100, MaxHealth: 100, Attack: 10, Defense: 0, Stamina: 50, MaxStamina: 50, Magic: 100, MaxMagic: 100,
+		Level:            1, XP: 0, XPToNext: 100, HunterLevel: 1, HunterRank: "E", 
+		Inventory:        map[string]int{"wood_pickaxe": 1, "gold": 100},
+		ToolDurability:   50, 
+		Structures:       make(map[string]bool), 
+		QuestProgress:    make(map[string]int), 
+		Rank:             "E", 
+		MonsterKills:     make(map[string]int),
+		SkillLevels:      make(map[string]int), 
+		SkillUsage:       make(map[string]int), 
+		SkillCooldowns:   make(map[string]int),
+		Subordinates:     []Subordinate{}, 
+		Squad:            []string{}, 
+		ItemRarities:     make(map[string]string), 
+		ItemLevels:       make(map[string]int),
+		ItemRunes:        make(map[string][]string),
+		Training:         TrainingProgress{LastReset: time.Now()}, 
+		Production:       ProductionLog{LastProduced: time.Now(), PendingItems: make(map[string]int)},
+		SystemOrigin:     "Human", 
+		Attributes:       make(map[string]bool), 
+		StatusEffects:    make(map[string]int),
+		DomainStructures: make(map[string]int),
 	}
 }
 
@@ -27,16 +42,27 @@ func LoadPlayer() *Player {
 	data, err := os.ReadFile("player_data.json")
 	if err != nil { data, err = os.ReadFile("player_data.json.bak"); if err != nil { return NewPlayer("Adventurer") } }
 	var p Player; json.Unmarshal(data, &p)
+	
+	// Rigorous map and slice initialization
 	if p.Inventory == nil { p.Inventory = make(map[string]int) }
 	if p.QuestProgress == nil { p.QuestProgress = make(map[string]int) }
 	if p.MonsterKills == nil { p.MonsterKills = make(map[string]int) }
 	if p.SkillLevels == nil { p.SkillLevels = make(map[string]int) }
 	if p.SkillUsage == nil { p.SkillUsage = make(map[string]int) }
+	if p.SkillCooldowns == nil { p.SkillCooldowns = make(map[string]int) }
 	if p.Subordinates == nil { p.Subordinates = []Subordinate{} }
 	if p.Squad == nil { p.Squad = []string{} }
 	if p.Attributes == nil { p.Attributes = make(map[string]bool) }
 	if p.StatusEffects == nil { p.StatusEffects = make(map[string]int) }
 	if p.Structures == nil { p.Structures = make(map[string]bool) }
+	if p.ItemRarities == nil { p.ItemRarities = make(map[string]string) }
+	if p.ItemLevels == nil { p.ItemLevels = make(map[string]int) }
+	if p.ItemRunes == nil { p.ItemRunes = make(map[string][]string) }
+	if p.DomainStructures == nil { p.DomainStructures = make(map[string]int) }
+	
+	p.InCombat = false // Reset state on load
+	p.TrialActive = false
+
 	p.UpdateRank(); p.UpdateHunterRank(); p.UpdateSkillSlots(); p.SyncStats()
 	return &p
 }
@@ -49,7 +75,15 @@ func (p *Player) UpdateHunterRank() { if p.HunterLevel >= 150 { p.HunterRank = "
 func (p *Player) UpdateSkillSlots() { p.SkillSlots = 5 + (p.Level / 5); if p.Attributes["shadow_army_expansion"] { p.SkillSlots += 3 } }
 
 func (p *Player) GainXP(amount int) {
-	if p.Structures["enchanting_table"] { amount = int(float64(amount) * 1.5) }; p.XP += amount
+	if p.Structures["enchanting_table"] { amount = int(float64(amount) * 1.5) }
+	
+	// Domain Bonus: Research Lab
+	if labLvl := p.DomainStructures["research_lab"]; labLvl > 0 {
+		bonus := float64(labLvl) * 0.1
+		amount = int(float64(amount) * (1.0 + bonus))
+	}
+
+	p.XP += amount
 	fmt.Printf("[✨ +%d EXPERIENCE POINTS]\n", amount)
 	for p.XP >= p.XPToNext {
 		p.Level++; p.XP -= p.XPToNext; p.XPToNext = int(float64(p.XPToNext) * 1.5)
@@ -105,6 +139,14 @@ func (p *Player) SyncStats() {
 	for _, tID := range p.Titles {
 		if t, ok := GlobalTitles[tID]; ok {
 			p.Attack += t.AttackBonus; p.MaxHealth += t.HPBonus; p.Defense += t.DefenseBonus; p.MaxMagic += t.MPBonus; p.MaxStamina += t.StaminaBonus
+		}
+	}
+
+	// Rune Bonuses
+	for _, runes := range p.ItemRunes {
+		for _, runeID := range runes {
+			if runeID == "mana_rune" { p.MaxMagic += 50 }
+			if runeID == "defense_rune" { p.Defense += 20 }
 		}
 	}
 
