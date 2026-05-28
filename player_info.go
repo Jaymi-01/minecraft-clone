@@ -86,6 +86,17 @@ func (p *Player) ListSquad() {
 	for _, n := range p.Squad { fmt.Printf("   🤝 UNIT: %s\n", n) }
 }
 
+func (p *Player) RemoveFromSquad(name string) {
+	for i, n := range p.Squad {
+		if strings.EqualFold(n, name) {
+			p.Squad = append(p.Squad[:i], p.Squad[i+1:]...)
+			p.WorldNotice(fmt.Sprintf("DISMISSAL: [%s] has been removed from active duty.", n))
+			p.Save(); return
+		}
+	}
+	fmt.Printf("❌ [SYSTEM]: Unit '%s' is not in the active squad.\n", name)
+}
+
 func (p *Player) ListTitles() {
 	fmt.Println("\n--- 🏆 [ACHIEVED TITLES] ---")
 	if len(p.Titles) == 0 { fmt.Println("   (No titles earned yet)"); return }
