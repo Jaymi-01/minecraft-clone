@@ -124,31 +124,43 @@ func (p *Player) ListAllSystemSkills() {
 	}
 }
 
-func (p *Player) MergeSkill(attr, target string) {
-	attr = strings.ToLower(attr); target = strings.ToLower(target)
-	if !p.Attributes[attr] { fmt.Printf("❌ [SYSTEM]: Attribute '%s' not present in soul core.\n", attr); return }
-	
+func (p *Player) MergeSkill(attrInput, target string) {
+	attrInput = strings.ToLower(attrInput); target = strings.ToLower(target)
+
+	// Normalize attribute ID (e.g., 'dark' -> 'dark_attribute')
+	attrID := attrInput
+	if !strings.HasSuffix(attrID, "_attribute") { attrID += "_attribute" }
+
+	if !p.Attributes[attrID] { 
+		fmt.Printf("❌ [SYSTEM]: Attribute '%s' not present in soul core. Mastery of the corresponding Taboo insight required.\n", attrInput)
+		return 
+	}
+
 	merges := map[string]map[string]string{
 		"dark_attribute": {
 			"prominence_burn": "hellfire", 
 			"indra_judgement": "black_lightning", 
-			"oceanic_wrath": "abyss_tide", 
-			"world_severing": "void_slash",
+			"oceanic_wrath":   "abyss_tide", 
+			"world_severing":  "void_slash",
 		},
 		"decay_attribute": {
 			"deadly_venom": "rot_attack",
 		},
 	}
-	
-	res, ok := merges[attr][target]
-	if !ok || !p.HasSkill(target) { fmt.Println("❌ [SYSTEM]: Merging sequence failed. Elements are incompatible."); return }
-	
+
+	res, ok := merges[attrID][target]
+	if !ok || !p.HasSkill(target) { 
+		fmt.Printf("❌ [SYSTEM]: Merging sequence failed. Elements [%s] and [%s] are incompatible or skill not owned.\n", strings.ToUpper(attrInput), strings.ToUpper(target))
+		return 
+	}
+
 	for i, s := range p.Skills { if s == target { p.Skills[i] = res; break } }
 	for i, s := range p.EquippedSkills { if s == target { p.EquippedSkills[i] = res; break } }
-	
-	p.WorldNotice(fmt.Sprintf("FORBIDDEN MERGE: [%s] and [%s] have fused to birth [%s]!", strings.ToUpper(attr), GlobalSkills[target].Name, GlobalSkills[res].Name))
+
+	p.WorldNotice(fmt.Sprintf("FORBIDDEN MERGE: [%s] and [%s] have fused to birth [%s]!", strings.ToUpper(attrInput), GlobalSkills[target].Name, GlobalSkills[res].Name))
 	p.Save()
 }
+
 
 func (p *Player) DuplicateSkill(subName, skillID string) {
 	if !p.HasSkill("shub_niggurath") { fmt.Println("❌ [SYSTEM]: Harvest Lord ability required for duplication."); return }
