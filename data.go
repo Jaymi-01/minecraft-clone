@@ -136,7 +136,10 @@ var GlobalSkills = map[string]Skill{
 	"divine_thread":  { ID: "divine_thread", Name: "✨ Divine Thread", DmgBonus: 1500, MPCost: 400, Rank: "Ultimate", Type: "active", Category: "attack", UnlockRequirement: "Evolve Steel Thread" },
 	"appraisal":      { ID: "appraisal", Name: "👁️ Appraisal", Rank: "Unique", Type: "passive", Category: "utility", UnlockRequirement: "Spider Origin" },
 	"evil_eye":       { ID: "evil_eye", Name: "🧿 Evil Eye of Statis", DmgBonus: 200, Rank: "B", Type: "active", Category: "attack", UnlockRequirement: "Spider Origin" },
-	"abyss_magic":    { ID: "abyss_magic", Name: "🕳️ Abyss Magic", DmgBonus: 8000, Rank: "Ultimate", Type: "active", Category: "attack", UnlockRequirement: "Evolve Evil Eye" },
+	"annihilating_eye": { ID: "annihilating_eye", Name: "🧿 Annihilating Evil Eye", DmgBonus: 2500, MPCost: 500, Rank: "Ultimate", Type: "active", Category: "attack", UnlockRequirement: "Evolve Evil Eye" },
+	"abyss_magic":    { ID: "abyss_magic", Name: "🕳️ Abyss Magic", DmgBonus: 8000, MPCost: 2000, Rank: "Ultimate", Type: "active", Category: "attack", UnlockRequirement: "Evolve Annihilating Eye" },
+	"parallel_minds": { ID: "parallel_minds", Name: "🧠 Parallel Minds", Rank: "Unique", Type: "passive", Category: "utility", UnlockRequirement: "Spider Evolution: Small Poison Taratect" },
+	"heresy_magic":   { ID: "heresy_magic", Name: "🔮 Heresy Magic", DmgBonus: 1000, MPCost: 300, Rank: "Unique", Type: "active", Category: "attack", UnlockRequirement: "Spider Origin + Taboo 10" },
 	"dim_maneuver":   { ID: "dim_maneuver", Name: "🌌 Dimensional Maneuver", MPCost: 150, Rank: "S", Type: "active", Category: "utility", UnlockRequirement: "Spider Evolution: Arachne" },
 	"egg_revival":    { ID: "egg_revival", Name: "🥚 Egg Revivification", Rank: "Ultimate", Type: "passive", Category: "defense", UnlockRequirement: "Spider Evolution: God" },
 	"sariel":         { ID: "sariel", Name: "🦉 Wisdom King Sariel", Rank: "Ultimate", Type: "passive", Category: "utility", UnlockRequirement: "Evolve Appraisal" },
@@ -145,8 +148,11 @@ var GlobalSkills = map[string]Skill{
 	"predator":       { ID: "predator", Name: "🌀 Predator", DmgBonus: 100, Rank: "Unique", Type: "active", Category: "attack", UnlockRequirement: "Slime Origin" },
 	"gluttony":       { ID: "gluttony", Name: "👿 Gluttony", DmgBonus: 300, Rank: "Unique", Type: "active", Category: "attack", UnlockRequirement: "Evolve Predator" },
 	"beelzebuth":     { ID: "beelzebuth", Name: "👹 Gluttonous King Beelzebuth", DmgBonus: 1200, Rank: "Ultimate", Type: "active", Category: "attack", UnlockRequirement: "Evolve Gluttony" },
+	"azathoth":       { ID: "azathoth", Name: "🌌 Void God Azathoth", DmgBonus: 15000, MPCost: 5000, Rank: "God", Type: "active", Category: "attack", UnlockRequirement: "Evolve Beelzebuth" },
 	"great_sage":     { ID: "great_sage", Name: "🧠 Great Sage", Rank: "Unique", Type: "passive", Category: "utility", UnlockRequirement: "Slime Origin" },
 	"raphael":        { ID: "raphael", Name: "📚 Wisdom King Raphael", Rank: "Ultimate", Type: "passive", Category: "utility", UnlockRequirement: "Evolve Great Sage" },
+	"ciel":           { ID: "ciel", Name: "👸 Manas: Ciel", Rank: "God", Type: "passive", Category: "utility", UnlockRequirement: "Evolve Raphael" },
+	"megiddo":        { ID: "megiddo", Name: "☀️ God's Wrath (Megiddo)", DmgBonus: 5000, MPCost: 1000, Rank: "Unique", Type: "active", Category: "attack", UnlockRequirement: "Slime Evolution: Demon Lord" },
 	"shub_niggurath": { ID: "shub_niggurath", Name: "🧬 Harvest Lord Shub-Niggurath", Rank: "Ultimate", Type: "passive", Category: "utility", UnlockRequirement: "Taboo Shop" },
 
 	// --- General ---
@@ -163,8 +169,9 @@ var SkillEvolutions = map[string]string{
 	"power_strike": "heavy_cleave", "heavy_cleave": "armor_break", "armor_break": "earth_shatter", "earth_shatter": "meteor_strike", "meteor_strike": "world_severing",
 	"venom_spit": "poison_fang", "poison_fang": "deadly_venom",
 	"spider_thread": "steel_thread", "steel_thread": "divine_thread",
-	"appraisal": "sariel", "great_sage": "raphael", "predator": "gluttony", "gluttony": "beelzebuth",
-	"evil_eye": "abyss_magic",
+	"appraisal": "sariel", "great_sage": "raphael", "raphael": "ciel",
+	"predator": "gluttony", "gluttony": "beelzebuth", "beelzebuth": "azathoth",
+	"evil_eye": "annihilating_eye", "annihilating_eye": "abyss_magic",
 }
 
 var GlobalQuests = []Quest{
@@ -177,23 +184,48 @@ var GlobalQuests = []Quest{
 }
 
 var GateBosses = map[string][]Monster{
-	"E": {{Name: "👹 Hobgoblin", Health: 100, Damage: 15, LootTable: map[string]float64{"goblin_ear": 1.0}}, {Name: "🕷️ Small Lesser Taratect", Health: 80, Damage: 10, LootTable: map[string]float64{"string": 1.0}}},
-	"D": {{Name: "🐺 Alpha Wolf", Health: 250, Damage: 30, LootTable: map[string]float64{"wolf_fang": 1.0}}, {Name: "🕷️ Spider Queen (Small)", Health: 300, Damage: 35, LootTable: map[string]float64{"spider_eye": 0.5, "string": 1.0}}},
-	"C": {{Name: "🦎 Naga Warrior", Health: 600, Damage: 60, LootTable: map[string]float64{"naga_scale": 1.0}}, {Name: "🛡️ Iron Tyrant", Health: 800, Damage: 70, LootTable: map[string]float64{"iron_plate": 0.5}}},
-	"B": {{Name: "🦾 Golem Guardian", Health: 1500, Damage: 120, LootTable: map[string]float64{"core_fragment": 1.0}}, {Name: "🎭 Clayman", Health: 2000, Damage: 150, LootTable: map[string]float64{"marionette_string": 0.5}}},
-	"A": {{Name: "🔥 Inferno Drake", Health: 4000, Damage: 250, LootTable: map[string]float64{"dragon_heart": 1.0}}, {Name: "⚔️ Hinata Sakaguchi", Health: 5000, Damage: 300, LootTable: map[string]float64{"holy_sword": 0.1}}},
-	"S": {{Name: "👑 Demon King", Health: 10000, Damage: 500, LootTable: map[string]float64{"demon_soul": 1.0}}, {Name: "👑 Shadow Monarch", Health: 15000, Damage: 600, LootTable: map[string]float64{"monarch_crown": 0.5}}},
-	"SS": {{Name: "🌌 Void Sovereign", Health: 50000, Damage: 1500, LootTable: map[string]float64{"void_crown": 1.0}}, {Name: "🌀 Storm Dragon Veldora", Health: 100000, Damage: 2500, LootTable: map[string]float64{"storm_crest": 1.0}}},
+	"E": {
+		{Name: "🕷️ Small Lesser Taratect", Health: 100, Damage: 15, LootTable: map[string]float64{"string": 1.0}},
+		{Name: "👺 Goblin Shaman", Health: 120, Damage: 20, LootTable: map[string]float64{"goblin_ear": 1.0}},
+	},
+	"D": {
+		{Name: "🕸️ Greater Taratect", Health: 350, Damage: 45, LootTable: map[string]float64{"spider_eye": 0.5, "string": 1.0}},
+		{Name: "🐺 Alpha Wolf (Dire)", Health: 400, Damage: 50, LootTable: map[string]float64{"wolf_fang": 1.0}},
+	},
+	"C": {
+		{Name: "🛡️ Blood-Red Commander Igris", Health: 1200, Damage: 120, LootTable: map[string]float64{"commander_helmet": 0.2, "iron_plate": 1.0}},
+		{Name: "👹 Orc Disaster Geld", Health: 1500, Damage: 100, LootTable: map[string]float64{"orc_meat": 1.0, "yellow_core": 0.3}},
+	},
+	"B": {
+		{Name: "🎭 Demon Lord Clayman", Health: 3500, Damage: 250, LootTable: map[string]float64{"marionette_string": 0.5, "demon_soul": 0.1}},
+		{Name: "❄️ Ice Elf Baruka", Health: 3000, Damage: 300, LootTable: map[string]float64{"ice_dagger": 0.2}},
+		{Name: "👵 Demon Lord Ariel", Health: 5000, Damage: 350, LootTable: map[string]float64{"demon_essence": 0.5}},
+	},
+	"A": {
+		{Name: "⚔️ Hinata Sakaguchi", Health: 12000, Damage: 650, LootTable: map[string]float64{"holy_sword": 0.1}},
+		{Name: "🔥 Vulcan (Ruler of Lower Floors)", Health: 15000, Damage: 800, LootTable: map[string]float64{"hell_stone": 0.5}},
+		{Name: "🤖 Potimas Harrifenas", Health: 20000, Damage: 900, LootTable: map[string]float64{"cyber_core": 0.3}},
+	},
+	"S": {
+		{Name: "👑 Shadow Monarch Sung Jin-Woo (Phantom)", Health: 50000, Damage: 2500, LootTable: map[string]float64{"monarch_crown": 0.5}},
+		{Name: "🐲 Storm Dragon Veldora (Corrupted)", Health: 75000, Damage: 3500, LootTable: map[string]float64{"storm_crest": 1.0}},
+		{Name: "💀 The Architect", Health: 60000, Damage: 3000, LootTable: map[string]float64{"system_key": 0.2}},
+	},
+	"SS": {
+		{Name: "🐲 Monarch of Destruction Antares", Health: 250000, Damage: 12000, LootTable: map[string]float64{"dragon_soul": 1.0}},
+		{Name: "✨ Yuuki Kagurazaka (Final Form)", Health: 300000, Damage: 15000, LootTable: map[string]float64{"world_core": 1.0}},
+		{Name: "🕷️ God (Shiraori) - Rival Reflection", Health: 200000, Damage: 20000, LootTable: map[string]float64{"void_crown": 1.0}},
+	},
 }
 
 var Gates = map[string]Gate{
-	"E": { Rank: "E", Floors: 3, MinLevel: 10, MonsterCount: 5, RewardXP: 500, RewardGold: 100, Descriptions: []string{"A weak crack."} },
-	"D": { Rank: "D", Floors: 4, MinLevel: 20, MonsterCount: 8, RewardXP: 1500, RewardGold: 500, Descriptions: []string{"A blue portal."} },
-	"C": { Rank: "C", Floors: 5, MinLevel: 30, MonsterCount: 12, RewardXP: 5000, RewardGold: 2000, Descriptions: []string{"A green gate."} },
-	"B": { Rank: "B", Floors: 6, MinLevel: 40, MonsterCount: 15, RewardXP: 15000, RewardGold: 8000, Descriptions: []string{"A purple portal."} },
-	"A": { Rank: "A", Floors: 8, MinLevel: 50, MonsterCount: 20, RewardXP: 50000, RewardGold: 25000, Descriptions: []string{"A red gate."} },
-	"S": { Rank: "S", Floors: 10, MinLevel: 100, MonsterCount: 30, RewardXP: 200000, RewardGold: 100000, Descriptions: []string{"A black gate."} },
-	"SS": { Rank: "SS", Floors: 12, MinLevel: 150, MonsterCount: 50, RewardXP: 1000000, RewardGold: 500000, Descriptions: []string{"A god-like rift."} },
+	"E": { Rank: "E", Floors: 3, MinLevel: 10, MonsterCount: 5, RewardXP: 500, RewardGold: 100, Descriptions: []string{"A minor tear in the dimensional fabric. Faint mana leaking."} },
+	"D": { Rank: "D", Floors: 4, MinLevel: 20, MonsterCount: 8, RewardXP: 1500, RewardGold: 500, Descriptions: []string{"A stable blue portal. Beastial presence detected within."} },
+	"C": { Rank: "C", Floors: 5, MinLevel: 30, MonsterCount: 12, RewardXP: 5000, RewardGold: 2000, Descriptions: []string{"A swirling green rift. High-ranking warriors guard the path."} },
+	"B": { Rank: "B", Floors: 6, MinLevel: 40, MonsterCount: 15, RewardXP: 15000, RewardGold: 8000, Descriptions: []string{"A deep purple portal. Demon Lord candidates and Ice Monarch servants loom."} },
+	"A": { Rank: "A", Floors: 8, MinLevel: 50, MonsterCount: 20, RewardXP: 50000, RewardGold: 25000, Descriptions: []string{"A crimson Gate. The threshold to Godhood and Holy Knights."} },
+	"S": { Rank: "S", Floors: 10, MinLevel: 100, MonsterCount: 30, RewardXP: 200000, RewardGold: 100000, Descriptions: []string{"A pitch-black void. True Monarchs and Architects of the System reside here."} },
+	"SS": { Rank: "SS", Floors: 12, MinLevel: 150, MonsterCount: 50, RewardXP: 1000000, RewardGold: 500000, Descriptions: []string{"A world-shattering rift. The peak of existence. Dragons and Gods await."} },
 }
 
 var GlobalTitles = map[string]Title{
