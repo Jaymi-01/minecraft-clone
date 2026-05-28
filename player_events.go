@@ -8,6 +8,9 @@ import (
 func (p *Player) TrackQuest(t, id string, q int) {
 	for _, qst := range GlobalQuests {
 		if qst.TargetType == t && qst.TargetID == id {
+			// Check if already completed to prevent duplicate notifications/rewards
+			if p.QuestProgress[qst.ID] >= qst.TargetQty { continue }
+
 			p.QuestProgress[qst.ID] += q
 			if p.QuestProgress[qst.ID] >= qst.TargetQty {
 				p.WorldNotice("MISSION CONCLUDED: " + qst.Name)
@@ -35,6 +38,15 @@ func (p *Player) FoundChest(hasAnalysis bool) {
 }
 
 func (p *Player) TriggerTrap(hasAnalysis bool) {
+	// Title Perk: Ruler of the Labyrinth
+	hasRulerTitle := false
+	for _, t := range p.Titles { if t == "ruler_of_the_labyrinth" || t == "labyrinth_walker" { hasRulerTitle = true; break } }
+	
+	if hasRulerTitle {
+		fmt.Println("👑 [TITLE PERK]: Your authority as Ruler of the Labyrinth has neutralized the trap.")
+		return
+	}
+
 	if hasAnalysis {
 		for _, sID := range p.EquippedSkills { if sID == "trap_sense" { p.SkillUsage[sID]++; if p.SkillUsage[sID] >= 10 { p.UpgradeSkill(sID, true) } } }
 		if rand.Float64() < 0.7 { fmt.Println("⚠️ [System]: TRAP DODGED."); return }
