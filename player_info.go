@@ -57,7 +57,17 @@ func (p *Player) ListSubordinates() {
 	fmt.Println("\n--- 🤝 [SHADOW ARMY: SUBORDINATES] ---")
 	if len(p.Subordinates) == 0 { fmt.Println("   (No subordinates recruited)"); return }
 	for _, s := range p.Subordinates { 
-		fmt.Printf("   🐾 %s [%s] - LV.%d | ATK: %d | DEF: %d\n", s.Name, strings.ToUpper(s.Species), s.Level, s.Attack, s.Defense) 
+		rankText := ""
+		if s.Rank != "" { rankText = fmt.Sprintf("[%s] ", strings.ToUpper(s.Rank)) }
+		fmt.Printf("   🐾 %s %s[%s] - LV.%d\n", rankText, s.Name, strings.ToUpper(s.Species), s.Level)
+		fmt.Printf("      ⚔️ ATK: %d | 🛡️ DEF: %d\n", s.Attack, s.Defense)
+		if len(s.Skills) > 0 {
+			fmt.Print("      ✨ SKILLS: ")
+			for _, skID := range s.Skills { fmt.Printf("[%s] ", GlobalSkills[skID].Name) }
+			fmt.Println()
+		} else {
+			fmt.Println("      ✨ SKILLS: (None mastered)")
+		}
 	}
 }
 
