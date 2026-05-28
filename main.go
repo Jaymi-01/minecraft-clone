@@ -108,6 +108,8 @@ func main() {
 			if len(parts) < 2 { fmt.Println("🔮 Usage: !upgrade <skill_id>") } else { player.UpgradeSkill(parts[1], false) }
 		case "!dupskill":
 			if len(parts) < 3 { fmt.Println("🔮 Usage: !dupskill <subordinate_name> <skill_id>") } else { player.DuplicateSkill(parts[1], parts[2]) }
+		case "!create":
+			if len(parts) < 3 { fmt.Println("🧬 Usage: !create <skill_1> <skill_2>") } else { player.CreateSkill(parts[1], parts[2]) }
 		case "!learn":
 			if len(parts) < 2 { fmt.Println("📖 Usage: !learn <id>") } else { player.LearnSkill(parts[1]) }
 		case "!tabooshop":
