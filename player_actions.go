@@ -137,6 +137,12 @@ func (p *Player) SubordinateAction(s *Subordinate) {
 func (p *Player) SubordinateGainXP(amount int) { for i := range p.Subordinates { p.SubordinateGainXPForOne(&p.Subordinates[i], amount) } }
 
 func (p *Player) SubordinateGainXPForOne(s *Subordinate, amount int) {
+	// Domain Bonus: Training Ground
+	if tgLvl := p.DomainStructures["training_ground"]; tgLvl > 0 {
+		bonus := float64(tgLvl) * 0.1
+		amount = int(float64(amount) * (1.0 + bonus))
+	}
+
 	if s.NextXP == 0 { s.NextXP = 100 }; s.XP += amount
 	if s.XP >= s.NextXP {
 		s.Level++; s.XP -= s.NextXP; s.NextXP = int(float64(s.NextXP) * 1.5); s.Attack += 10; s.Defense += 10
@@ -146,14 +152,45 @@ func (p *Player) SubordinateGainXPForOne(s *Subordinate, amount int) {
 }
 
 func (p *Player) CheckSubordinateSkills(s *Subordinate) {
+	// Level-based skill mapping for all species
 	skills := map[string][]struct{lvl int; id string}{
-		"slime": {{1, "predator"}, {5, "water_jet"}, {15, "gluttony"}, {30, "lightning"}},
-		"spider": {{1, "appraisal"}, {5, "venom_spit"}, {15, "evil_eye"}, {30, "heresy_magic"}},
+		"slime": {
+			{1, "predator"}, {5, "water_jet"}, {10, "gluttony"}, 
+			{20, "great_sage"}, {30, "beelzebuth"}, {50, "raphael"},
+		},
+		"spider": {
+			{1, "appraisal"}, {3, "venom_spit"}, {7, "spider_thread"}, 
+			{15, "evil_eye"}, {25, "parallel_minds"}, {40, "annihilating_eye"},
+		},
+		"taratect": {
+			{1, "appraisal"}, {5, "poison_fang"}, {10, "steel_thread"}, 
+			{20, "parallel_minds"}, {35, "heresy_magic"},
+		},
+		"wolf": {
+			{1, "power_strike"}, {10, "heavy_cleave"}, {20, "spark"},
+		},
+		"alpha wolf": {
+			{1, "heavy_cleave"}, {10, "armor_break"}, {25, "chain_lightning"},
+		},
+		"goblin": {
+			{1, "power_strike"}, {5, "natures_touch"}, {15, "bone_armor"},
+		},
+		"hobgoblin": {
+			{1, "heavy_cleave"}, {10, "armor_break"}, {20, "earth_shatter"},
+		},
+		"ogre": {
+			{1, "armor_break"}, {15, "earth_shatter"}, {30, "meteor_strike"},
+		},
+		"kijin": {
+			{1, "meteor_strike"}, {20, "world_severing"}, {50, "flame_lance"},
+		},
 	}
+
 	if list, ok := skills[s.Species]; ok {
 		for _, ss := range list {
 			if s.Level >= ss.lvl {
-				owned := false; for _, sk := range s.Skills { if sk == ss.id { owned = true; break } }
+				owned := false
+				for _, sk := range s.Skills { if sk == ss.id { owned = true; break } }
 				if !owned { 
 					s.Skills = append(s.Skills, ss.id)
 					p.WorldNotice(fmt.Sprintf("LEGACY ACQUIRED: %s has mastered the art of %s.", s.Name, GlobalSkills[ss.id].Name)) 
