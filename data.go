@@ -154,6 +154,7 @@ var GlobalSkills = map[string]Skill{
 	"ciel":           { ID: "ciel", Name: "👸 Manas: Ciel", Rank: "God", Type: "passive", Category: "utility", UnlockRequirement: "Evolve Raphael" },
 	"megiddo":        { ID: "megiddo", Name: "☀️ God's Wrath (Megiddo)", DmgBonus: 5000, MPCost: 1000, Rank: "Unique", Type: "active", Category: "attack", UnlockRequirement: "Slime Evolution: Demon Lord" },
 	"shub_niggurath": { ID: "shub_niggurath", Name: "🧬 Harvest Lord Shub-Niggurath", Rank: "Ultimate", Type: "passive", Category: "utility", UnlockRequirement: "Taboo Shop" },
+	"immortality":    { ID: "immortality", Name: "♾️ Immortality", Rank: "Ultimate", Type: "passive", Category: "defense", UnlockRequirement: "Taboo Shop" },
 
 	// --- General ---
 	"natures_touch": { ID: "natures_touch", Name: "💚 Nature's Touch", MPCost: 20, Rank: "E", Type: "active", Category: "heal", UnlockRequirement: "Defeat Gate Boss" },
