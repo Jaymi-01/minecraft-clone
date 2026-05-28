@@ -109,13 +109,33 @@ func (p *Player) StartRegeneration() {
 }
 
 func (p *Player) Regenerate() {
-	p.Health += 10; p.Stamina += 10; p.Magic += 20
-	if p.Health > p.MaxHealth { p.Health = p.MaxHealth }; if p.Stamina > p.MaxStamina { p.Stamina = p.MaxStamina }; if p.Magic > p.MaxMagic { p.Magic = p.MaxMagic }
+	hpGain, staminaGain, magicGain := 10, 10, 20
+
+	// True Demon Lord Passive: Infinite Regeneration
+	if p.Job == "True Demon Lord" {
+		hpGain *= 5
+		staminaGain *= 3
+		magicGain *= 3
+		fmt.Println("👿 [INFINITE REGENERATION]: Chaos energy is rapidly stabilizing your physical form.")
+	}
+
+	p.Health += hpGain
+	p.Stamina += staminaGain
+	p.Magic += magicGain
+
+	if p.Health > p.MaxHealth { p.Health = p.MaxHealth }
+	if p.Stamina > p.MaxStamina { p.Stamina = p.MaxStamina }
+	if p.Magic > p.MaxMagic { p.Magic = p.MaxMagic }
 }
 
 func (p *Player) StartRaids() {
 	ticker := time.NewTicker(30 * time.Minute)
-	go func() { for range ticker.C { if rand.Float64() < 0.2 { p.UnderRaid() } } }()
+	go func() { 
+		for range ticker.C { 
+			if p.Exploring || p.InCombat { continue }
+			if rand.Float64() < 0.2 { p.UnderRaid() } 
+		} 
+	}()
 }
 
 func (p *Player) UnderRaid() {
@@ -126,7 +146,13 @@ func (p *Player) UnderRaid() {
 
 func (p *Player) StartGateSpawning() {
 	ticker := time.NewTicker(10 * time.Minute)
-	go func() { for range ticker.C { p.SpawnGate(); p.Save() } }()
+	go func() { 
+		for range ticker.C { 
+			if p.Exploring || p.InCombat { continue }
+			p.SpawnGate()
+			p.Save() 
+		} 
+	}()
 	p.SpawnGate()
 }
 
