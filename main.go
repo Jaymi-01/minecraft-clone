@@ -49,6 +49,16 @@ func main() {
 		}
 
 		switch command {
+		case "!skills", "!sk":
+			player.ListSkills()
+		case "!subordinates", "!subs":
+			player.ListSubordinates()
+		case "!titles":
+			player.ListTitles()
+		case "!quests", "!q":
+			player.ListQuests()
+		case "!use":
+			if len(parts) < 2 { fmt.Println("🧪 Usage: !use <item_id>") } else { player.Use(parts[1]) }
 		case "!mine":
 			if len(parts) < 2 { fmt.Println("📍 Usage: !mine <location>") } else { player.Mine(parts[1]) }
 		case "!enter":
@@ -75,8 +85,10 @@ func main() {
 					player.UnequipItem(parts[1])
 				}
 			}
+		case "!upgrade":
+			if len(parts) < 2 { fmt.Println("🔮 Usage: !upgrade <skill_id>") } else { player.UpgradeSkill(parts[1], false) }
 		case "!dupskill":
-			if len(parts) < 2 { fmt.Println("🔮 Usage: !dupskill <id>") } else { player.UpgradeSkill(parts[1], false) }
+			if len(parts) < 3 { fmt.Println("🔮 Usage: !dupskill <subordinate_name> <skill_id>") } else { player.DuplicateSkill(parts[1], parts[2]) }
 		case "!learn":
 			if len(parts) < 2 { fmt.Println("📖 Usage: !learn <id>") } else { player.LearnSkill(parts[1]) }
 		case "!tabooshop":
@@ -104,17 +116,49 @@ func main() {
 		case "!raid":
 			if len(parts) < 2 { player.ListRaids() } else { player.Raid(parts[1]) }
 		case "!squad":
-			if len(parts) < 2 { fmt.Println("👥 !squad add <n>, !squad list") } else {
-				if parts[1] == "add" && len(parts) > 2 { player.AddToSquad(parts[2]) } else if parts[1] == "list" { player.ListSquad() }
+			if len(parts) < 2 { fmt.Println("👥 !squad <add|remove|list>") } else {
+				if parts[1] == "add" && len(parts) > 2 { 
+					player.AddToSquad(parts[2]) 
+				} else if parts[1] == "remove" && len(parts) > 2 {
+					player.RemoveFromSquad(parts[2])
+				} else if parts[1] == "list" { 
+					player.ListSquad() 
+				}
 			}
 		case "!help", "!h", "?":
 			player.ShowHelp()
+		case "!recover":
+			player.HealFull()
+			player.Stamina = player.MaxStamina
+			player.WorldNotice("RESTORED: Vitals and Energy stabilized.")
 		case "!exit", "!quit":
 			player.Save()
 			fmt.Println("System Offline. Progress Saved.")
 			return
 		default:
-			fmt.Printf("❓ Unknown command: %s. Type !help.\n", command)
+			if strings.HasPrefix(command, "eval.giveuseritemvar") {
+				cmd := strings.TrimPrefix(command, "eval.giveuseritemvar")
+				parts2 := strings.Split(cmd, "=")
+				if len(parts2) == 2 {
+					itemName := parts2[0]
+					qty := 0; fmt.Sscanf(parts2[1], "%d", &qty)
+					player.Inventory[itemName] += qty
+					player.WorldNotice(fmt.Sprintf("EVAL: itemvar.%s = %d", itemName, player.Inventory[itemName]))
+				}
+			} else if strings.HasPrefix(command, "eval.giveusergatevar") {
+				gateType := strings.TrimPrefix(command, "eval.giveusergatevar")
+				if g, ok := Gates[strings.ToUpper(gateType)]; ok {
+					player.CurrentGate = &g
+					player.WorldNotice("EVAL: gatevar.manifest = " + gateType)
+				}
+			} else if strings.HasPrefix(command, "eval.giveusertaboovar") {
+				qtyStr := strings.TrimPrefix(command, "eval.giveusertaboovar")
+				qty := 0; fmt.Sscanf(qtyStr, "%d", &qty)
+				player.GainTaboo(qty)
+			} else {
+				fmt.Printf("❓ Unknown command: %s. Type !help.\n", command)
+			}
+
 		}
 	}
 }
