@@ -72,10 +72,51 @@ func (p *Player) GainHunterXP(amount int) {
 }
 
 func (p *Player) SyncStats() {
-	p.MaxHealth = 100 + ((p.Level - 1) * 10); p.MaxStamina = 50 + ((p.Level - 1) * 10); p.MaxMagic = 100 + ((p.Level - 1) * 20); p.Attack = 10; p.Defense = 0
-	for _, tID := range p.Titles { if t, ok := GlobalTitles[tID]; ok { p.Attack += t.AttackBonus; p.MaxHealth += t.HPBonus; p.Defense += t.DefenseBonus; p.MaxMagic += t.MPBonus; p.MaxStamina += t.StaminaBonus } }
-	if p.Structures["vault"] { p.MaxHealth += 50 }; if p.Structures["castle"] { p.Attack += 20; p.MaxHealth += 100; p.MaxStamina += 50 }; if p.Structures["forge"] { p.Attack += 10 }
-	if p.Health > p.MaxHealth { p.Health = p.MaxHealth }; if p.Stamina > p.MaxStamina { p.Stamina = p.MaxStamina }; if p.Magic > p.MaxMagic { p.Magic = p.MaxMagic }
+	// Base Stats from Level
+	baseHP := 100 + ((p.Level - 1) * 20)
+	baseMP := 100 + ((p.Level - 1) * 30)
+	baseStamina := 50 + ((p.Level - 1) * 15)
+	baseAtk := 10 + ((p.Level - 1) * 5)
+	baseDef := 0 + ((p.Level - 1) * 2)
+
+	// Evolution Multipliers & Flat Bonuses
+	multiplier := 1.0
+	flatHP, flatMP, flatAtk, flatDef := 0, 0, 0, 0
+
+	switch p.SystemOrigin {
+	case "Slime", "Spider":
+		multiplier = 1.2; flatHP = 100; flatMP = 100; flatAtk = 20
+	case "Small Poison Taratect":
+		multiplier = 1.5; flatHP = 250; flatMP = 250; flatAtk = 50; flatDef = 20
+	case "Demon Slime", "Arachne":
+		multiplier = 2.5; flatHP = 1000; flatMP = 1000; flatAtk = 150; flatDef = 100
+	case "Ultimate Slime (True Dragon)", "God (Shiraori)":
+		multiplier = 5.0; flatHP = 5000; flatMP = 5000; flatAtk = 500; flatDef = 300
+	}
+
+	// Apply Evolution
+	p.MaxHealth = int(float64(baseHP+flatHP) * multiplier)
+	p.MaxMagic = int(float64(baseMP+flatMP) * multiplier)
+	p.MaxStamina = int(float64(baseStamina) * multiplier)
+	p.Attack = int(float64(baseAtk+flatAtk) * multiplier)
+	p.Defense = int(float64(baseDef+flatDef) * multiplier)
+
+	// Title Bonuses
+	for _, tID := range p.Titles {
+		if t, ok := GlobalTitles[tID]; ok {
+			p.Attack += t.AttackBonus; p.MaxHealth += t.HPBonus; p.Defense += t.DefenseBonus; p.MaxMagic += t.MPBonus; p.MaxStamina += t.StaminaBonus
+		}
+	}
+
+	// Structure Bonuses
+	if p.Structures["vault"] { p.MaxHealth += 50 }
+	if p.Structures["castle"] { p.Attack += 20; p.MaxHealth += 100; p.MaxStamina += 50 }
+	if p.Structures["forge"] { p.Attack += 10 }
+
+	// Cap current values
+	if p.Health > p.MaxHealth { p.Health = p.MaxHealth }
+	if p.Stamina > p.MaxStamina { p.Stamina = p.MaxStamina }
+	if p.Magic > p.MaxMagic { p.Magic = p.MaxMagic }
 }
 
 func (p *Player) HealFull() { p.Health = p.MaxHealth; p.Magic = p.MaxMagic; p.Stamina = p.MaxStamina; p.Save() }
