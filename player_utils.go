@@ -79,7 +79,8 @@ func (p *Player) ShowHelp() {
 	fmt.Println("   !elementalshop    - Contract with fundamental elements.")
 	fmt.Println("   !tabooshop        - Access the Forbidden Sanctum.")
 	fmt.Println("   !raid <target>    - Commence assault on hostile settlements.")
-	fmt.Println("   !squad <list|add> - Manage the Shadow Army vanguard.")
+	fmt.Println("   !squad <list|add|remove> - Manage the Shadow Army vanguard.")
+	fmt.Println("   !name <sp> <n>    - Bestow a name upon a creature (Baptism).")
 	fmt.Println("   !help             - Re-display this directory.")
 }
 
