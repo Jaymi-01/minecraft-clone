@@ -69,6 +69,7 @@ func (p *Player) ShowHelp() {
 	fmt.Println("   !use <item_id>    - Consume material for restoration.")
 	fmt.Println("   !upgrade <sk_id>  - Enhance skill level using Skill Points.")
 	fmt.Println("   !dupskill <n> <id>- Harvest and duplicate skill from subordinate.")
+	fmt.Println("   !create <s1> <s2> - Synthesize a new skill from raw mana.")
 	fmt.Println("   !learn <skill_id> - Integrate new skill data.")
 	fmt.Println("   !craft <item_id>  - Synthesize gear at the system forge.")
 	fmt.Println("   !merge <attr> <sk>- Fuse forbidden attributes with mastered skills.")
