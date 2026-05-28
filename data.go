@@ -85,11 +85,11 @@ var TabooShopInventory = map[string]struct{ID string; Name string; Price int; De
 
 var GlobalSkills = map[string]Skill{
 	// --- Fire Tree ---
-	"fire_bolt":       { ID: "fire_bolt", Name: "🔥 Fire Bolt", DmgBonus: 30, MPCost: 10, Rank: "E", Type: "active", Category: "attack", UnlockRequirement: "Elemental Shop" },
-	"flame_lance":     { ID: "flame_lance", Name: "🔥 Flame Lance", DmgBonus: 100, MPCost: 40, Rank: "D", Type: "active", Category: "attack", UnlockRequirement: "Evolve Fire Bolt" },
-	"prominence_burn": { ID: "prominence_burn", Name: "☀️ Prominence Burn", DmgBonus: 800, MPCost: 250, Rank: "A", Type: "active", Category: "attack", UnlockRequirement: "Evolve Flame Lance" },
-	"inferno":         { ID: "inferno", Name: "🔥💀 Inferno", DmgBonus: 2500, MPCost: 800, Rank: "Ultimate", Type: "active", Category: "attack", UnlockRequirement: "Evolve Prominence Burn" },
-	"hellfire":        { ID: "hellfire", Name: "🔥🌑 Hellfire", DmgBonus: 3500, MPCost: 1000, Rank: "Ultimate", Type: "active", Category: "attack", UnlockRequirement: "Merge Dark + Prominence Burn" },
+	"fire_bolt":       { ID: "fire_bolt", Name: "🔥 Fire Bolt", DmgBonus: 30, MPCost: 10, Rank: "E", Type: "active", Category: "attack", StatusEffect: "burn", StatusChance: 0.2, UnlockRequirement: "Elemental Shop" },
+	"flame_lance":     { ID: "flame_lance", Name: "🔥 Flame Lance", DmgBonus: 100, MPCost: 40, Rank: "D", Type: "active", Category: "attack", StatusEffect: "burn", StatusChance: 0.3, UnlockRequirement: "Evolve Fire Bolt" },
+	"prominence_burn": { ID: "prominence_burn", Name: "☀️ Prominence Burn", DmgBonus: 800, MPCost: 250, Rank: "A", Type: "active", Category: "attack", StatusEffect: "burn", StatusChance: 0.5, UnlockRequirement: "Evolve Flame Lance" },
+	"inferno":         { ID: "inferno", Name: "🔥💀 Inferno", DmgBonus: 2500, MPCost: 800, Rank: "Ultimate", Type: "active", Category: "attack", StatusEffect: "burn", StatusChance: 0.8, UnlockRequirement: "Evolve Prominence Burn" },
+	"hellfire":        { ID: "hellfire", Name: "🔥🌑 Hellfire", DmgBonus: 3500, MPCost: 1000, Rank: "Ultimate", Type: "active", Category: "attack", StatusEffect: "burn", StatusChance: 1.0, UnlockRequirement: "Merge Dark + Prominence Burn" },
 
 	// --- Water Tree ---
 	"water_jet":     { ID: "water_jet", Name: "💧 Water Jet", DmgBonus: 30, MPCost: 10, Rank: "E", Type: "active", Category: "attack", UnlockRequirement: "Elemental Shop" },
