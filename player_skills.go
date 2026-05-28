@@ -104,6 +104,24 @@ func (p *Player) ListSkills() {
 		isEquipped := false; for _, eq := range p.EquippedSkills { if eq == sID { isEquipped = true; break } }
 		if !isEquipped { fmt.Printf("      [ ] %s (Lv.%d)\n", GlobalSkills[sID].Name, p.SkillLevels[sID]) }
 	}
+	fmt.Println("\n💡 [TIP]: Use '!allskills' to see the complete System database.")
+}
+
+func (p *Player) ListAllSystemSkills() {
+	fmt.Println("\n--- 🌌 [GLOBAL SYSTEM ARCHIVE: ALL SKILLS] ---")
+	owned := make(map[string]bool); for _, s := range p.Skills { owned[s] = true }
+	
+	categories := []string{"attack", "defense", "heal", "utility"}
+	for _, cat := range categories {
+		fmt.Printf("\n   --- %s ---\n", strings.ToUpper(cat))
+		for id, s := range GlobalSkills {
+			if s.Category == cat {
+				status := "🔒 LOCKED"
+				if owned[id] { status = "✅ UNLOCKED" }
+				fmt.Printf("      - %s [%s] (%s)\n         📜 %s\n", s.Name, s.Rank, status, s.UnlockRequirement)
+			}
+		}
+	}
 }
 
 func (p *Player) MergeSkill(attr, target string) {
