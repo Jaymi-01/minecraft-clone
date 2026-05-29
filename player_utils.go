@@ -93,9 +93,11 @@ func (p *Player) ShowHelp() {
 	fmt.Println("   !socket <it> <rn>- Insert a combat rune into gear slots.")
 	fmt.Println("   !dupskill <n> <id>- Harvest Lord: Duplicate skill from subordinate.")
 	fmt.Println("   !create <s1> <s2> - Harvest Lord: Synthesize a new skill from raw mana.")
-	fmt.Println("   !learn <skill_id> - Integrate new skill data from the archive.")
-	fmt.Println("   !craft <item_id>  - Synthesize gear at the System forge.")
+	fmt.Println("   !learn <skill_id> - Integrate new skill data.")
+	fmt.Println("   !craft <item_id>  - Synthesize gear at the system forge.")
+	fmt.Println("   !build <struct>   - Construct base structures (House, Farm, etc).")
 	fmt.Println("   !merge <attr> <sk>- Fuse forbidden attributes with mastered skills.")
+
 
 	fmt.Println("\n   --- ECONOMY & DOMAIN ---")
 	fmt.Println("   !shop             - Access the static merchant network.")
