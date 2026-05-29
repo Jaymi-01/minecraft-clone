@@ -110,7 +110,11 @@ func (p *Player) RemoveFromSquad(name string) {
 func (p *Player) ListTitles() {
 	fmt.Println("\n--- 🏆 [ACHIEVED TITLES] ---")
 	if len(p.Titles) == 0 { fmt.Println("   (No titles earned yet)"); return }
-	for _, tid := range p.Titles { fmt.Printf("   🏅 %s\n", GlobalTitles[tid].Name) }
+	for _, tid := range p.Titles { 
+		if t, ok := GlobalTitles[tid]; ok {
+			fmt.Printf("   🏅 %s\n      📜 PERKS: %s\n", t.Name, t.PerkDesc) 
+		}
+	}
 }
 
 func (p *Player) NameSubordinate(species, givenName string) {
