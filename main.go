@@ -154,6 +154,8 @@ func main() {
 			if len(parts) < 3 { fmt.Println("⚒️ Usage: !socket <item_id> <rune_id>") } else { player.SocketRune(parts[1], parts[2]) }
 		case "!craft":
 			if len(parts) < 2 { player.ListDCraftable() } else { player.Craft(parts[1]) }
+		case "!build":
+			if len(parts) < 2 { player.ListDCraftable() } else { player.Build(parts[1]) }
 		case "!raid":
 			if len(parts) < 2 { player.ListRaids() } else { player.Raid(parts[1]) }
 		case "!arise":
