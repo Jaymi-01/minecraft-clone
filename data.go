@@ -159,6 +159,8 @@ var GlobalSkills = map[string]Skill{
 	// --- General ---
 	"natures_touch": { ID: "natures_touch", Name: "💚 Nature's Touch", MPCost: 20, Rank: "E", Type: "active", Category: "heal", UnlockRequirement: "Defeat Gate Boss" },
 	"bone_armor":    { ID: "bone_armor", Name: "🦴 Bone Armor", MPCost: 20, Rank: "E", Type: "active", Category: "defense", UnlockRequirement: "Defeat Gate Boss" },
+	"critical_eye":  { ID: "critical_eye", Name: "🎯 Critical Eye", Rank: "C", Type: "passive", Category: "utility", UnlockRequirement: "Defeat 100 Monsters" },
+	"trap_sense":    { ID: "trap_sense", Name: "⚠️ Trap Sense", Rank: "D", Type: "passive", Category: "utility", UnlockRequirement: "Labyrinth Exploration" },
 }
 
 var SkillEvolutions = map[string]string{
