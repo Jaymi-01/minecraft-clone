@@ -7,17 +7,31 @@ import (
 
 var ShadowRanks = []string{"Soldier", "Elite", "Knight", "Elite Knight", "Commander", "Grand Marshal"}
 
-func (p *Player) PromoteShadow(name string) {
+func (p *Player) PromoteShadow(nameInput string) {
 	foundIdx := -1
+	nameInput = strings.ToLower(nameInput)
+
+	// Phase 1: Try exact match (case-insensitive)
 	for i := range p.Subordinates {
-		if strings.EqualFold(p.Subordinates[i].Name, name) {
-			foundIdx = i
-			break
+		if strings.EqualFold(p.Subordinates[i].Name, nameInput) {
+			foundIdx = i; break
+		}
+	}
+
+	// Phase 2: Try partial match (if no exact match found)
+	if foundIdx == -1 {
+		for i := range p.Subordinates {
+			// Check if input is in name OR if name (without 'Shadow ') is in input
+			subName := strings.ToLower(p.Subordinates[i].Name)
+			cleanSubName := strings.Replace(subName, "shadow ", "", 1)
+			if strings.Contains(subName, nameInput) || strings.Contains(nameInput, cleanSubName) {
+				foundIdx = i; break
+			}
 		}
 	}
 
 	if foundIdx == -1 {
-		fmt.Printf("❌ [SYSTEM]: Shadow '%s' not found in your army.\n", name)
+		fmt.Printf("❌ [SYSTEM]: Shadow '%s' not found in your army. Use !subordinates to check names.\n", nameInput)
 		return
 	}
 

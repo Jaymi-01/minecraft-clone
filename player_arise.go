@@ -48,11 +48,17 @@ func (p *Player) Arise() {
 func (p *Player) SuccessArise() {
 	p.WorldNotice("EXTRACTION SUCCESSFUL: [ARISE]")
 	
-	shadowName := strings.Replace(p.AriseMonster.Name, "🕷️ ", "", 1)
-	shadowName = strings.Replace(shadowName, "👹 ", "", 1)
-	shadowName = strings.Replace(shadowName, "🛡️ ", "", 1)
-	shadowName = strings.Replace(shadowName, "👑 ", "", 1)
-	shadowName = strings.Replace(shadowName, "💀 ", "", 1)
+	rawName := p.AriseMonster.Name
+	// Remove all emojis (simplistic approach: remove non-ASCII or specific known ranges)
+	// For now, let's just strip the common prefixes and known emojis
+	shadowName := rawName
+	prefixes := []string{
+		"🕷️ ", "👹 ", "🛡️ ", "👑 ", "💀 ", "🎭 ", "❄️ ", "👵 ", "⚔️ ", "🔥 ", "🤖 ", "🐲 ", "✨ ", "🟢 ", "🧟 ",
+		"Demon Lord ", "Monarch of ", "Shadow Monarch ", "Commander ", "High Priest of ", "Abyssal ", "Ruler of ",
+	}
+	for _, pref := range prefixes {
+		shadowName = strings.Replace(shadowName, pref, "", -1)
+	}
 	shadowName = strings.TrimSpace(shadowName)
 
 	newShadow := Subordinate{
