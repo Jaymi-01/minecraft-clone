@@ -43,7 +43,15 @@ func (p *Player) BuyTabooSkill(id string) {
 	if !ok { fmt.Printf("❌ [SYSTEM]: Forbidden attribute '%s' not found.\n", id); return }
 	if p.Taboo < it.Price { fmt.Printf("❌ [SYSTEM]: Insight rejected. Insufficient Taboo level (Need %d more).\n", it.Price-p.Taboo); return }
 	
-	p.Taboo -= it.Price; if p.Attributes == nil { p.Attributes = make(map[string]bool) }; p.Attributes[id] = true
+	p.Taboo -= it.Price
+	if p.Attributes == nil { p.Attributes = make(map[string]bool) }
+	p.Attributes[id] = true
+
+	// Check if this is a Skill that needs to be added to the Skill Archive
+	if _, isSkill := GlobalSkills[id]; isSkill {
+		p.AddSkill(id)
+	}
+	
 	p.WorldNotice(fmt.Sprintf("TABOO MASTERED: Your soul has absorbed the %s.", it.Name))
 	p.Save()
 }
