@@ -18,7 +18,10 @@ func (p *Player) Mine(locName string) {
 	p.Stamina -= 10; p.ToolDurability -= 1
 	fmt.Printf("\n⚒️ [EXTRACTION]: Commencing resource harvest in %s...\n", loc.Name)
 	
-	for _, sID := range p.EquippedSkills { if sID == "miners_instinct" { p.SkillUsage[sID]++; if p.SkillUsage[sID] >= 10 { p.UpgradeSkill(sID, true) } } }
+	if p.HasSkill("miners_instinct") {
+		p.SkillUsage["miners_instinct"]++
+		if p.SkillUsage["miners_instinct"] >= 10 { p.UpgradeSkill("miners_instinct", true) }
+	}
 	
 	if rand.Float64() <= loc.EncounterChance {
 		m := &loc.EncounterTable[rand.Intn(len(loc.EncounterTable))]
