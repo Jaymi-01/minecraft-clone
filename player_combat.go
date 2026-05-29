@@ -105,10 +105,11 @@ func (p *Player) Combat(m *Monster, isGate bool) bool {
 			p.StatusEffects["paralyze"]--
 		} else {
 			bonusDef := 0; critChance := 0.05
-			for _, sID := range p.EquippedSkills {
-				if sID == "great_sage" { bonusDef += 10 }; if sID == "raphael" { bonusDef += 50 }
-				if sID == "critical_eye" { critChance += 0.2 }
-			}
+			// Passive Logic: Check entire library (HasSkill) instead of Equipped
+			if p.HasSkill("great_sage") { bonusDef += 10; critChance += 0.05 }
+			if p.HasSkill("raphael") { bonusDef += 50; critChance += 0.1 }
+			if p.HasSkill("ciel") { bonusDef += 200; critChance += 0.25 }
+			if p.HasSkill("critical_eye") { critChance += 0.2 }
 
 			fmt.Print("AVAILABLE ACTIONS: [!fight] ")
 			for i, sID := range p.EquippedSkills {
