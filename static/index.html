@@ -284,7 +284,11 @@
         function updateDashboard() {
             fetch('/api/player?t=' + Date.now())
                 .then(response => response.json())
-                .then(p => {
+                .then(data => {
+                    const p = data.player;
+                    const globalTitles = data.global_titles;
+                    const globalSkills = data.global_skills;
+
                     const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
                     setVal('player-name', p.name);
                     setVal('level-val', p.level);
@@ -297,8 +301,14 @@
                     setVal('taboo-val', p.taboo || 0);
                     setVal('kills-val', p.kills || 0);
                     setVal('skill-slots-val', `${p.equipped_skills ? p.equipped_skills.length : 0} / ${p.skill_slots}`);
-                    setVal('equipped-weapon', (p.equipped_weapon || 'NONE').replace('_', ' ').toUpperCase());
-                    setVal('equipped-armor', (p.equipped_armor || 'NONE').replace('_', ' ').toUpperCase());
+                    
+                    const weaponName = (p.equipped_weapon || 'NONE').replace('_', ' ').toUpperCase();
+                    const armorName = (p.equipped_armor || 'NONE').replace('_', ' ').toUpperCase();
+                    setVal('equipped-weapon', weaponName);
+                    setVal('equipped-armor', armorName);
+                    
+                    if (p.equipped_weapon) document.getElementById('equipped-weapon').title = `Weapon: ${weaponName}`;
+                    if (p.equipped_armor) document.getElementById('equipped-armor').title = `Armor: ${armorName}`;
 
                     const updateBar = (fillId, textId, curr, max) => {
                         const fill = document.getElementById(fillId);
@@ -328,7 +338,10 @@
                     renderList('subs-list', p.subordinates, s => {
                         const d = document.createElement('div');
                         d.className = 'p-4 border-l-2 border-blue-500 bg-white/5 w-60 flex-shrink-0';
-                        const skills = s.skills && s.skills.length > 0 ? s.skills.map(id => id.split('_').join(' ').toUpperCase()).join(', ') : 'None';
+                        const skills = s.skills && s.skills.length > 0 ? s.skills.map(id => {
+                            const sk = globalSkills[id];
+                            return sk ? sk.Name : id.split('_').join(' ').toUpperCase();
+                        }).join(', ') : 'None';
                         d.innerHTML = `
                             <div class="flex justify-between items-start mb-2">
                                 <div class="text-blue-400 font-bold text-sm truncate">${s.name}</div>
@@ -348,25 +361,31 @@
 
                     renderList('skills-list', p.equipped_skills, sID => {
                         const d = document.createElement('div');
-                        d.className = 'px-4 py-2 border-l-2 border-cyan-500 bg-cyan-500/5 flex justify-between items-center';
-                        const name = sID.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                        d.className = 'px-4 py-2 border-l-2 border-cyan-500 bg-cyan-500/5 flex justify-between items-center cursor-help';
+                        const sk = globalSkills[sID];
+                        const name = sk ? sk.Name : sID.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                        d.title = sk ? `${sk.Name} [Rank ${sk.Rank}]\n${sk.Desc}` : name;
                         d.innerHTML = `<span class="text-cyan-400 font-bold text-sm uppercase">${name}</span><span class="text-[8px] font-orbitron text-cyan-900">ACTIVE</span>`;
                         return d;
                     });
 
                     renderList('mastered-skills-list', p.skills, sID => {
                         const d = document.createElement('div');
-                        d.className = 'px-3 py-2 bg-white/5 border border-white/5 text-[11px] flex justify-between items-center';
-                        const name = sID.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                        d.className = 'px-3 py-2 bg-white/5 border border-white/5 text-[11px] flex justify-between items-center cursor-help';
+                        const sk = globalSkills[sID];
+                        const name = sk ? sk.Name : sID.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
                         const lvl = p.skill_levels[sID] || 1;
+                        d.title = sk ? `${sk.Name} [Rank ${sk.Rank}]\n${sk.Desc}` : name;
                         d.innerHTML = `<span class="text-gray-400">${name}</span><span class="text-blue-500 font-bold">LV.${lvl}</span>`;
                         return d;
                     });
 
-                    renderList('titles-list', p.titles, t => {
+                    renderList('titles-list', p.titles, tID => {
                         const s = document.createElement('span');
-                        s.className = 'px-3 py-1 bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 text-[10px] font-orbitron uppercase';
-                        s.innerText = t.replace('_', ' ');
+                        s.className = 'px-3 py-1 bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 text-[10px] font-orbitron uppercase cursor-help';
+                        const titleData = globalTitles[tID];
+                        s.innerText = titleData ? titleData.Name.replace('🏅 ', '') : tID.replace('_', ' ');
+                        if (titleData) s.title = `PERKS: ${titleData.PerkDesc}`;
                         return s;
                     });
 
@@ -379,6 +398,8 @@
                         if (invItems[i]) {
                             const [id, qty] = invItems[i];
                             const emoji = itemEmojis[id] || "📦";
+                            const name = id.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                            slot.title = `${name} (x${qty})`;
                             slot.innerHTML = `<span class="text-2xl">${emoji}</span><span class="absolute bottom-1 right-1 text-[9px] font-bold px-1 bg-black/80">${qty}</span>`;
                         }
                         grid.appendChild(slot);
