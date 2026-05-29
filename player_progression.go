@@ -69,7 +69,7 @@ func (p *Player) Move(dir string) {
 	dir = strings.ToUpper(dir)
 	fmt.Printf("\n👣 [LABYRINTH]: Moving %s... (Current Depth: %d)\n", dir, p.ExplorationDepth)
 	
-	hasAnalysis := p.HasSkill("great_sage") || p.HasSkill("sariel")
+	hasAnalysis := p.HasSkill("appraisal") || p.HasSkill("great_sage") || p.HasSkill("sariel") || p.HasSkill("raphael") || p.HasSkill("ciel")
 	e := rand.Intn(100)
 	if e < 15 { p.FoundChest(hasAnalysis) } else if e < 30 { p.TriggerTrap(hasAnalysis) } else if e < 55 { p.EncounterMonster() }
 }
