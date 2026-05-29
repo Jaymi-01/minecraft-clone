@@ -19,6 +19,11 @@ func (p *Player) Combat(m *Monster, isGate bool) bool {
 	appraisalActive := p.HasSkill("appraisal") || p.HasSkill("sariel")
 	parallelActive := p.HasSkill("parallel_minds")
 
+	// Increment Insight skill usage at start of combat
+	if appraisalActive {
+		if p.HasSkill("sariel") { p.SkillUsage["sariel"]++; if p.SkillUsage["sariel"] >= 10 { p.UpgradeSkill("sariel", true) } } else { p.SkillUsage["appraisal"]++; if p.SkillUsage["appraisal"] >= 10 { p.UpgradeSkill("appraisal", true) } }
+	}
+
 	// Initialize status effects for this combat session
 	p.StatusEffects = make(map[string]int)
 	m.StatusEffects = make(map[string]int)
@@ -225,7 +230,7 @@ func (p *Player) Combat(m *Monster, isGate bool) bool {
 		}
 		
 		if p.Health <= 0 && immActive {
-			p.Health = 1; immActive = false
+			p.Health = 1
 			p.WorldNotice("SKILL [IMMORTALITY] TRIGGERED: Death has been rejected.")
 		}
 

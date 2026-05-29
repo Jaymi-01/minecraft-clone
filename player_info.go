@@ -32,6 +32,10 @@ func (p *Player) AutoAnalyze(itemID string) {
 	}
 
 	fmt.Printf("\n[🧠 ANALYZE]: '%s' identified.", strings.ToUpper(itemID))
+	
+	// Increment usage
+	if p.HasSkill("sariel") { p.SkillUsage["sariel"]++; if p.SkillUsage["sariel"] >= 10 { p.UpgradeSkill("sariel", true) } } else if p.HasSkill("appraisal") { p.SkillUsage["appraisal"]++; if p.SkillUsage["appraisal"] >= 10 { p.UpgradeSkill("appraisal", true) } }
+
 	if lvl >= 4 { fmt.Printf(" | RARITY: %s", rarity) }
 	if lvl >= 7 { fmt.Printf(" | MARKET VALUE: 💰 %d Gold", price) }
 	if lvl >= 10 {
