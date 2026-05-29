@@ -76,38 +76,56 @@ func (p *Player) SelectJob() {
 	}
 }
 
-func (p *Player) ShadowExchange(current, replacement string) {
+func (p *Player) ShadowExchange(currentInput, replacementInput string) {
 	if p.Job != "Shadow Monarch" { return }
 	
+	currentInput = strings.ToLower(currentInput)
+	replacementInput = strings.ToLower(replacementInput)
+
+	// Phase 1: Find 'current' member in squad (exact or partial)
 	foundIdx := -1
 	for i, n := range p.Squad {
-		if strings.EqualFold(n, current) {
-			foundIdx = i
-			break
+		nLower := strings.ToLower(n)
+		cleanN := strings.Replace(nLower, "shadow ", "", 1)
+		if strings.EqualFold(n, currentInput) || strings.Contains(nLower, currentInput) || strings.Contains(currentInput, cleanN) {
+			foundIdx = i; break
 		}
 	}
 
 	if foundIdx == -1 {
-		fmt.Printf("❌ [SYSTEM]: '%s' is not in the active squad.\n", current)
+		fmt.Printf("❌ [SYSTEM]: '%s' is not in the active squad.\n", currentInput)
 		return
 	}
 
-	subExists := false
-	for _, s := range p.Subordinates {
-		if strings.EqualFold(s.Name, replacement) {
-			subExists = true
-			break
+	// Phase 2: Find 'replacement' in Shadow Army (exact or partial)
+	subFoundIdx := -1
+	for i := range p.Subordinates {
+		if strings.EqualFold(p.Subordinates[i].Name, replacementInput) {
+			subFoundIdx = i; break
 		}
 	}
 
-	if !subExists {
-		fmt.Printf("❌ [SYSTEM]: '%s' not found in your Shadow Army.\n", replacement)
+	if subFoundIdx == -1 {
+		for i := range p.Subordinates {
+			subName := strings.ToLower(p.Subordinates[i].Name)
+			cleanSubName := strings.Replace(subName, "shadow ", "", 1)
+			if strings.Contains(subName, replacementInput) || strings.Contains(replacementInput, cleanSubName) {
+				subFoundIdx = i; break
+			}
+		}
+	}
+
+	if subFoundIdx == -1 {
+		fmt.Printf("❌ [SYSTEM]: '%s' not found in your Shadow Army.\n", replacementInput)
 		return
 	}
 
+	replacementName := p.Subordinates[subFoundIdx].Name
+	currentName := p.Squad[foundIdx]
+
 	// Swap
-	p.Squad[foundIdx] = replacement
-	p.WorldNotice(fmt.Sprintf("SHADOW EXCHANGE: [%s] has been swapped with [%s].", current, replacement))
+	p.Squad[foundIdx] = replacementName
+	p.WorldNotice(fmt.Sprintf("SHADOW EXCHANGE: [%s] has been swapped with [%s].", currentName, replacementName))
 	p.Save()
 }
 

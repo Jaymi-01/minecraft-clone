@@ -71,23 +71,46 @@ func (p *Player) ListSubordinates() {
 	}
 }
 
-func (p *Player) AddToSquad(name string) {
+func (p *Player) AddToSquad(nameInput string) {
 	if len(p.Squad) >= 3 { fmt.Println("❌ [SYSTEM]: Squad capacity reached. Maximum 3 units allowed."); return }
-	for _, s := range p.Subordinates {
-		if strings.EqualFold(s.Name, name) {
-			for _, n := range p.Squad { 
-				if strings.EqualFold(n, name) { 
-					fmt.Println("❌ [SYSTEM]: Unit is already active in the current squad.")
-					return 
-				} 
-			}
-			p.Squad = append(p.Squad, s.Name)
-			p.WorldNotice(fmt.Sprintf("SHADOW EXTRACTION: [%s] has been integrated into the Combat Squad.", s.Name))
-			p.Save()
-			return
+	
+	foundIdx := -1
+	nameInput = strings.ToLower(nameInput)
+
+	// Phase 1: Exact match
+	for i := range p.Subordinates {
+		if strings.EqualFold(p.Subordinates[i].Name, nameInput) {
+			foundIdx = i; break
 		}
 	}
-	fmt.Printf("❌ [SYSTEM]: Subordinate '%s' not found in records.\n", name)
+
+	// Phase 2: Partial match
+	if foundIdx == -1 {
+		for i := range p.Subordinates {
+			subName := strings.ToLower(p.Subordinates[i].Name)
+			cleanSubName := strings.Replace(subName, "shadow ", "", 1)
+			if strings.Contains(subName, nameInput) || strings.Contains(nameInput, cleanSubName) {
+				foundIdx = i; break
+			}
+		}
+	}
+
+	if foundIdx == -1 {
+		fmt.Printf("❌ [SYSTEM]: Subordinate '%s' not found in records. Use !subordinates to check names.\n", nameInput)
+		return
+	}
+
+	sub := &p.Subordinates[foundIdx]
+	for _, n := range p.Squad { 
+		if strings.EqualFold(n, sub.Name) { 
+			fmt.Println("❌ [SYSTEM]: Unit is already active in the current squad.")
+			return 
+		} 
+	}
+	
+	p.Squad = append(p.Squad, sub.Name)
+	p.WorldNotice(fmt.Sprintf("SHADOW EXTRACTION: [%s] has been integrated into the Combat Squad.", sub.Name))
+	p.Save()
 }
 
 func (p *Player) ListSquad() {
@@ -96,15 +119,27 @@ func (p *Player) ListSquad() {
 	for _, n := range p.Squad { fmt.Printf("   🤝 UNIT: %s\n", n) }
 }
 
-func (p *Player) RemoveFromSquad(name string) {
+func (p *Player) RemoveFromSquad(nameInput string) {
+	nameInput = strings.ToLower(nameInput)
+	foundIdx := -1
+
+	// Try to find by exact name or partial name in the current squad
 	for i, n := range p.Squad {
-		if strings.EqualFold(n, name) {
-			p.Squad = append(p.Squad[:i], p.Squad[i+1:]...)
-			p.WorldNotice(fmt.Sprintf("DISMISSAL: [%s] has been removed from active duty.", n))
-			p.Save(); return
+		nLower := strings.ToLower(n)
+		cleanN := strings.Replace(nLower, "shadow ", "", 1)
+		if strings.EqualFold(n, nameInput) || strings.Contains(nLower, nameInput) || strings.Contains(nameInput, cleanN) {
+			foundIdx = i; break
 		}
 	}
-	fmt.Printf("❌ [SYSTEM]: Unit '%s' is not in the active squad.\n", name)
+
+	if foundIdx != -1 {
+		name := p.Squad[foundIdx]
+		p.Squad = append(p.Squad[:foundIdx], p.Squad[foundIdx+1:]...)
+		p.WorldNotice(fmt.Sprintf("DISMISSAL: [%s] has been removed from active duty.", name))
+		p.Save()
+	} else {
+		fmt.Printf("❌ [SYSTEM]: Unit '%s' is not in the active squad.\n", nameInput)
+	}
 }
 
 func (p *Player) ListTitles() {
