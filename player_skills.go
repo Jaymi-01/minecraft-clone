@@ -73,22 +73,31 @@ func (p *Player) UpgradeSkill(skillID string, isFree bool) {
 
 func (p *Player) EquipSkill(id string) {
 	id = strings.ToLower(id)
+	skill, exists := GlobalSkills[id]
+	if !exists { fmt.Println("❌ [SYSTEM]: Skill data not found."); return }
+
 	owned := false; for _, s := range p.Skills { if s == id { owned = true; break } }
-	if !owned { fmt.Println("❌ [SYSTEM]: Skill data not found in local memory."); return }
-	
+	if !owned { fmt.Println("❌ [SYSTEM]: Skill not found in local memory."); return }
+
+	if skill.Type == "passive" {
+		fmt.Printf("ℹ️ [SYSTEM]: [%s] is a Passive ability and is already synchronized to your background logic.\n", skill.Name)
+		return
+	}
+
 	for i, eq := range p.EquippedSkills { 
 		if eq == id { 
 			p.EquippedSkills = append(p.EquippedSkills[:i], p.EquippedSkills[i+1:]...)
-			fmt.Printf("⚪ [SYSTEM]: Skill [%s] de-synchronized.\n", GlobalSkills[id].Name)
+			fmt.Printf("⚪ [SYSTEM]: Skill [%s] de-synchronized.\n", skill.Name)
 			p.Save(); return 
 		} 
 	}
-	
+
 	if len(p.EquippedSkills) >= p.SkillSlots { fmt.Println("❌ [SYSTEM]: Neural capacity reached. Unequip a skill first."); return }
 	p.EquippedSkills = append(p.EquippedSkills, id)
-	fmt.Printf("✨ [SYSTEM]: Skill [%s] synchronized to active memory.\n", GlobalSkills[id].Name)
+	fmt.Printf("✨ [SYSTEM]: Skill [%s] synchronized to active memory.\n", skill.Name)
 	p.Save()
 }
+
 
 func (p *Player) ListSkills() {
 	fmt.Println("\n--- 🎮 [SYSTEM: SKILL ARCHIVE] ---")
