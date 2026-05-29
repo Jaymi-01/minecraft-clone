@@ -18,7 +18,8 @@ func (p *Player) ShowStats() {
 
 func (p *Player) AutoAnalyze(itemID string) {
 	lvl := 1
-	if l, ok := p.SkillLevels["great_sage"]; ok { lvl = l }
+	if l, ok := p.SkillLevels["appraisal"]; ok { lvl = l }
+	if l, ok := p.SkillLevels["great_sage"]; ok && l > lvl { lvl = l }
 	if l, ok := p.SkillLevels["raphael"]; ok { lvl = l + 10 }
 	if l, ok := p.SkillLevels["sariel"]; ok { lvl = l + 10 }
 
