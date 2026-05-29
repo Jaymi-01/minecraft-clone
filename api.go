@@ -56,5 +56,16 @@ func playerHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Player not found", http.StatusNotFound)
 		return
 	}
-	json.NewEncoder(w).Encode(globalPlayer)
+	
+	resp := struct {
+		Player *Player `json:"player"`
+		Titles map[string]Title `json:"global_titles"`
+		Skills map[string]Skill `json:"global_skills"`
+	}{
+		Player: globalPlayer,
+		Titles: GlobalTitles,
+		Skills: GlobalSkills,
+	}
+	
+	json.NewEncoder(w).Encode(resp)
 }
